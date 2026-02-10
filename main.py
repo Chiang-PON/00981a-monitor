@@ -11,47 +11,45 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# ================= ⚙️ 修改 A：從環境變數讀取 Token =================
-# 這樣做最安全，等一下我們會在 GitHub 網站上設定這個變數
+# ================= ⚙️ 設定區 =================
+# 1. LINE Token (從 GitHub Secrets 讀取)
 LINE_TOKEN = os.environ.get("LINE_TOKEN")
 
-# 如果你在自己電腦跑，不想設定環境變數，可以把上面那行註解掉，用下面這行：
-# LINE_TOKEN = "你的_LINE_TOKEN_直接貼在這裡" 
+# 2. 要監控的 ETF 清單 (你想加幾支都可以寫在這裡)
+ETF_LIST = ["00980A", "00981A", "00982A"]
 
-TARGET_URL = "https://www.pocket.tw/etf/tw/00981A/fundholding/"
+# 3. 網址樣板 ({} 會被自動替換成代號)
+URL_TEMPLATE = "https://www.pocket.tw/etf/tw/{}/fundholding/"
 
 # ================= 📂 路徑設定 =================
-# 在雲端上，直接用相對路徑最穩
 HISTORY_DIR = "history"
 if not os.path.exists(HISTORY_DIR):
     os.makedirs(HISTORY_DIR)
 
 # ================= 🕸️ 爬蟲功能 =================
-def fetch_data():
-    print("🔵 啟動爬蟲 (Selenium Headless)...")
+def fetch_data(etf_code):
+    target_url = URL_TEMPLATE.format(etf_code)
+    print(f"🔵 [{etf_code}] 啟動爬蟲...")
     
     chrome_options = Options()
     chrome_options.add_argument("--headless") 
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
-    
-    # ================= ⚙️ 修改 B：新增這兩行給雲端用 =================
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    # ===============================================================
-
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 
+    driver = None
     try:
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
-        print(f"🚀 前往: {TARGET_URL}")
-        driver.get(TARGET_URL)
+        print(f"🚀 前往: {target_url}")
+        driver.get(target_url)
         time.sleep(5) 
         
         # 模擬捲動
-        print("🖱️ 模擬捲動頁面...")
+        print(f"🖱️ [{etf_code}] 模擬捲動頁面...")
         last_height = driver.execute_script("return document.body.scrollHeight")
         for i in range(3):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -62,8 +60,7 @@ def fetch_data():
             last_height = new_height
             
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        driver.quit()
-
+        
         table = soup.find("table", class_="cm-table__table")
         data = []
         
@@ -86,14 +83,15 @@ def fetch_data():
                             "shares": int(shares)
                         })
         
-        print(f"✅ 成功抓取 {len(data)} 筆持股資料")
+        print(f"✅ [{etf_code}] 成功抓取 {len(data)} 筆資料")
         return data
 
     except Exception as e:
-        print(f"💥 爬蟲發生錯誤: {e}")
-        try: driver.quit()
-        except: pass
+        print(f"💥 [{etf_code}] 爬蟲發生錯誤: {e}")
         return []
+    finally:
+        if driver:
+            driver.quit()
 
 # ================= 📡 LINE 通知功能 =================
 def send_line_message(msg):
@@ -110,45 +108,48 @@ def send_line_message(msg):
         "messages": [{"type": "text", "text": msg}]
     }
     try:
-        response = requests.post(url, headers=headers, json=payload)
-        if response.status_code == 200:
-            print("✅ LINE 通知發送成功")
-        else:
-            print(f"❌ LINE 發送失敗: {response.text}")
+        requests.post(url, headers=headers, json=payload)
+        print("✅ LINE 通知已發送")
     except Exception as e:
         print(f"❌ LINE 連線錯誤: {e}")
 
-# ================= 🚀 主程式邏輯 =================
-def main():
+# ================= 📊 單一 ETF 處理邏輯 =================
+def process_etf(etf_code):
+    print(f"\n======== 開始處理 {etf_code} ========")
     today_str = datetime.now().strftime('%Y-%m-%d')
-    today_file = os.path.join(HISTORY_DIR, f"{today_str}.csv")
+    # 檔名加上 ETF 代號，避免搞混 (例如: history/00981A_2026-02-11.csv)
+    today_file = os.path.join(HISTORY_DIR, f"{etf_code}_{today_str}.csv")
 
-    today_data = fetch_data()
+    # 1. 抓取資料
+    today_data = fetch_data(etf_code)
     if not today_data:
-        print("⚠️ 抓不到資料，程式停止。")
+        print(f"⚠️ {etf_code} 抓不到資料，跳過。")
         return
 
     today_df = pd.DataFrame(today_data)
+    
+    # 2. 存檔
     today_df.to_csv(today_file, index=False, encoding="utf-8-sig")
-    print(f"💾 今日資料已存檔: {today_file}")
+    print(f"💾 {etf_code} 資料已存檔: {today_file}")
 
-    # 尋找歷史檔案
-    all_files = sorted(glob.glob(os.path.join(HISTORY_DIR, "*.csv")))
+    # 3. 比對歷史紀錄
+    # 只抓取「這個代號」的歷史檔案 (00981A_*.csv)
+    all_files = sorted(glob.glob(os.path.join(HISTORY_DIR, f"{etf_code}_*.csv")))
     
     new_buy_list = []
     sold_out_list = []
     weight_changes = []
 
     if len(all_files) >= 2:
-        last_file = all_files[-2]
-        print(f"🔍 正在比對: {os.path.basename(last_file)} vs 今日")
+        last_file = all_files[-2] # 倒數第二個是昨天
+        print(f"🔍 [{etf_code}] 比對對象: {os.path.basename(last_file)}")
         
         last_df = pd.read_csv(last_file, dtype={'code': str})
-        today_map = today_df.set_index('code').to_dict('index')
-        last_map = last_df.set_index('code').to_dict('index')
+        
         today_codes = set(today_df['code'].astype(str))
         last_codes = set(last_df['code'].astype(str))
 
+        # A. 買進與賣出
         new_buy_codes = today_codes - last_codes
         sold_out_codes = last_codes - today_codes
         common_codes = today_codes & last_codes
@@ -161,6 +162,7 @@ def main():
             row = last_df[last_df['code'].astype(str) == c].iloc[0]
             sold_out_list.append(row['name'])
             
+        # B. 權重變化
         for c in common_codes:
             row_now = today_df[today_df['code'].astype(str) == c].iloc[0]
             row_last = last_df[last_df['code'].astype(str) == c].iloc[0]
@@ -168,12 +170,13 @@ def main():
             
             if abs(diff) > 0.2:
                 arrow = "⬆️" if diff > 0 else "⬇️"
-                weight_changes.append(f"{arrow} {row_now['name']}: {row_last['weight']}% ➝ {row_now['weight']}%")
+                weight_changes.append(f"{arrow} {row_now['name']}: {diff:+.2f}%")
     else:
-        print("ℹ️ 這是第一筆資料，無法進行比對。")
-    
-    msg = f"📊 00981A 戰報 ({today_str})\n"
-    msg += "\n【⚡️ 籌碼異動】\n"
+        print(f"ℹ️ {etf_code} 資料不足，無法比對 (可能是第一天執行)。")
+
+    # 4. 組合訊息
+    msg = f"📊 {etf_code} 戰報 ({today_str})\n"
+    msg += "━━━━━━━━━━━━\n"
     
     has_action = False
     if new_buy_list:
@@ -186,19 +189,32 @@ def main():
         has_action = True
         msg += "⚖️ 重點調整:\n" + "\n".join(weight_changes) + "\n"
     if not has_action:
-        msg += "✅ 今日無新增或剔除成分股。\n"
+        msg += "✅ 成分股無重大異動。\n"
 
-    msg += "\n【💰 今日持股權重 (前20大)】\n"
+    msg += "\n【💰 持股權重 (前10大)】\n"
     sorted_df = today_df.sort_values(by='weight', ascending=False)
     rank = 1
     for index, row in sorted_df.iterrows():
-        if rank > 20: 
-            msg += f"...(還有 {len(sorted_df)-20} 檔)\n"
+        if rank > 10: # 3支股票訊息會很多，建議縮減到前10名
             break
         msg += f"{rank}. {row['name']}: {row['weight']}%\n"
         rank += 1
-
+    
+    # 傳送 Line
     send_line_message(msg)
+    time.sleep(2) # 休息一下再發下一則，避免太快被 Line 擋
+
+# ================= 🚀 主程式 (迴圈執行) =================
+def main():
+    print(f"📢 開始執行多檔監控: {ETF_LIST}")
+    
+    for etf in ETF_LIST:
+        try:
+            process_etf(etf)
+        except Exception as e:
+            print(f"❌ 處理 {etf} 時發生未知錯誤: {e}")
+            
+    print("🎉 所有 ETF 處理完成！")
 
 if __name__ == "__main__":
     main()
