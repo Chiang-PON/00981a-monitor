@@ -115,7 +115,7 @@ def send_line_message(msg):
     except Exception as e:
         print(f"❌ LINE 連線錯誤: {e}")
 
-# ================= 📊 單一 ETF 處理邏輯 (回傳數據供彙總用) =================
+# ================= 📊 單一 ETF 處理邏輯 (含張數換算) =================
 def process_etf(etf_code):
     print(f"\n======== 開始處理 {etf_code} ========")
     today_str = datetime.now().strftime('%Y-%m-%d')
@@ -137,8 +137,6 @@ def process_etf(etf_code):
     new_buy_list = []
     sold_out_list = []
     weight_changes_msg = []
-    
-    # 用來儲存變動數據 (股票名稱: 變動值)
     changes_dict = {} 
 
     if len(all_files) >= 2:
@@ -147,22 +145,22 @@ def process_etf(etf_code):
         
         today_codes = set(today_df['code'].astype(str))
         last_codes = set(last_df['code'].astype(str))
-
-        new_buy_codes = today_codes - last_codes
-        sold_out_codes = last_codes - today_codes
         common_codes = today_codes & last_codes
         
-        # 新買進
-        for c in new_buy_codes:
+        # 新買進 (新增顯示張數)
+        for c in (today_codes - last_codes):
             row = today_df[today_df['code'].astype(str) == c].iloc[0]
-            new_buy_list.append(f"{row['name']} ({row['weight']}%)")
-            changes_dict[row['name']] = row['weight'] # 變動值 = 當前權重
+            # 計算張數 (股數 / 1000)
+            sheets = int(row['shares'] / 1000)
+            # 格式範例: 台積電 (5.5%, 2,000張)
+            new_buy_list.append(f"{row['name']} ({row['weight']}%, {sheets:,}張)")
+            changes_dict[row['name']] = row['weight']
             
         # 已賣出
-        for c in sold_out_codes:
+        for c in (last_codes - today_codes):
             row = last_df[last_df['code'].astype(str) == c].iloc[0]
             sold_out_list.append(row['name'])
-            changes_dict[row['name']] = -row['weight'] # 變動值 = 負的上次權重
+            changes_dict[row['name']] = -row['weight']
             
         # 權重調整
         for c in common_codes:
@@ -170,10 +168,8 @@ def process_etf(etf_code):
             row_last = last_df[last_df['code'].astype(str) == c].iloc[0]
             diff = row_now['weight'] - row_last['weight']
             
-            # 記錄所有變動，供總結分析使用
             changes_dict[row_now['name']] = diff
             
-            # 個別報表只顯示變動 > 0.2%
             if abs(diff) > 0.2:
                 arrow = "⬆️" if diff > 0 else "⬇️"
                 weight_changes_msg.append(f"{arrow} {row_now['name']}: {diff:+.2f}%")
@@ -195,18 +191,19 @@ def process_etf(etf_code):
     if not has_action:
         msg += "✅ 成分股無重大異動。\n"
 
-    msg += "\n【💰 前十大持股】\n"
+    msg += "\n【💰 前十大持股 (含張數)】\n"
     sorted_df = today_df.sort_values(by='weight', ascending=False)
     rank = 1
     for index, row in sorted_df.iterrows():
         if rank > 10: break
-        msg += f"{rank}. {row['name']}: {row['weight']}%\n"
+        # 計算張數並加上千分位
+        sheets = int(row['shares'] / 1000)
+        msg += f"{rank}. {row['name']}: {row['weight']}% ({sheets:,}張)\n"
         rank += 1
     
     send_line_message(msg)
     time.sleep(2)
     
-    # 回傳資料給總結報告使用
     return {
         "etf": etf_code,
         "df": today_df,
@@ -218,8 +215,8 @@ def generate_summary_report(results):
     print("\n======== 正在產生總結報告 ========")
     if not results: return
 
-    # 1. 計算共同持股與平均權重
-    all_stocks = {} # {name: [weight1, weight2...]}
+    # 1. 計算共同持股
+    all_stocks = {} 
     
     for res in results:
         df = res['df']
@@ -228,21 +225,18 @@ def generate_summary_report(results):
                 all_stocks[row['name']] = []
             all_stocks[row['name']].append(row['weight'])
             
-    # 篩選出至少被 2 檔 ETF 持有的股票
     common_holdings = []
     for name, weights in all_stocks.items():
-        if len(weights) >= 2: # 至少 2 家持有
+        if len(weights) >= 2: 
             avg_w = sum(weights) / len(weights)
             common_holdings.append((name, avg_w, len(weights)))
             
-    # 排序 (平均權重高 -> 低)
     common_holdings.sort(key=lambda x: x[1], reverse=True)
 
-    # 2. 分析集體動向 (2家以上同時買進或賣出)
+    # 2. 分析集體動向
     collective_buy = []
     collective_sell = []
     
-    # 取得所有有變動的股票名稱
     all_changed_stocks = set()
     for res in results:
         all_changed_stocks.update(res['changes'].keys())
@@ -253,12 +247,11 @@ def generate_summary_report(results):
         
         for res in results:
             diff = res['changes'].get(stock, 0)
-            if diff > 0.05: # 稍微過濾雜訊，變動 > 0.05% 才算
+            if diff > 0.05: 
                 up_count += 1
             elif diff < -0.05:
                 down_count += 1
                 
-        # 如果有 2 家以上同方向
         if up_count >= 2:
             collective_buy.append(f"{stock} (x{up_count})")
         if down_count >= 2:
@@ -269,7 +262,6 @@ def generate_summary_report(results):
     summary_msg = f"📑 主動式 ETF 家族總結 ({today_str})\n"
     summary_msg += "━━━━━━━━━━━━\n"
     
-    # 顯示集體動向
     if collective_buy:
         summary_msg += f"🚀 【集體看好】(同時加碼):\n" + "、".join(collective_buy) + "\n\n"
     
@@ -279,9 +271,8 @@ def generate_summary_report(results):
     if not collective_buy and not collective_sell:
         summary_msg += "⚖️ 今日無明顯集體操作方向。\n\n"
 
-    # 顯示共同核心持股
     summary_msg += "🔥 【共同重壓股】(平均權重):\n"
-    for i, (name, avg_w, count) in enumerate(common_holdings[:5]): # 只列前 5 名
+    for i, (name, avg_w, count) in enumerate(common_holdings[:5]): 
         summary_msg += f"{i+1}. {name}: {avg_w:.2f}% (持有數:{count})\n"
 
     print("---------------- 總結預覽 ----------------")
@@ -304,7 +295,6 @@ def main():
         except Exception as e:
             print(f"❌ 處理 {etf} 時發生未知錯誤: {e}")
             
-    # 全部跑完後，發送總結
     if len(results) >= 2:
         try:
             generate_summary_report(results)
