@@ -1,0 +1,43 @@
+name: 每日 00981A 監控
+
+on:
+  schedule:
+    # 每天台灣時間 17:30 執行
+    # GitHub 使用 UTC 時間，台灣是 UTC+8
+    # 所以 17:30 - 8小時 = 09:30 UTC
+    - cron: '30 09 * * 1-5' 
+  workflow_dispatch: # 讓你可以手動按按鈕測試
+
+permissions:
+  contents: write # 允許腳本把 CSV 存檔寫回你的倉庫
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code (下載程式碼)
+      uses: actions/checkout@v3
+
+    - name: Set up Python (安裝 Python)
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies (安裝套件)
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run script (執行爬蟲)
+      env:
+        LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
+      run: python main.py
+
+    - name: Commit and Push Data (存檔回倉庫)
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add history/*.csv
+        # 如果有新檔案才 commit，沒有就略過 (防止報錯)
+        git commit -m "Auto update data: $(date +'%Y-%m-%d')" || exit 0
+        git push
