@@ -13,7 +13,7 @@ from datetime import datetime
 
 # ================= ⚙️ 修改 A：從環境變數讀取 Token =================
 # 這樣做最安全，等一下我們會在 GitHub 網站上設定這個變數
-LINE_TOKEN = os.environ.get("TFnGs2oCTg2XFx36148i1ocMmKAUSh7C9M1qCY7v0bfnhQC2dmdN5IcNqs5L7/tZ/d247+jYOcVPeZUZk3hy14TOYSBQHPiVOZINSMzQT67DScN+tO53WJ9iQjMOJ0Dk901WX+AP/gVNE4cgyZRJ7QdB04t89/1O/w1cDnyilFU=")
+LINE_TOKEN = os.environ.get("LINE_TOKEN")
 
 # 如果你在自己電腦跑，不想設定環境變數，可以把上面那行註解掉，用下面這行：
 # LINE_TOKEN = "你的_LINE_TOKEN_直接貼在這裡" 
