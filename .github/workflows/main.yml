@@ -1,4 +1,4 @@
-name: 每日 00981A 監控
+name: 主動式ETF 監控
 
 on:
   schedule:
