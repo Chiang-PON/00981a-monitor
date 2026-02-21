@@ -5,7 +5,7 @@ on:
     # 每天台灣時間 17:30 執行
     # GitHub 使用 UTC 時間，台灣是 UTC+8
     # 所以 17:30 - 8小時 = 09:30 UTC
-    - cron: '30 02 * * *' 
+    - cron: '00 10 * * *' 
   workflow_dispatch: # 讓你可以手動按按鈕測試
 
 permissions:
