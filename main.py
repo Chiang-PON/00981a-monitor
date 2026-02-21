@@ -4,6 +4,7 @@ import glob
 import pandas as pd
 import requests
 import sys
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -12,7 +13,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from collections import Counter
 
-# ================= ⚙️ 設定區 =================
+# ================= 設定區 =================
 # 1. LINE Token
 LINE_TOKEN = os.environ.get("LINE_TOKEN")
 
@@ -22,6 +23,34 @@ ETF_LIST = ["00980A", "00981A", "00982A"]
 # 3. 網址樣板
 URL_TEMPLATE = "https://www.pocket.tw/etf/tw/{}/fundholding/"
 
+# ================= 名稱淨化功能 =================
+def clean_stock_name(name):
+    # 替換常見的冗長全名為精簡簡稱
+    replacements = {
+        "台灣積體電路製造": "台積電",
+        "鴻海精密工業": "鴻海",
+        "台達電子工業": "台達電",
+        "緯穎科技服務": "緯穎",
+        "聯發科技": "聯發科",
+        "金像電子": "金像電",
+        "廣達電腦": "廣達",
+        "智邦科技": "智邦",
+        "奇鋐科技": "奇鋐",
+        "鴻勁精密": "鴻勁",
+        "台燿科技": "台燿",
+        "群聯電子": "群聯",
+        "健策精密工業": "健策",
+        "旺矽科技": "旺矽"
+    }
+    
+    for old, new in replacements.items():
+        if old in name:
+            return new
+            
+    # 如果不在替換清單內，使用正則表達式通用處理，拔除贅字
+    name = re.sub(r'（股）公司|\(股\)公司|股份有限公司|有限公司|科技|工業|電子|電腦', '', name)
+    return name.strip()
+
 # ================= 📂 路徑設定 =================
 HISTORY_DIR = "history"
 if not os.path.exists(HISTORY_DIR):
@@ -30,7 +59,7 @@ if not os.path.exists(HISTORY_DIR):
 # ================= 🕸️ 爬蟲功能 =================
 def fetch_data(etf_code):
     target_url = URL_TEMPLATE.format(etf_code)
-    print(f"🔵 [{etf_code}] 啟動爬蟲...")
+    print(f"[{etf_code}] 啟動爬蟲...")
     
     chrome_options = Options()
     chrome_options.add_argument("--headless") 
@@ -45,12 +74,12 @@ def fetch_data(etf_code):
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
-        print(f"🚀 前往: {target_url}")
+        print(f"前往: {target_url}")
         driver.get(target_url)
         time.sleep(5) 
         
         # 模擬捲動
-        print(f"🖱️ [{etf_code}] 模擬捲動頁面...")
+        print(f"[{etf_code}] 模擬捲動頁面...")
         last_height = driver.execute_script("return document.body.scrollHeight")
         for i in range(3):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -84,11 +113,11 @@ def fetch_data(etf_code):
                             "shares": int(shares)
                         })
         
-        print(f"✅ [{etf_code}] 成功抓取 {len(data)} 筆資料")
+        print(f"[{etf_code}] 成功抓取 {len(data)} 筆資料")
         return data
 
     except Exception as e:
-        print(f"💥 [{etf_code}] 爬蟲發生錯誤: {e}")
+        print(f"[{etf_code}] 爬蟲發生錯誤: {e}")
         return []
     finally:
         if driver:
@@ -98,7 +127,7 @@ def fetch_data(etf_code):
 # ================= 📡 LINE 通知功能 =================
 def send_line_message(msg):
     if not LINE_TOKEN:
-        print("❌ 未設定 LINE TOKEN，跳過發送")
+        print("未設定 LINE TOKEN，跳過發送")
         return
 
     url = "https://api.line.me/v2/bot/message/broadcast"
@@ -111,9 +140,9 @@ def send_line_message(msg):
     }
     try:
         requests.post(url, headers=headers, json=payload)
-        print("✅ LINE 通知已發送")
+        print("LINE 通知已發送")
     except Exception as e:
-        print(f"❌ LINE 連線錯誤: {e}")
+        print(f"LINE 連線錯誤: {e}")
 
 # ================= 📊 單一 ETF 處理邏輯 (含張數換算) =================
 def process_etf(etf_code):
@@ -124,12 +153,12 @@ def process_etf(etf_code):
     # 1. 抓取資料
     today_data = fetch_data(etf_code)
     if not today_data:
-        print(f"⚠️ {etf_code} 抓不到資料，跳過。")
+        print(f"{etf_code} 抓不到資料，跳過。")
         return None
 
     today_df = pd.DataFrame(today_data)
     today_df.to_csv(today_file, index=False, encoding="utf-8-sig")
-    print(f"💾 {etf_code} 資料已存檔")
+    print(f"{etf_code} 資料已存檔")
 
     # 2. 比對歷史紀錄
     all_files = sorted(glob.glob(os.path.join(HISTORY_DIR, f"{etf_code}_*.csv")))
@@ -147,19 +176,19 @@ def process_etf(etf_code):
         last_codes = set(last_df['code'].astype(str))
         common_codes = today_codes & last_codes
         
-        # 新買進 (新增顯示張數)
+        # 新買進 (淨化名稱 + 強制小數點兩位 + 格式對齊)
         for c in (today_codes - last_codes):
             row = today_df[today_df['code'].astype(str) == c].iloc[0]
-            # 計算張數 (股數 / 1000)
             sheets = int(row['shares'] / 1000)
-            # 格式範例: 台積電 (5.5%, 2,000張)
-            new_buy_list.append(f"{row['name']} ({row['weight']}%, {sheets:,}張)")
+            clean_name = clean_stock_name(row['name'])
+            new_buy_list.append(f"+ {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張")
             changes_dict[row['name']] = row['weight']
             
         # 已賣出
         for c in (last_codes - today_codes):
             row = last_df[last_df['code'].astype(str) == c].iloc[0]
-            sold_out_list.append(row['name'])
+            clean_name = clean_stock_name(row['name'])
+            sold_out_list.append(f"- {clean_name}")
             changes_dict[row['name']] = -row['weight']
             
         # 權重調整
@@ -171,37 +200,38 @@ def process_etf(etf_code):
             changes_dict[row_now['name']] = diff
             
             if abs(diff) > 0.2:
-                arrow = "⬆️" if diff > 0 else "⬇️"
-                weight_changes_msg.append(f"{arrow} {row_now['name']}: {diff:+.2f}%")
+                clean_name = clean_stock_name(row_now['name'])
+                weight_changes_msg.append(f"{clean_name}: {diff:+.2f}%")
 
     # 3. 發送個別戰報
-    msg = f"📊 {etf_code} 戰報 ({today_str})\n"
-    msg += "━━━━━━━━━━━━\n"
+    msg = f"{etf_code} 監控日報 ({today_str})\n"
+    msg += "------------------------\n"
     
     has_action = False
     if new_buy_list:
         has_action = True
-        msg += "🔥 新進場:\n" + "\n".join([f"   + {x}" for x in new_buy_list]) + "\n"
+        msg += "[新進場]\n" + "\n".join(new_buy_list) + "\n\n"
     if sold_out_list:
         has_action = True
-        msg += "👋 已離場:\n" + "\n".join([f"   - {x}" for x in sold_out_list]) + "\n"
+        msg += "[已離場]\n" + "\n".join(sold_out_list) + "\n\n"
     if weight_changes_msg:
         has_action = True
-        msg += "⚖️ 重點調整:\n" + "\n".join(weight_changes_msg) + "\n"
+        msg += "[權重異動]\n" + "\n".join(weight_changes_msg) + "\n\n"
+        
     if not has_action:
-        msg += "✅ 成分股無重大異動。\n"
+        msg += "今日成分股無重大異動。\n\n"
 
-    msg += "\n【💰 前十大持股 (含張數)】\n"
+    msg += "[前十大持股]\n"
     sorted_df = today_df.sort_values(by='weight', ascending=False)
     rank = 1
     for index, row in sorted_df.iterrows():
         if rank > 10: break
-        # 計算張數並加上千分位
         sheets = int(row['shares'] / 1000)
-        msg += f"{rank}. {row['name']}: {row['weight']}% ({sheets:,}張)\n"
+        clean_name = clean_stock_name(row['name'])
+        msg += f"{rank}. {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張\n"
         rank += 1
     
-    send_line_message(msg)
+    send_line_message(msg.strip())
     time.sleep(2)
     
     return {
@@ -252,38 +282,40 @@ def generate_summary_report(results):
             elif diff < -0.05:
                 down_count += 1
                 
+        clean_name = clean_stock_name(stock)
         if up_count >= 2:
-            collective_buy.append(f"{stock} (x{up_count})")
+            collective_buy.append(f"{clean_name} (x{up_count})")
         if down_count >= 2:
-            collective_sell.append(f"{stock} (x{down_count})")
+            collective_sell.append(f"{clean_name} (x{down_count})")
 
     # 3. 組合總結訊息
     today_str = datetime.now().strftime('%Y-%m-%d')
-    summary_msg = f"📑 主動式 ETF 家族總結 ({today_str})\n"
-    summary_msg += "━━━━━━━━━━━━\n"
+    summary_msg = f"主動式 ETF 家族彙總 ({today_str})\n"
+    summary_msg += "------------------------\n"
     
     if collective_buy:
-        summary_msg += f"🚀 【集體看好】(同時加碼):\n" + "、".join(collective_buy) + "\n\n"
+        summary_msg += "[集體加碼]\n" + "、".join(collective_buy) + "\n\n"
     
     if collective_sell:
-        summary_msg += f"📉 【集體看壞】(同時減碼):\n" + "、".join(collective_sell) + "\n\n"
+        summary_msg += "[集體減碼]\n" + "、".join(collective_sell) + "\n\n"
         
     if not collective_buy and not collective_sell:
-        summary_msg += "⚖️ 今日無明顯集體操作方向。\n\n"
+        summary_msg += "今日無明顯集體操作方向。\n\n"
 
-    summary_msg += "🔥 【共同重壓股】(平均權重):\n"
+    summary_msg += "[核心重壓股]\n"
     for i, (name, avg_w, count) in enumerate(common_holdings[:5]): 
-        summary_msg += f"{i+1}. {name}: {avg_w:.2f}% (持有數:{count})\n"
+        clean_name = clean_stock_name(name)
+        summary_msg += f"{i+1}. {clean_name} ｜ {avg_w:.2f}% ｜ 持有: {count} 檔\n"
 
     print("---------------- 總結預覽 ----------------")
     print(summary_msg)
     print("----------------------------------------")
     
-    send_line_message(summary_msg)
+    send_line_message(summary_msg.strip())
 
 # ================= 🚀 主程式 =================
 def main():
-    print(f"📢 開始執行多檔監控: {ETF_LIST}")
+    print(f"開始執行多檔監控: {ETF_LIST}")
     
     results = []
     
@@ -293,15 +325,15 @@ def main():
             if res:
                 results.append(res)
         except Exception as e:
-            print(f"❌ 處理 {etf} 時發生未知錯誤: {e}")
+            print(f"處理 {etf} 時發生未知錯誤: {e}")
             
     if len(results) >= 2:
         try:
             generate_summary_report(results)
         except Exception as e:
-            print(f"❌ 產生總結報告失敗: {e}")
+            print(f"產生總結報告失敗: {e}")
             
-    print("🎉 所有 ETF 處理完成！")
+    print("所有 ETF 處理完成！")
 
 if __name__ == "__main__":
     main()
