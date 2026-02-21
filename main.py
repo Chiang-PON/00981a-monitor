@@ -139,8 +139,13 @@ def send_line_message(msg):
         "messages": [{"type": "text", "text": msg}]
     }
     try:
-        requests.post(url, headers=headers, json=payload)
-        print("LINE 通知已發送")
+        response = requests.post(url, headers=headers, json=payload)
+        # 檢查 LINE 官方的回覆狀態碼
+        if response.status_code == 200:
+            print("✅ LINE 通知發送成功！")
+        else:
+            print(f"❌ LINE 發送失敗！狀態碼: {response.status_code}")
+            print(f"❌ 錯誤原因: {response.text}")
     except Exception as e:
         print(f"LINE 連線錯誤: {e}")
 
