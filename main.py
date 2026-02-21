@@ -140,22 +140,20 @@ def send_line_message(msg):
     }
     try:
         response = requests.post(url, headers=headers, json=payload)
-        # 檢查 LINE 官方的回覆狀態碼
         if response.status_code == 200:
-            print("✅ LINE 通知發送成功！")
+            print("LINE 通知發送成功！")
         else:
-            print(f"❌ LINE 發送失敗！狀態碼: {response.status_code}")
-            print(f"❌ 錯誤原因: {response.text}")
+            print(f"LINE 發送失敗！狀態碼: {response.status_code}")
+            print(f"錯誤原因: {response.text}")
     except Exception as e:
         print(f"LINE 連線錯誤: {e}")
 
-# ================= 📊 單一 ETF 處理邏輯 (含張數換算) =================
+# ================= 📊 單一 ETF 處理邏輯 (回傳字串不直接發送) =================
 def process_etf(etf_code):
     print(f"\n======== 開始處理 {etf_code} ========")
     today_str = datetime.now().strftime('%Y-%m-%d')
     today_file = os.path.join(HISTORY_DIR, f"{etf_code}_{today_str}.csv")
 
-    # 1. 抓取資料
     today_data = fetch_data(etf_code)
     if not today_data:
         print(f"{etf_code} 抓不到資料，跳過。")
@@ -165,7 +163,6 @@ def process_etf(etf_code):
     today_df.to_csv(today_file, index=False, encoding="utf-8-sig")
     print(f"{etf_code} 資料已存檔")
 
-    # 2. 比對歷史紀錄
     all_files = sorted(glob.glob(os.path.join(HISTORY_DIR, f"{etf_code}_*.csv")))
     
     new_buy_list = []
@@ -181,7 +178,6 @@ def process_etf(etf_code):
         last_codes = set(last_df['code'].astype(str))
         common_codes = today_codes & last_codes
         
-        # 新買進 (淨化名稱 + 強制小數點兩位 + 格式對齊)
         for c in (today_codes - last_codes):
             row = today_df[today_df['code'].astype(str) == c].iloc[0]
             sheets = int(row['shares'] / 1000)
@@ -189,14 +185,12 @@ def process_etf(etf_code):
             new_buy_list.append(f"+ {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張")
             changes_dict[row['name']] = row['weight']
             
-        # 已賣出
         for c in (last_codes - today_codes):
             row = last_df[last_df['code'].astype(str) == c].iloc[0]
             clean_name = clean_stock_name(row['name'])
             sold_out_list.append(f"- {clean_name}")
             changes_dict[row['name']] = -row['weight']
             
-        # 權重調整
         for c in common_codes:
             row_now = today_df[today_df['code'].astype(str) == c].iloc[0]
             row_last = last_df[last_df['code'].astype(str) == c].iloc[0]
@@ -208,7 +202,6 @@ def process_etf(etf_code):
                 clean_name = clean_stock_name(row_now['name'])
                 weight_changes_msg.append(f"{clean_name}: {diff:+.2f}%")
 
-    # 3. 發送個別戰報
     msg = f"{etf_code} 監控日報 ({today_str})\n"
     msg += "------------------------\n"
     
@@ -236,23 +229,20 @@ def process_etf(etf_code):
         msg += f"{rank}. {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張\n"
         rank += 1
     
-    send_line_message(msg.strip())
-    time.sleep(2)
-    
+    # 這裡不再呼叫 send_line_message，而是把字串存起來回傳
     return {
         "etf": etf_code,
         "df": today_df,
-        "changes": changes_dict
+        "changes": changes_dict,
+        "msg_string": msg.strip()
     }
 
-# ================= 📈 產生總結報告 =================
+# ================= 📈 產生總結報告 (回傳字串不直接發送) =================
 def generate_summary_report(results):
     print("\n======== 正在產生總結報告 ========")
-    if not results: return
+    if not results: return ""
 
-    # 1. 計算共同持股
     all_stocks = {} 
-    
     for res in results:
         df = res['df']
         for _, row in df.iterrows():
@@ -268,10 +258,8 @@ def generate_summary_report(results):
             
     common_holdings.sort(key=lambda x: x[1], reverse=True)
 
-    # 2. 分析集體動向
     collective_buy = []
     collective_sell = []
-    
     all_changed_stocks = set()
     for res in results:
         all_changed_stocks.update(res['changes'].keys())
@@ -279,7 +267,6 @@ def generate_summary_report(results):
     for stock in all_changed_stocks:
         up_count = 0
         down_count = 0
-        
         for res in results:
             diff = res['changes'].get(stock, 0)
             if diff > 0.05: 
@@ -293,17 +280,14 @@ def generate_summary_report(results):
         if down_count >= 2:
             collective_sell.append(f"{clean_name} (x{down_count})")
 
-    # 3. 組合總結訊息
     today_str = datetime.now().strftime('%Y-%m-%d')
     summary_msg = f"主動式 ETF 家族彙總 ({today_str})\n"
     summary_msg += "------------------------\n"
     
     if collective_buy:
         summary_msg += "[集體加碼]\n" + "、".join(collective_buy) + "\n\n"
-    
     if collective_sell:
         summary_msg += "[集體減碼]\n" + "、".join(collective_sell) + "\n\n"
-        
     if not collective_buy and not collective_sell:
         summary_msg += "今日無明顯集體操作方向。\n\n"
 
@@ -312,17 +296,14 @@ def generate_summary_report(results):
         clean_name = clean_stock_name(name)
         summary_msg += f"{i+1}. {clean_name} ｜ {avg_w:.2f}% ｜ 持有: {count} 檔\n"
 
-    print("---------------- 總結預覽 ----------------")
-    print(summary_msg)
-    print("----------------------------------------")
-    
-    send_line_message(summary_msg.strip())
+    return summary_msg.strip()
 
-# ================= 🚀 主程式 =================
+# ================= 🚀 主程式 (統一合併與發送) =================
 def main():
     print(f"開始執行多檔監控: {ETF_LIST}")
     
     results = []
+    final_message_blocks = []
     
     for etf in ETF_LIST:
         try:
@@ -332,12 +313,27 @@ def main():
         except Exception as e:
             print(f"處理 {etf} 時發生未知錯誤: {e}")
             
+    # 1. 先把「總結報告」加到訊息的最前面
     if len(results) >= 2:
         try:
-            generate_summary_report(results)
+            summary = generate_summary_report(results)
+            if summary:
+                final_message_blocks.append(summary)
         except Exception as e:
             print(f"產生總結報告失敗: {e}")
             
+    # 2. 接著依序加入各檔 ETF 的細節
+    for res in results:
+        final_message_blocks.append(res["msg_string"])
+        
+    # 3. 將所有區塊用明顯的分隔線串聯起來，並且只發送一次！
+    if final_message_blocks:
+        print("\n======== 準備發送合併後的 LINE 訊息 ========")
+        separator = "\n\n========================\n\n"
+        final_combined_message = separator.join(final_message_blocks)
+        
+        send_line_message(final_combined_message)
+        
     print("所有 ETF 處理完成！")
 
 if __name__ == "__main__":
