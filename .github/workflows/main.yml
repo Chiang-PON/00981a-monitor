@@ -2,42 +2,83 @@ name: 主動式ETF 監控
 
 on:
   schedule:
-    # 每天台灣時間 17:30 執行
-    # GitHub 使用 UTC 時間，台灣是 UTC+8
-    # 所以 17:30 - 8小時 = 09:30 UTC
-    - cron: '00 10 * * *' 
-  workflow_dispatch: # 讓你可以手動按按鈕測試
+    # 每天台灣時間 18:00 (UTC 10:00) — 平日執行，假日由程式自動跳過
+    - cron: '00 10 * * 1-5'
+    # 每週五台灣時間 18:30 (UTC 10:30) — 週報
+    - cron: '30 10 * * 5'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '執行模式 (daily / weekly)'
+        required: false
+        default: 'daily'
+      force:
+        description: '強制執行（忽略假日）'
+        required: false
+        default: 'false'
 
 permissions:
-  contents: write # 允許腳本把 CSV 存檔寫回你的倉庫
+  contents: write
 
 jobs:
-  build:
+  daily:
+    if: github.event.schedule != '30 10 * * 5'
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code (下載程式碼)
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Set up Python (安裝 Python)
-      uses: actions/setup-python@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: '3.11'
 
-    - name: Install dependencies (安裝套件)
-      run: |
-        pip install -r requirements.txt
+    - name: Install dependencies
+      run: pip install -r requirements.txt
 
-    - name: Run script (執行爬蟲)
+    - name: Run daily report
       env:
         LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
-      run: python main.py
+      run: |
+        MODE="${{ github.event.inputs.mode || 'daily' }}"
+        FORCE="${{ github.event.inputs.force || 'false' }}"
+        CMD="python main.py --mode $MODE"
+        if [ "$FORCE" = "true" ]; then CMD="$CMD --force"; fi
+        echo "執行: $CMD"
+        $CMD
 
-    - name: Commit and Push Data (存檔回倉庫)
+    - name: Commit and Push Data
       run: |
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
         git add history/*.csv
-        # 如果有新檔案才 commit，沒有就略過 (防止報錯)
+        git commit -m "Auto update data: $(date +'%Y-%m-%d')" || exit 0
+        git push
+
+  weekly:
+    if: github.event.schedule == '30 10 * * 5'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run weekly report
+      env:
+        LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
+      run: python main.py --mode weekly --force
+
+    - name: Commit and Push Data
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add history/*.csv
         git commit -m "Auto update data: $(date +'%Y-%m-%d')" || exit 0
         git push
