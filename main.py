@@ -11,7 +11,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from datetime import datetime
-from collections import Counter
 
 # ================= 設定區 =================
 LINE_TOKEN = os.environ.get("LINE_TOKEN")
@@ -163,21 +162,20 @@ def process_etf(etf_code):
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
-    # 改版：輕量化標題與分隔線
     msg = f"■ {etf_code}\n"
     msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
     
     has_action = False
     if new_buy_list:
         has_action = True
-        msg += "✨ 新進場:\n" + "\n".join(new_buy_list) + "\n\n"
+        msg += f"✨ [ {etf_code} 新進場 ]\n" + "\n".join(new_buy_list) + "\n\n"
     if sold_out_list:
         has_action = True
-        msg += "👋 已離場: " + "、".join(sold_out_list) + "\n\n"
+        msg += f"👋 [ {etf_code} 已離場 ]\n　" + "、".join(sold_out_list) + "\n\n"
         
     if increased_list or decreased_list:
         has_action = True
-        msg += "[ 權重異動 ]\n"
+        msg += f"[ {etf_code} 權重異動 ]\n"
         if increased_list:
             msg += "🔴 加碼\n"
             for n, d in increased_list: msg += f"　+ {n} ｜ +{d:.2f}%\n"
@@ -187,16 +185,16 @@ def process_etf(etf_code):
         msg += "\n"
         
     if not has_action:
-        msg += "✔️ 今日成分股無重大異動。\n\n"
+        msg += f"✔️ {etf_code} 今日無重大異動。\n\n"
 
-    msg += "[ 前十大持股 ]\n"
+    msg += f"[ {etf_code} 前十大持股 ]\n"
     sorted_df = today_df.sort_values(by='weight', ascending=False)
     rank = 1
     for index, row in sorted_df.iterrows():
         if rank > 10: break
         sheets = int(row['shares'] / 1000)
         clean_name = clean_stock_name(row['name'])
-        rank_str = str(rank).zfill(2) # 幫數字補 0，例如 01, 02
+        rank_str = str(rank).zfill(2)
         msg += f"{rank_str}. {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張\n"
         rank += 1
     
@@ -237,18 +235,17 @@ def generate_summary_report(results):
         if down_count >= 2: collective_sell.append(f"{clean_name} (x{down_count})")
 
     today_str = datetime.now().strftime('%Y-%m-%d')
-    # 改版：輕量化標題與分隔線
     summary_msg = f"📈 主動式 ETF 家族彙總 ({today_str})\n"
     summary_msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
     
     if collective_buy:
-        summary_msg += "🔴 [ 集體加碼 ]\n" + "、".join(collective_buy) + "\n\n"
+        summary_msg += "🔴 [ 家族集體加碼 ]\n" + "、".join(collective_buy) + "\n\n"
     if collective_sell:
-        summary_msg += "🟢 [ 集體減碼 ]\n" + "、".join(collective_sell) + "\n\n"
+        summary_msg += "🟢 [ 家族集體減碼 ]\n" + "、".join(collective_sell) + "\n\n"
     if not collective_buy and not collective_sell:
         summary_msg += "🧭 今日無明顯集體操作方向。\n\n"
 
-    summary_msg += "[ 核心重壓股 ]\n"
+    summary_msg += "[ 家族核心重壓股 ]\n"
     for i, (name, avg_w, count) in enumerate(common_holdings[:5]): 
         clean_name = clean_stock_name(name)
         rank_str = str(i+1).zfill(2)
@@ -277,8 +274,7 @@ def main():
         final_message_blocks.append(res["msg_string"])
         
     if final_message_blocks:
-        # 改版：用適當的空行隔開，不再使用沉重的粗橫線
-        separator = "\n\n\n"
+        separator = "\n\n════════════════════════\n\n"
         final_combined_message = separator.join(final_message_blocks)
         send_line_message(final_combined_message)
 
