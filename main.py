@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 from datetime import datetime
+from collections import Counter
 
 # ================= 設定區 =================
 LINE_TOKEN = os.environ.get("LINE_TOKEN")
@@ -162,25 +163,25 @@ def process_etf(etf_code):
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
-    msg = f"■ {etf_code}\n"
-    msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
+    msg = f"▪️ {etf_code}\n"
+    msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
     
     has_action = False
     if new_buy_list:
         has_action = True
-        msg += f"✨ [ {etf_code} 新進場 ]\n" + "\n".join(new_buy_list) + "\n\n"
+        msg += f"✦ [ {etf_code} 新進場 ]\n" + "\n".join(new_buy_list) + "\n\n"
     if sold_out_list:
         has_action = True
-        msg += f"👋 [ {etf_code} 已離場 ]\n　" + "、".join(sold_out_list) + "\n\n"
+        msg += f"✖️ [ {etf_code} 已離場 ]\n　" + "、".join(sold_out_list) + "\n\n"
         
     if increased_list or decreased_list:
         has_action = True
         msg += f"[ {etf_code} 權重異動 ]\n"
         if increased_list:
-            msg += "🔴 加碼\n"
+            msg += "🔺 加碼\n"
             for n, d in increased_list: msg += f"　+ {n} ｜ +{d:.2f}%\n"
         if decreased_list:
-            msg += "🟢 減碼\n"
+            msg += "🟩 減碼\n"
             for n, d in decreased_list: msg += f"　- {n} ｜ {d:.2f}%\n"
         msg += "\n"
         
@@ -235,15 +236,15 @@ def generate_summary_report(results):
         if down_count >= 2: collective_sell.append(f"{clean_name} (x{down_count})")
 
     today_str = datetime.now().strftime('%Y-%m-%d')
-    summary_msg = f"📈 主動式 ETF 家族彙總 ({today_str})\n"
-    summary_msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
+    summary_msg = f"⚡ 主動式 ETF 家族彙總 ({today_str})\n"
+    summary_msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
     
     if collective_buy:
-        summary_msg += "🔴 [ 家族集體加碼 ]\n" + "、".join(collective_buy) + "\n\n"
+        summary_msg += "🔺 [ 家族集體加碼 ]\n" + "、".join(collective_buy) + "\n\n"
     if collective_sell:
-        summary_msg += "🟢 [ 家族集體減碼 ]\n" + "、".join(collective_sell) + "\n\n"
+        summary_msg += "🟩 [ 家族集體減碼 ]\n" + "、".join(collective_sell) + "\n\n"
     if not collective_buy and not collective_sell:
-        summary_msg += "🧭 今日無明顯集體操作方向。\n\n"
+        summary_msg += "➖ 今日無明顯集體操作方向。\n\n"
 
     summary_msg += "[ 家族核心重壓股 ]\n"
     for i, (name, avg_w, count) in enumerate(common_holdings[:5]): 
@@ -274,7 +275,8 @@ def main():
         final_message_blocks.append(res["msg_string"])
         
     if final_message_blocks:
-        separator = "\n\n════════════════════════\n\n"
+        # 分隔線也縮短到 15 個字元，確保手機不折行
+        separator = "\n\n━━━━━━━━━━━━━━━\n\n"
         final_combined_message = separator.join(final_message_blocks)
         send_line_message(final_combined_message)
 
