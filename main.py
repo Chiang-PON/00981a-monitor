@@ -17,7 +17,6 @@ from collections import Counter
 LINE_TOKEN = os.environ.get("LINE_TOKEN")
 ETF_LIST = ["00980A", "00981A", "00982A"]
 URL_TEMPLATE = "https://www.pocket.tw/etf/tw/{}/fundholding/"
-CHANGE_THRESHOLD = 0.20 # 權重變動門檻
 
 # ================= 名稱淨化功能 =================
 def clean_stock_name(name):
@@ -123,7 +122,7 @@ def process_etf(etf_code):
     sold_out_list = []
     increased_list = []
     decreased_list = []
-    changes_dict = {} 
+    changes_dict = {} # 記錄「張數差異」
 
     if len(all_files) >= 2:
         last_file = all_files[-2]
@@ -133,40 +132,41 @@ def process_etf(etf_code):
         last_codes = set(last_df['code'].astype(str))
         common_codes = today_codes & last_codes
         
+        # 新進場 (記錄買了幾張)
         for c in (today_codes - last_codes):
             row = today_df[today_df['code'].astype(str) == c].iloc[0]
             sheets = int(row['shares'] / 1000)
             clean_name = clean_stock_name(row['name'])
-            new_buy_list.append(f"　+ {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張")
-            changes_dict[row['name']] = row['weight']
+            new_buy_list.append(f"　+ {clean_name} ｜ {sheets:,} 張")
+            changes_dict[row['name']] = sheets 
             
+        # 已離場 (記錄賣了幾張)
         for c in (last_codes - today_codes):
             row = last_df[last_df['code'].astype(str) == c].iloc[0]
+            sheets = int(row['shares'] / 1000)
             clean_name = clean_stock_name(row['name'])
-            sold_out_list.append(clean_name)
-            changes_dict[row['name']] = -row['weight']
+            sold_out_list.append(f"　- {clean_name} ｜ 出清 {sheets:,} 張")
+            changes_dict[row['name']] = -sheets 
             
+        # 張數異動 (只看張數，不看權重)
         for c in common_codes:
             row_now = today_df[today_df['code'].astype(str) == c].iloc[0]
             row_last = last_df[last_df['code'].astype(str) == c].iloc[0]
             
-            # 計算權重變動
-            diff = round(row_now['weight'] - row_last['weight'], 2)
-            
-            # 計算張數變動
             shares_now = int(row_now['shares'] / 1000)
             shares_last = int(row_last['shares'] / 1000)
             shares_diff = shares_now - shares_last
             
-            changes_dict[row_now['name']] = diff
-            
-            if abs(diff) >= CHANGE_THRESHOLD:
+            # 只要張數有變，就記錄下來
+            if shares_diff != 0:
+                changes_dict[row_now['name']] = shares_diff
                 clean_name = clean_stock_name(row_now['name'])
-                if diff > 0:
-                    increased_list.append((clean_name, diff, shares_diff))
+                if shares_diff > 0:
+                    increased_list.append((clean_name, shares_diff))
                 else:
-                    decreased_list.append((clean_name, diff, shares_diff))
+                    decreased_list.append((clean_name, shares_diff))
                     
+    # 依照張數多寡排序
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
@@ -179,27 +179,23 @@ def process_etf(etf_code):
         msg += f"✦ [ {etf_code} 新進場 ]\n" + "\n".join(new_buy_list) + "\n\n"
     if sold_out_list:
         has_action = True
-        msg += f"✖️ [ {etf_code} 已離場 ]\n　" + "、".join(sold_out_list) + "\n\n"
+        msg += f"✖️ [ {etf_code} 已離場 ]\n" + "\n".join(sold_out_list) + "\n\n"
         
     if increased_list or decreased_list:
         has_action = True
-        msg += f"[ {etf_code} 權重異動 ]\n"
+        msg += f"[ {etf_code} 張數異動 ]\n"
         if increased_list:
             msg += "🔺 加碼\n"
-            for n, d, sd in increased_list: 
-                # 判斷張數的正負號顯示
-                sd_str = f"+{sd:,}" if sd > 0 else f"{sd:,}"
-                msg += f"　+ {n} ｜ +{d:.2f}% ｜ {sd_str} 張\n"
+            for n, sd in increased_list: 
+                msg += f"　+ {n} ｜ +{sd:,} 張\n"
         if decreased_list:
             msg += "🟩 減碼\n"
-            for n, d, sd in decreased_list: 
-                # 判斷張數的正負號顯示
-                sd_str = f"+{sd:,}" if sd > 0 else f"{sd:,}"
-                msg += f"　- {n} ｜ {d:.2f}% ｜ {sd_str} 張\n"
+            for n, sd in decreased_list: 
+                msg += f"　- {n} ｜ {sd:,} 張\n"
         msg += "\n"
         
     if not has_action:
-        msg += f"✔️ {etf_code} 今日無重大異動。\n\n"
+        msg += f"✔️ {etf_code} 今日籌碼無重大異動。\n\n"
 
     msg += f"[ {etf_code} 前十大持股 ]\n"
     sorted_df = today_df.sort_values(by='weight', ascending=False)
@@ -209,6 +205,7 @@ def process_etf(etf_code):
         sheets = int(row['shares'] / 1000)
         clean_name = clean_stock_name(row['name'])
         rank_str = str(rank).zfill(2)
+        # 前十大保留權重與張數，方便你檢視整體佔比
         msg += f"{rank_str}. {clean_name} ｜ {row['weight']:.2f}% ｜ {sheets:,} 張\n"
         rank += 1
     
@@ -240,9 +237,10 @@ def generate_summary_report(results):
         up_count = 0
         down_count = 0
         for res in results:
-            diff = res['changes'].get(stock, 0)
-            if diff >= CHANGE_THRESHOLD: up_count += 1
-            elif diff <= -CHANGE_THRESHOLD: down_count += 1
+            # 現在這裡抓出來的是「張數差異」
+            shares_diff = res['changes'].get(stock, 0)
+            if shares_diff > 0: up_count += 1
+            elif shares_diff < 0: down_count += 1
                 
         clean_name = clean_stock_name(stock)
         if up_count >= 2: collective_buy.append(f"{clean_name} (x{up_count})")
@@ -257,7 +255,7 @@ def generate_summary_report(results):
     if collective_sell:
         summary_msg += "🟩 [ 家族集體減碼 ]\n" + "、".join(collective_sell) + "\n\n"
     if not collective_buy and not collective_sell:
-        summary_msg += "➖ 今日無明顯集體操作方向。\n\n"
+        summary_msg += "➖ 今日籌碼無明顯集體操作方向。\n\n"
 
     summary_msg += "[ 家族核心重壓股 ]\n"
     for i, (name, avg_w, count) in enumerate(common_holdings[:5]): 
