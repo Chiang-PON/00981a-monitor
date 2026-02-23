@@ -149,16 +149,23 @@ def process_etf(etf_code):
         for c in common_codes:
             row_now = today_df[today_df['code'].astype(str) == c].iloc[0]
             row_last = last_df[last_df['code'].astype(str) == c].iloc[0]
+            
+            # 計算權重變動
             diff = round(row_now['weight'] - row_last['weight'], 2)
+            
+            # 計算張數變動
+            shares_now = int(row_now['shares'] / 1000)
+            shares_last = int(row_last['shares'] / 1000)
+            shares_diff = shares_now - shares_last
             
             changes_dict[row_now['name']] = diff
             
             if abs(diff) >= CHANGE_THRESHOLD:
                 clean_name = clean_stock_name(row_now['name'])
                 if diff > 0:
-                    increased_list.append((clean_name, diff))
+                    increased_list.append((clean_name, diff, shares_diff))
                 else:
-                    decreased_list.append((clean_name, diff))
+                    decreased_list.append((clean_name, diff, shares_diff))
                     
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
@@ -179,10 +186,16 @@ def process_etf(etf_code):
         msg += f"[ {etf_code} 權重異動 ]\n"
         if increased_list:
             msg += "🔺 加碼\n"
-            for n, d in increased_list: msg += f"　+ {n} ｜ +{d:.2f}%\n"
+            for n, d, sd in increased_list: 
+                # 判斷張數的正負號顯示
+                sd_str = f"+{sd:,}" if sd > 0 else f"{sd:,}"
+                msg += f"　+ {n} ｜ +{d:.2f}% ｜ {sd_str} 張\n"
         if decreased_list:
             msg += "🟩 減碼\n"
-            for n, d in decreased_list: msg += f"　- {n} ｜ {d:.2f}%\n"
+            for n, d, sd in decreased_list: 
+                # 判斷張數的正負號顯示
+                sd_str = f"+{sd:,}" if sd > 0 else f"{sd:,}"
+                msg += f"　- {n} ｜ {d:.2f}% ｜ {sd_str} 張\n"
         msg += "\n"
         
     if not has_action:
@@ -275,7 +288,6 @@ def main():
         final_message_blocks.append(res["msg_string"])
         
     if final_message_blocks:
-        # 分隔線也縮短到 15 個字元，確保手機不折行
         separator = "\n\n━━━━━━━━━━━━━━━\n\n"
         final_combined_message = separator.join(final_message_blocks)
         send_line_message(final_combined_message)
