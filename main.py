@@ -2,7 +2,7 @@
 
 追蹤 00980A ~ 00985A 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
-極簡設計：完美對齊分隔線、移除多餘 Emoji、專屬日期標題。
+極簡設計：完美對齊分隔線、移除多餘 Emoji、專屬日期標題、每 5 行微弱輔助線。
 """
 
 import argparse
@@ -304,7 +304,7 @@ def build_flex_carousel(results: list[dict], report_date: str) -> dict:
             })
         # 有異動
         else:
-            # 將每一個 tuple 生成左中右對齊的 Box
+            # 將每一個 tuple 生成左中右對齊的 Box，並自動加入引導線
             def add_section(title: str, title_color: str, items: list, margin_top: str = "md"):
                 if not items: return
                 
@@ -317,7 +317,7 @@ def build_flex_carousel(results: list[dict], report_date: str) -> dict:
                 
                 # 建立完美的表格列 (Horizontal Layout)
                 item_boxes = []
-                for name, val in items:
+                for i, (name, val) in enumerate(items):
                     item_boxes.append({
                         "type": "box",
                         "layout": "horizontal",
@@ -351,6 +351,14 @@ def build_flex_carousel(results: list[dict], report_date: str) -> dict:
                             }
                         ]
                     })
+                    
+                    # 💎 新增：每 5 行插入一條極微弱的輔助引導線 (除了最後一行)
+                    if (i + 1) % 5 == 0 and (i + 1) < len(items):
+                        item_boxes.append({
+                            "type": "separator",
+                            "color": "#f2f2f2", # 極淺灰色，比區塊分隔線淡很多
+                            "margin": "sm"
+                        })
                 
                 # 將這幾列打包加進 body
                 body_contents.append({
@@ -359,7 +367,7 @@ def build_flex_carousel(results: list[dict], report_date: str) -> dict:
                     "contents": item_boxes
                 })
                 
-                # 底部收尾分隔線
+                # 底部收尾分隔線 (區隔不同的買/賣動作區塊)
                 body_contents.append({
                     "type": "separator",
                     "margin": "md",
