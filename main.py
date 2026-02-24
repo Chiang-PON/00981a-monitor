@@ -1,7 +1,8 @@
-"""main.py — 主動式 ETF 家族監控系統 (Flex 卡片版)
+"""main.py — 主動式 ETF 家族監控系統 (極簡質感卡片版)
 
 追蹤 00980A ~ 00985A 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
+極簡設計：移除 Emoji，新增日期標題，提升財經專業感。
 """
 
 import argparse
@@ -210,13 +211,13 @@ def process_etf(etf_code: str) -> dict:
 
             for c in (today_codes - last_codes):
                 row = today_df[today_df["code"].astype(str) == c].iloc[0]
-                sheets = int(row["shares"] / 1000)
-                new_buy_list.append(f"＋ {clean_stock_name(row['name'])} ｜ {sheets:,} 張")
+                shares = int(row["shares"] / 1000)
+                new_buy_list.append(f"+ {clean_stock_name(row['name'])} ｜ {shares:,} 張")
                 
             for c in (last_codes - today_codes):
                 row = last_df[last_df["code"].astype(str) == c].iloc[0]
-                sheets = int(row["shares"] / 1000)
-                sold_out_list.append(f"－ {clean_stock_name(row['name'])} ｜ 出清 {sheets:,} 張")
+                shares = int(row["shares"] / 1000)
+                sold_out_list.append(f"- {clean_stock_name(row['name'])} ｜ 出清 {shares:,} 張")
                 
             for c in common_codes:
                 row_now = today_df[today_df["code"].astype(str) == c].iloc[0]
@@ -235,8 +236,8 @@ def process_etf(etf_code: str) -> dict:
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
-    increased_strs = [f"＋ {n} ｜ +{sd:,} 張" for n, sd in increased_list]
-    decreased_strs = [f"－ {n} ｜ {sd:,} 張" for n, sd in decreased_list]
+    increased_strs = [f"+ {n} ｜ +{sd:,} 張" for n, sd in increased_list]
+    decreased_strs = [f"- {n} ｜ {sd:,} 張" for n, sd in decreased_list]
 
     has_action = bool(new_buy_list or sold_out_list or increased_strs or decreased_strs)
 
@@ -253,14 +254,14 @@ def process_etf(etf_code: str) -> dict:
 # ═══════════════════════════════
 # 建立 LINE Flex Message
 # ═══════════════════════════════
-def build_flex_carousel(results: list[dict]) -> dict:
+def build_flex_carousel(results: list[dict], report_date: str) -> dict:
     bubbles = []
     
     for res in results:
         etf_code = res["etf"]
         body_contents = []
         
-        # 標題區塊 (深色質感)
+        # 標題區塊 (深色質感 + 日期)
         header_box = {
             "type": "box",
             "layout": "vertical",
@@ -269,10 +270,19 @@ def build_flex_carousel(results: list[dict]) -> dict:
             "contents": [
                 {
                     "type": "text",
-                    "text": f"📊 {etf_code}",
+                    "text": report_date,
+                    "color": "#95a5a6",
+                    "size": "xs",
+                    "weight": "bold",
+                    "margin": "none"
+                },
+                {
+                    "type": "text",
+                    "text": etf_code,
                     "weight": "bold",
                     "size": "xl",
-                    "color": "#ffffff"
+                    "color": "#ffffff",
+                    "margin": "sm"
                 }
             ]
         }
@@ -281,7 +291,7 @@ def build_flex_carousel(results: list[dict]) -> dict:
         if res.get("error"):
             body_contents.append({
                 "type": "text",
-                "text": "⚠️ 尚未公布或查無持股",
+                "text": "尚未公布或查無持股",
                 "color": "#e74c3c",
                 "size": "sm",
                 "wrap": True,
@@ -292,7 +302,7 @@ def build_flex_carousel(results: list[dict]) -> dict:
         elif not res.get("has_action"):
             body_contents.append({
                 "type": "text",
-                "text": "✔️ 今日籌碼無異動",
+                "text": "今日籌碼無異動",
                 "color": "#95a5a6",
                 "size": "sm",
                 "weight": "bold",
@@ -313,7 +323,7 @@ def build_flex_carousel(results: list[dict]) -> dict:
                     "size": "sm",
                     "margin": margin_top
                 })
-                # 內容 (使用 \n 組合，大幅減少 JSON 體積)
+                # 內容 (使用 \n 組合)
                 body_contents.append({
                     "type": "text",
                     "text": "\n".join(items),
@@ -329,10 +339,10 @@ def build_flex_carousel(results: list[dict]) -> dict:
                     "color": "#eeeeee"
                 })
 
-            add_section("✦ 新進場", "#d35400", res["new_buy"])
-            add_section("🔺 加碼", "#e74c3c", res["increased"])
-            add_section("🟩 減碼", "#27ae60", res["decreased"])
-            add_section("✖️ 已離場", "#7f8c8d", res["sold_out"])
+            add_section("新進場", "#d35400", res["new_buy"])
+            add_section("加碼", "#e74c3c", res["increased"])
+            add_section("減碼", "#27ae60", res["decreased"])
+            add_section("已離場", "#7f8c8d", res["sold_out"])
 
             # 移除最後一條多餘的分隔線
             if body_contents and body_contents[-1]["type"] == "separator":
@@ -340,7 +350,7 @@ def build_flex_carousel(results: list[dict]) -> dict:
 
         bubble = {
             "type": "bubble",
-            "size": "kilo", # 寬度適中，適合左右滑動
+            "size": "kilo", 
             "header": header_box,
             "body": {
                 "type": "box",
@@ -354,7 +364,7 @@ def build_flex_carousel(results: list[dict]) -> dict:
     # 封裝成 Carousel
     return {
         "type": "flex",
-        "altText": "📈 每日籌碼異動卡片已送達",
+        "altText": f"每日籌碼異動卡片已送達 ({report_date})",
         "contents": {
             "type": "carousel",
             "contents": bubbles
@@ -390,7 +400,8 @@ def main() -> None:
         return
 
     os.makedirs(HISTORY_DIR, exist_ok=True)
-    logger.info("📋 執行每日籌碼異動報告 (卡片版)")
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    logger.info(f"📋 執行每日籌碼異動報告 ({today_str})")
     
     results = []
     for etf in ETF_LIST:
@@ -401,7 +412,7 @@ def main() -> None:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
 
     if results:
-        flex_payload = build_flex_carousel(results)
+        flex_payload = build_flex_carousel(results, today_str)
         send_flex_message(flex_payload)
     else:
         # Fallback 純文字錯誤訊息
@@ -410,7 +421,7 @@ def main() -> None:
             requests.post(
                 "https://api.line.me/v2/bot/message/broadcast", 
                 headers=headers, 
-                json={"messages": [{"type": "text", "text": "⚠️ 今日爬蟲全部失敗。"}]}
+                json={"messages": [{"type": "text", "text": "今日爬蟲全部失敗。"}]}
             )
 
 if __name__ == "__main__":
