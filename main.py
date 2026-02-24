@@ -1,7 +1,7 @@
-"""main.py — 主動式 ETF 家族監控系統 (極簡籌碼版)
+"""main.py — 主動式 ETF 家族監控系統 (Flex 卡片版)
 
 追蹤 00980A ~ 00985A 的每日持股變化。
-僅推播：新進場 / 已離場 / 加碼 / 減碼 張數。
+輸出升級為 LINE Flex Message (Carousel 卡片格式)。
 """
 
 import argparse
@@ -38,7 +38,6 @@ LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
 ETF_LIST: list[str] = ["00980A", "00981A", "00982A", "00983A", "00984A", "00985A"]
 URL_TEMPLATE: str = "https://www.pocket.tw/etf/tw/{}/fundholding/"
 HISTORY_DIR: str = "history"
-LINE_MAX_LENGTH: int = 4800  
 CRAWL_MAX_RETRIES: int = 2
 CRAWL_PAGE_LOAD_WAIT: float = 5.0
 CRAWL_SCROLL_WAIT: float = 3.0
@@ -111,7 +110,7 @@ def fetch_data(etf_code: str) -> list[dict]:
     for attempt in range(CRAWL_MAX_RETRIES + 1):
         driver = None
         try:
-            logger.info("[%s] 啟爬蟲 (第 %d 次)...", etf_code, attempt + 1)
+            logger.info("[%s] 啟動爬蟲 (第 %d 次)...", etf_code, attempt + 1)
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-gpu")
@@ -153,7 +152,6 @@ def fetch_data(etf_code: str) -> list[dict]:
                             weight_str = cols[2].text.strip().replace("%", "")
                             shares_str = cols[3].text.strip().replace(",", "")
                             
-                            # 檢查是否包含非股票關鍵字
                             name_upper = name.upper()
                             code_upper = code.upper()
                             should_skip = any(kw in name_upper or kw in code_upper for kw in skip_keywords)
@@ -178,42 +176,20 @@ def fetch_data(etf_code: str) -> list[dict]:
     return []
 
 # ═══════════════════════════════
-# LINE 通知
+# 資料處理 (返回結構化資料供 Flex 繪製)
 # ═══════════════════════════════
-def send_line_message(msg: str) -> None:
-    if not LINE_TOKEN: return
-    url = "https://api.line.me/v2/bot/message/broadcast"
-    headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
-    
-    chunks = _split_message(msg)
-    for chunk in chunks:
-        try:
-            requests.post(url, headers=headers, json={"messages": [{"type": "text", "text": chunk}]}, timeout=10)
-        except Exception as e:
-            logger.error("LINE 連線錯誤: %s", e)
-
-def _split_message(msg: str, max_len: int = LINE_MAX_LENGTH) -> list[str]:
-    if len(msg) <= max_len: return [msg]
-    chunks, current = [], ""
-    for block in msg.split("━━━━━━━━━━━━━━━"):
-        test = current + "━━━━━━━━━━━━━━━" + block if current else block
-        if len(test) <= max_len: current = test
-        else:
-            if current: chunks.append(current.strip())
-            current = block
-    if current: chunks.append(current.strip())
-    return chunks
-
-# ═══════════════════════════════
-# 單一 ETF 處理 (極簡版)
-# ═══════════════════════════════
-def process_etf(etf_code: str) -> str:
+def process_etf(etf_code: str) -> dict:
     today_str = datetime.now().strftime("%Y-%m-%d")
     today_file = os.path.join(HISTORY_DIR, f"{etf_code}_{today_str}.csv")
 
     today_data = fetch_data(etf_code)
     if not today_data: 
-        return f"▪️ {etf_code}\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n⚠️ 網站尚未公布或查無持股資料。"
+        return {
+            "etf": etf_code,
+            "has_action": False,
+            "error": True,
+            "new_buy": [], "sold_out": [], "increased": [], "decreased": []
+        }
 
     today_df = pd.DataFrame(today_data)
     today_df.to_csv(today_file, index=False, encoding="utf-8-sig")
@@ -235,12 +211,12 @@ def process_etf(etf_code: str) -> str:
             for c in (today_codes - last_codes):
                 row = today_df[today_df["code"].astype(str) == c].iloc[0]
                 sheets = int(row["shares"] / 1000)
-                new_buy_list.append(f"　+ {clean_stock_name(row['name'])} ｜ {sheets:,} 張")
+                new_buy_list.append(f"＋ {clean_stock_name(row['name'])} ｜ {sheets:,} 張")
                 
             for c in (last_codes - today_codes):
                 row = last_df[last_df["code"].astype(str) == c].iloc[0]
                 sheets = int(row["shares"] / 1000)
-                sold_out_list.append(f"　- {clean_stock_name(row['name'])} ｜ 出清 {sheets:,} 張")
+                sold_out_list.append(f"－ {clean_stock_name(row['name'])} ｜ 出清 {sheets:,} 張")
                 
             for c in common_codes:
                 row_now = today_df[today_df["code"].astype(str) == c].iloc[0]
@@ -259,32 +235,147 @@ def process_etf(etf_code: str) -> str:
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
-    msg = f"▪️ {etf_code}\n"
-    msg += "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n"
-    
-    has_action = False
-    if new_buy_list:
-        has_action = True
-        msg += f"✦ [ {etf_code} 新進場 ]\n" + "\n".join(new_buy_list) + "\n\n"
-    if sold_out_list:
-        has_action = True
-        msg += f"✖️ [ {etf_code} 已離場 ]\n" + "\n".join(sold_out_list) + "\n\n"
-        
-    if increased_list or decreased_list:
-        has_action = True
-        msg += f"[ {etf_code} 張數異動 ]\n"
-        if increased_list:
-            msg += "🔺 加碼\n"
-            for n, sd in increased_list: msg += f"　+ {n} ｜ +{sd:,} 張\n"
-        if decreased_list:
-            msg += "🟩 減碼\n"
-            for n, sd in decreased_list: msg += f"　- {n} ｜ {sd:,} 張\n"
-        msg += "\n"
-        
-    if not has_action:
-        msg += f"✔️ {etf_code} 今日籌碼無重大異動。\n"
+    increased_strs = [f"＋ {n} ｜ +{sd:,} 張" for n, sd in increased_list]
+    decreased_strs = [f"－ {n} ｜ {sd:,} 張" for n, sd in decreased_list]
 
-    return msg.strip()
+    has_action = bool(new_buy_list or sold_out_list or increased_strs or decreased_strs)
+
+    return {
+        "etf": etf_code,
+        "has_action": has_action,
+        "error": False,
+        "new_buy": new_buy_list,
+        "sold_out": sold_out_list,
+        "increased": increased_strs,
+        "decreased": decreased_strs
+    }
+
+# ═══════════════════════════════
+# 建立 LINE Flex Message
+# ═══════════════════════════════
+def build_flex_carousel(results: list[dict]) -> dict:
+    bubbles = []
+    
+    for res in results:
+        etf_code = res["etf"]
+        body_contents = []
+        
+        # 標題區塊 (深色質感)
+        header_box = {
+            "type": "box",
+            "layout": "vertical",
+            "backgroundColor": "#1e272e", # 財經質感的深藍黑
+            "paddingAll": "15px",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": f"📊 {etf_code}",
+                    "weight": "bold",
+                    "size": "xl",
+                    "color": "#ffffff"
+                }
+            ]
+        }
+
+        # 錯誤處理 (抓不到資料)
+        if res.get("error"):
+            body_contents.append({
+                "type": "text",
+                "text": "⚠️ 尚未公布或查無持股",
+                "color": "#e74c3c",
+                "size": "sm",
+                "wrap": True,
+                "align": "center",
+                "margin": "xl"
+            })
+        # 無異動
+        elif not res.get("has_action"):
+            body_contents.append({
+                "type": "text",
+                "text": "✔️ 今日籌碼無異動",
+                "color": "#95a5a6",
+                "size": "sm",
+                "weight": "bold",
+                "wrap": True,
+                "align": "center",
+                "margin": "xl"
+            })
+        # 有異動
+        else:
+            def add_section(title: str, title_color: str, items: list, margin_top: str = "md"):
+                if not items: return
+                # 標題
+                body_contents.append({
+                    "type": "text",
+                    "text": title,
+                    "color": title_color,
+                    "weight": "bold",
+                    "size": "sm",
+                    "margin": margin_top
+                })
+                # 內容 (使用 \n 組合，大幅減少 JSON 體積)
+                body_contents.append({
+                    "type": "text",
+                    "text": "\n".join(items),
+                    "color": "#333333",
+                    "size": "sm",
+                    "wrap": True,
+                    "margin": "sm"
+                })
+                # 分隔線
+                body_contents.append({
+                    "type": "separator",
+                    "margin": "md",
+                    "color": "#eeeeee"
+                })
+
+            add_section("✦ 新進場", "#d35400", res["new_buy"])
+            add_section("🔺 加碼", "#e74c3c", res["increased"])
+            add_section("🟩 減碼", "#27ae60", res["decreased"])
+            add_section("✖️ 已離場", "#7f8c8d", res["sold_out"])
+
+            # 移除最後一條多餘的分隔線
+            if body_contents and body_contents[-1]["type"] == "separator":
+                body_contents.pop()
+
+        bubble = {
+            "type": "bubble",
+            "size": "kilo", # 寬度適中，適合左右滑動
+            "header": header_box,
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "paddingAll": "15px",
+                "contents": body_contents
+            }
+        }
+        bubbles.append(bubble)
+
+    # 封裝成 Carousel
+    return {
+        "type": "flex",
+        "altText": "📈 每日籌碼異動卡片已送達",
+        "contents": {
+            "type": "carousel",
+            "contents": bubbles
+        }
+    }
+
+def send_flex_message(flex_payload: dict) -> None:
+    """透過 LINE Broadcast API 發送 Flex Message"""
+    if not LINE_TOKEN: return
+    url = "https://api.line.me/v2/bot/message/broadcast"
+    headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
+    payload = {"messages": [flex_payload]}
+    
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=10)
+        if not resp.ok:
+            logger.error(f"LINE 發送失敗: {resp.status_code} - {resp.text}")
+        else:
+            logger.info("✅ Flex Message 發送成功！")
+    except Exception as e:
+        logger.error("LINE 連線錯誤: %s", e)
 
 # ═══════════════════════════════
 # 主程式
@@ -299,21 +390,28 @@ def main() -> None:
         return
 
     os.makedirs(HISTORY_DIR, exist_ok=True)
-    logger.info("📋 執行每日籌碼異動報告")
+    logger.info("📋 執行每日籌碼異動報告 (卡片版)")
     
-    final_blocks = []
+    results = []
     for etf in ETF_LIST:
         try:
-            report = process_etf(etf)
-            if report: final_blocks.append(report)
+            res = process_etf(etf)
+            results.append(res)
         except Exception as e:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
 
-    if final_blocks:
-        separator = "\n\n━━━━━━━━━━━━━━━\n\n"
-        send_line_message(separator.join(final_blocks))
+    if results:
+        flex_payload = build_flex_carousel(results)
+        send_flex_message(flex_payload)
     else:
-        send_line_message(f"⚠️ 主動式 ETF 監控\n今日爬蟲全部失敗。")
+        # Fallback 純文字錯誤訊息
+        if LINE_TOKEN:
+            headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
+            requests.post(
+                "https://api.line.me/v2/bot/message/broadcast", 
+                headers=headers, 
+                json={"messages": [{"type": "text", "text": "⚠️ 今日爬蟲全部失敗。"}]}
+            )
 
 if __name__ == "__main__":
     main()
