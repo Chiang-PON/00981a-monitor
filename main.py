@@ -149,7 +149,8 @@ def fetch_data(etf_code: str) -> list[dict]:
                             name = name_tag.text.strip() if name_tag else cols[1].text.strip()
                             weight_str = cols[2].text.strip().replace("%", "")
                             shares_str = cols[3].text.strip().replace(",", "")
-                            if code.isdigit():
+                            # 修正點：取消 code.isdigit() 限制，只要代碼不為空就抓取，支援美股與現金部位
+                            if code:
                                 try:
                                     data.append({
                                         "code": code, "name": name,
@@ -203,7 +204,9 @@ def process_etf(etf_code: str) -> str:
     today_file = os.path.join(HISTORY_DIR, f"{etf_code}_{today_str}.csv")
 
     today_data = fetch_data(etf_code)
-    if not today_data: return ""
+    # 如果抓不到資料，誠實回報，不直接隱藏
+    if not today_data: 
+        return f"▪️ {etf_code}\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n⚠️ 網站尚未公布或查無持股資料。"
 
     today_df = pd.DataFrame(today_data)
     today_df.to_csv(today_file, index=False, encoding="utf-8-sig")
