@@ -111,7 +111,7 @@ def fetch_data(etf_code: str) -> list[dict]:
     for attempt in range(CRAWL_MAX_RETRIES + 1):
         driver = None
         try:
-            logger.info("[%s] 啟動爬蟲 (第 %d 次)...", etf_code, attempt + 1)
+            logger.info("[%s] 啟爬蟲 (第 %d 次)...", etf_code, attempt + 1)
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-gpu")
@@ -136,6 +136,9 @@ def fetch_data(etf_code: str) -> list[dict]:
             soup = BeautifulSoup(driver.page_source, "html.parser")
             table = soup.find("table", class_="cm-table__table")
             data: list[dict] = []
+            
+            # 要剔除的非股票會計項目關鍵字
+            skip_keywords = ["CASH", "RECEIVABLE", "PAYABLE", "MARGIN", "加權股價指數", "C_NTD", "C_USD"]
 
             if table:
                 tbody = table.find("tbody")
@@ -149,8 +152,13 @@ def fetch_data(etf_code: str) -> list[dict]:
                             name = name_tag.text.strip() if name_tag else cols[1].text.strip()
                             weight_str = cols[2].text.strip().replace("%", "")
                             shares_str = cols[3].text.strip().replace(",", "")
-                            # 修正點：取消 code.isdigit() 限制，只要代碼不為空就抓取，支援美股與現金部位
-                            if code:
+                            
+                            # 檢查是否包含非股票關鍵字
+                            name_upper = name.upper()
+                            code_upper = code.upper()
+                            should_skip = any(kw in name_upper or kw in code_upper for kw in skip_keywords)
+                            
+                            if code and not should_skip:
                                 try:
                                     data.append({
                                         "code": code, "name": name,
@@ -204,7 +212,6 @@ def process_etf(etf_code: str) -> str:
     today_file = os.path.join(HISTORY_DIR, f"{etf_code}_{today_str}.csv")
 
     today_data = fetch_data(etf_code)
-    # 如果抓不到資料，誠實回報，不直接隱藏
     if not today_data: 
         return f"▪️ {etf_code}\n┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n⚠️ 網站尚未公布或查無持股資料。"
 
