@@ -1,6 +1,6 @@
 """main.py — 主動式 ETF 家族監控系統 (滿載突破對齊版)
 
-追蹤 00980A ~ 00985A 的每日持股變化。
+追蹤 0050 及 00980A, 00981A, 00982A, 00983A, 00985A 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
 極簡設計：完美對齊、微弱輔助線。
 智慧突破：動態計算 JSON 容量，自動拆分多則訊息，避開 50KB 限制，保留 100% 完整清單。
@@ -38,7 +38,8 @@ logger = logging.getLogger("ETF-Monitor")
 # 常數設定
 # ═══════════════════════════════
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
-ETF_LIST: list[str] = ["00980A", "00981A", "00982A", "00983A", "00984A", "00985A"]
+# 💎 調整監控清單：移除 00984A，加入 0050
+ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00983A", "00985A"]
 URL_TEMPLATE: str = "https://www.pocket.tw/etf/tw/{}/fundholding/"
 HISTORY_DIR: str = "history"
 CRAWL_MAX_RETRIES: int = 2
