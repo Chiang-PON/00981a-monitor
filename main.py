@@ -1,12 +1,14 @@
-"""main.py — 主動式 ETF 家族監控系統 (極簡質感對齊版)
+"""main.py — 主動式 ETF 家族監控系統 (滿載突破對齊版)
 
 追蹤 00980A ~ 00985A 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
-極簡設計：完美對齊分隔線、移除多餘 Emoji、專屬日期標題、每 5 行微弱輔助線。
+極簡設計：完美對齊、微弱輔助線。
+智慧突破：動態計算 JSON 容量，自動拆分多則訊息，避開 50KB 限制，保留 100% 完整清單。
 """
 
 import argparse
 import glob
+import json
 import logging
 import os
 import re
@@ -137,7 +139,6 @@ def fetch_data(etf_code: str) -> list[dict]:
             table = soup.find("table", class_="cm-table__table")
             data: list[dict] = []
             
-            # 要剔除的非股票會計項目關鍵字
             skip_keywords = ["CASH", "RECEIVABLE", "PAYABLE", "MARGIN", "加權股價指數", "C_NTD", "C_USD"]
 
             if table:
@@ -177,7 +178,7 @@ def fetch_data(etf_code: str) -> list[dict]:
     return []
 
 # ═══════════════════════════════
-# 資料處理 (返回 Tuple 以利三欄排版)
+# 資料處理
 # ═══════════════════════════════
 def process_etf(etf_code: str) -> dict:
     today_str = datetime.now().strftime("%Y-%m-%d")
@@ -186,9 +187,7 @@ def process_etf(etf_code: str) -> dict:
     today_data = fetch_data(etf_code)
     if not today_data: 
         return {
-            "etf": etf_code,
-            "has_action": False,
-            "error": True,
+            "etf": etf_code, "has_action": False, "error": True,
             "new_buy": [], "sold_out": [], "increased": [], "decreased": []
         }
 
@@ -209,7 +208,6 @@ def process_etf(etf_code: str) -> dict:
             last_codes = set(last_df["code"].astype(str))
             common_codes = today_codes & last_codes
 
-            # 改用 Tuple 儲存，供後續切分為三欄 (左字、中槓、右字)
             for c in (today_codes - last_codes):
                 row = today_df[today_df["code"].astype(str) == c].iloc[0]
                 shares = int(row["shares"] / 1000)
@@ -234,6 +232,10 @@ def process_etf(etf_code: str) -> dict:
         except Exception as e:
             logger.warning("[%s] 比較歷史資料失敗: %s", etf_code, e)
 
+    # 排序確保張數最大的排上面
+    new_buy_list.sort(key=lambda x: int(x[1].replace(' 張','').replace(',','')), reverse=True)
+    sold_out_list.sort(key=lambda x: int(x[1].replace('出清 ','').replace(' 張','').replace(',','')), reverse=True)
+    
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
@@ -243,182 +245,126 @@ def process_etf(etf_code: str) -> dict:
     has_action = bool(new_buy_list or sold_out_list or increased_tuples or decreased_tuples)
 
     return {
-        "etf": etf_code,
-        "has_action": has_action,
-        "error": False,
-        "new_buy": new_buy_list,
-        "sold_out": sold_out_list,
-        "increased": increased_tuples,
-        "decreased": decreased_tuples
+        "etf": etf_code, "has_action": has_action, "error": False,
+        "new_buy": new_buy_list, "sold_out": sold_out_list,
+        "increased": increased_tuples, "decreased": decreased_tuples
     }
 
 # ═══════════════════════════════
-# 建立 LINE Flex Message (終極對齊版)
+# 建立單一張 ETF 卡片 (Bubble)
 # ═══════════════════════════════
-def build_flex_carousel(results: list[dict], report_date: str) -> dict:
-    bubbles = []
+def build_single_bubble(res: dict, report_date: str) -> dict:
+    etf_code = res["etf"]
+    body_contents = []
     
-    for res in results:
-        etf_code = res["etf"]
-        body_contents = []
-        
-        # 標題區塊 (深色質感 + 日期)
-        header_box = {
-            "type": "box",
-            "layout": "vertical",
-            "backgroundColor": "#1e272e",
-            "paddingAll": "15px",
-            "contents": [
-                {
-                    "type": "text",
-                    "text": report_date,
-                    "color": "#95a5a6",
-                    "size": "xs",
-                    "weight": "bold",
-                    "margin": "none"
-                },
-                {
-                    "type": "text",
-                    "text": etf_code,
-                    "weight": "bold",
-                    "size": "xl",
-                    "color": "#ffffff",
-                    "margin": "sm"
-                }
-            ]
-        }
+    header_box = {
+        "type": "box", "layout": "vertical", "backgroundColor": "#1e272e", "paddingAll": "15px",
+        "contents": [
+            {"type": "text", "text": report_date, "color": "#95a5a6", "size": "xs", "weight": "bold", "margin": "none"},
+            {"type": "text", "text": etf_code, "weight": "bold", "size": "xl", "color": "#ffffff", "margin": "sm"}
+        ]
+    }
 
-        # 錯誤處理
-        if res.get("error"):
-            body_contents.append({
-                "type": "text", "text": "尚未公布或查無持股",
-                "color": "#e74c3c", "size": "sm",
-                "wrap": True, "align": "center", "margin": "xl"
-            })
-        # 無異動
-        elif not res.get("has_action"):
-            body_contents.append({
-                "type": "text", "text": "今日籌碼無異動",
-                "color": "#95a5a6", "size": "sm", "weight": "bold",
-                "wrap": True, "align": "center", "margin": "xl"
-            })
-        # 有異動
-        else:
-            # 將每一個 tuple 生成左中右對齊的 Box，並自動加入引導線
-            def add_section(title: str, title_color: str, items: list, margin_top: str = "md"):
-                if not items: return
-                
-                # 區塊大標題
-                body_contents.append({
-                    "type": "text", "text": title,
-                    "color": title_color, "weight": "bold",
-                    "size": "sm", "margin": margin_top
+    if res.get("error"):
+        body_contents.append({"type": "text", "text": "尚未公布或查無持股", "color": "#e74c3c", "size": "sm", "wrap": True, "align": "center", "margin": "xl"})
+    elif not res.get("has_action"):
+        body_contents.append({"type": "text", "text": "今日籌碼無異動", "color": "#95a5a6", "size": "sm", "weight": "bold", "wrap": True, "align": "center", "margin": "xl"})
+    else:
+        def add_section(title: str, title_color: str, items: list, margin_top: str = "md"):
+            if not items: return
+            
+            body_contents.append({"type": "text", "text": title, "color": title_color, "weight": "bold", "size": "sm", "margin": margin_top})
+            item_boxes = []
+            
+            # 不限筆數，完整顯示所有異動
+            for i, (name, val) in enumerate(items):
+                item_boxes.append({
+                    "type": "box", "layout": "horizontal", "spacing": "sm", "margin": "xs",
+                    "contents": [
+                        { "type": "text", "text": name, "size": "sm", "color": "#333333", "flex": 5, "wrap": False },
+                        { "type": "text", "text": "｜", "size": "sm", "color": "#bdc3c7", "flex": 1, "align": "center" },
+                        { "type": "text", "text": val, "size": "sm", "color": "#333333", "flex": 4, "align": "end", "wrap": False }
+                    ]
                 })
                 
-                # 建立完美的表格列 (Horizontal Layout)
-                item_boxes = []
-                for i, (name, val) in enumerate(items):
-                    item_boxes.append({
-                        "type": "box",
-                        "layout": "horizontal",
-                        "spacing": "sm",
-                        "margin": "xs",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": name,
-                                "size": "sm",
-                                "color": "#333333",
-                                "flex": 5, # 給予名字適當寬度
-                                "wrap": False
-                            },
-                            {
-                                "type": "text",
-                                "text": "｜",
-                                "size": "sm",
-                                "color": "#bdc3c7",
-                                "flex": 1,
-                                "align": "center"
-                            },
-                            {
-                                "type": "text",
-                                "text": val,
-                                "size": "sm",
-                                "color": "#333333",
-                                "flex": 4, # 靠右貼齊數字
-                                "align": "end",
-                                "wrap": False
-                            }
-                        ]
-                    })
-                    
-                    # 💎 新增：每 5 行插入一條極微弱的輔助引導線 (除了最後一行)
-                    if (i + 1) % 5 == 0 and (i + 1) < len(items):
-                        item_boxes.append({
-                            "type": "separator",
-                            "color": "#f2f2f2", # 極淺灰色，比區塊分隔線淡很多
-                            "margin": "sm"
-                        })
-                
-                # 將這幾列打包加進 body
-                body_contents.append({
-                    "type": "box",
-                    "layout": "vertical",
-                    "contents": item_boxes
-                })
-                
-                # 底部收尾分隔線 (區隔不同的買/賣動作區塊)
-                body_contents.append({
-                    "type": "separator",
-                    "margin": "md",
-                    "color": "#eeeeee"
-                })
+                # 每 5 行插入微弱輔助線
+                if (i + 1) % 5 == 0 and (i + 1) < len(items):
+                    item_boxes.append({"type": "separator", "color": "#f2f2f2", "margin": "sm"})
+            
+            body_contents.append({"type": "box", "layout": "vertical", "contents": item_boxes})
+            body_contents.append({"type": "separator", "margin": "md", "color": "#eeeeee"})
 
-            add_section("新進場", "#d35400", res["new_buy"])
-            add_section("加碼", "#e74c3c", res["increased"])
-            add_section("減碼", "#27ae60", res["decreased"])
-            add_section("已離場", "#7f8c8d", res["sold_out"])
+        add_section("新進場", "#d35400", res["new_buy"])
+        add_section("加碼", "#e74c3c", res["increased"])
+        add_section("減碼", "#27ae60", res["decreased"])
+        add_section("已離場", "#7f8c8d", res["sold_out"])
 
-            # 移除最後一條多餘的分隔線
-            if body_contents and body_contents[-1]["type"] == "separator":
-                body_contents.pop()
-
-        bubble = {
-            "type": "bubble",
-            "size": "kilo", 
-            "header": header_box,
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "paddingAll": "15px",
-                "contents": body_contents
-            }
-        }
-        bubbles.append(bubble)
+        if body_contents and body_contents[-1]["type"] == "separator":
+            body_contents.pop()
 
     return {
-        "type": "flex",
-        "altText": f"每日籌碼異動卡片已送達 ({report_date})",
-        "contents": {
-            "type": "carousel",
-            "contents": bubbles
-        }
+        "type": "bubble", "size": "kilo", "header": header_box,
+        "body": {"type": "box", "layout": "vertical", "paddingAll": "15px", "contents": body_contents}
     }
 
-def send_flex_message(flex_payload: dict) -> None:
+# ═══════════════════════════════
+# 建立多個 Payload (動態分流，避開 50KB)
+# ═══════════════════════════════
+def build_flex_payloads(results: list[dict], report_date: str) -> list[dict]:
+    """將多張卡片打包，若容量過大則自動切分成多個 Carousel 訊息"""
+    bubbles = [build_single_bubble(res, report_date) for res in results]
+    flex_messages = []
+    
+    current_bubbles = []
+    current_size = 0
+    SAFE_SIZE_LIMIT = 40000 # 安全閾值 40KB (官方極限 50KB)
+
+    for bubble in bubbles:
+        # 計算單張卡片編碼後的 Byte 大小
+        bubble_size = len(json.dumps(bubble, ensure_ascii=False).encode('utf-8'))
+        
+        # 若加上這張卡片會超過 40KB，則把現有的打包成一則訊息，並開新的一單
+        if current_bubbles and (current_size + bubble_size > SAFE_SIZE_LIMIT):
+            flex_messages.append({
+                "type": "flex",
+                "altText": f"📊 每日籌碼異動 ({report_date})",
+                "contents": {"type": "carousel", "contents": current_bubbles}
+            })
+            current_bubbles = []
+            current_size = 0
+
+        current_bubbles.append(bubble)
+        current_size += bubble_size
+
+    # 把剩餘的打包成最後一則
+    if current_bubbles:
+        flex_messages.append({
+            "type": "flex",
+            "altText": f"📊 每日籌碼異動 ({report_date})",
+            "contents": {"type": "carousel", "contents": current_bubbles}
+        })
+
+    return flex_messages
+
+def send_flex_messages(payloads: list[dict]) -> None:
+    """發送訊息，支援多個 Flex payload 同時發送"""
     if not LINE_TOKEN: return
     url = "https://api.line.me/v2/bot/message/broadcast"
     headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
-    payload = {"messages": [flex_payload]}
     
-    try:
-        resp = requests.post(url, headers=headers, json=payload, timeout=10)
-        if not resp.ok:
-            logger.error(f"LINE 發送失敗: {resp.status_code} - {resp.text}")
-        else:
-            logger.info("✅ Flex Message 發送成功！")
-    except Exception as e:
-        logger.error("LINE 連線錯誤: %s", e)
+    # LINE 廣播一次最多能夾帶 5 個 Message Object
+    for i in range(0, len(payloads), 5):
+        batch = payloads[i:i+5]
+        payload = {"messages": batch}
+        
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=10)
+            if not resp.ok:
+                logger.error(f"LINE 發送失敗: {resp.status_code} - {resp.text}")
+            else:
+                logger.info(f"✅ 第 {i//5 + 1} 批 Flex Message 發送成功！")
+        except Exception as e:
+            logger.error("LINE 連線錯誤: %s", e)
 
 # ═══════════════════════════════
 # 主程式
@@ -445,8 +391,9 @@ def main() -> None:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
 
     if results:
-        flex_payload = build_flex_carousel(results, today_str)
-        send_flex_message(flex_payload)
+        # 取得智慧分流後的 payload 清單
+        payloads = build_flex_payloads(results, today_str)
+        send_flex_messages(payloads)
     else:
         if LINE_TOKEN:
             headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
