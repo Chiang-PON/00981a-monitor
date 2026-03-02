@@ -1,9 +1,10 @@
-"""main.py — 主動式 ETF 家族監控系統 (滿載突破對齊版)
+"""main.py — 主動式 ETF 家族監控系統 (長輩友善主題版)
 
-追蹤 0050 及 00980A, 00981A, 00982A, 00983A, 00985A 的每日持股變化。
+追蹤 0050 及 00980A, 00981A, 00982A, 00984A, 00985A 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
 極簡設計：完美對齊、微弱輔助線。
-智慧突破：動態計算 JSON 容量，自動拆分多則訊息，避開 50KB 限制，保留 100% 完整清單。
+智慧突破：動態計算 JSON 容量，避開 50KB 限制。
+孝親優化：加入各 ETF 專屬的中文主題與名稱標籤，提升閱讀體驗。
 """
 
 import argparse
@@ -38,8 +39,20 @@ logger = logging.getLogger("ETF-Monitor")
 # 常數設定
 # ═══════════════════════════════
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
-# 💎 調整監控清單：移除 00984A，加入 0050
-ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00983A", "00985A"]
+
+# 💎 調整監控清單
+ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00984A", "00985A"]
+
+# 💎 專屬主題標籤 (顯示於卡片標題下方)
+ETF_THEMES: dict[str, str] = {
+    "0050": "🇹🇼 大盤指標 (元大台灣50)",
+    "00980A": "📈 成長配息 (野村智慧優選)",
+    "00981A": "🚀 科技增長 (統一台股增長)",
+    "00982A": "🔥 強勢動能 (群益精選強棒)",
+    "00984A": "💰 高息成長 (安聯台灣高息)",
+    "00985A": "💪 增強市值 (野村台灣增強50)"
+}
+
 URL_TEMPLATE: str = "https://www.pocket.tw/etf/tw/{}/fundholding/"
 HISTORY_DIR: str = "history"
 CRAWL_MAX_RETRIES: int = 2
@@ -258,11 +271,16 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
     etf_code = res["etf"]
     body_contents = []
     
+    # 💎 提取這檔 ETF 的專屬中文主題標籤
+    theme_text = ETF_THEMES.get(etf_code, "📊 主動式 ETF")
+    
     header_box = {
         "type": "box", "layout": "vertical", "backgroundColor": "#1e272e", "paddingAll": "15px",
         "contents": [
             {"type": "text", "text": report_date, "color": "#95a5a6", "size": "xs", "weight": "bold", "margin": "none"},
-            {"type": "text", "text": etf_code, "weight": "bold", "size": "xl", "color": "#ffffff", "margin": "sm"}
+            {"type": "text", "text": etf_code, "weight": "bold", "size": "xl", "color": "#ffffff", "margin": "sm"},
+            # 💎 新增的主題標籤區塊 (暖金橘色，醒目且有質感)
+            {"type": "text", "text": theme_text, "weight": "bold", "size": "sm", "color": "#f39c12", "margin": "xs"}
         ]
     }
 
@@ -277,8 +295,12 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
             body_contents.append({"type": "text", "text": title, "color": title_color, "weight": "bold", "size": "sm", "margin": margin_top})
             item_boxes = []
             
-            # 不限筆數，完整顯示所有異動
-            for i, (name, val) in enumerate(items):
+            # 限制最多顯示 12 筆，剩下的收合成提示文字
+            MAX_ITEMS = 12
+            display_items = items[:MAX_ITEMS]
+            hidden_count = len(items) - MAX_ITEMS
+
+            for i, (name, val) in enumerate(display_items):
                 item_boxes.append({
                     "type": "box", "layout": "horizontal", "spacing": "sm", "margin": "xs",
                     "contents": [
@@ -289,8 +311,20 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
                 })
                 
                 # 每 5 行插入微弱輔助線
-                if (i + 1) % 5 == 0 and (i + 1) < len(items):
+                if (i + 1) % 5 == 0 and (i + 1) < len(display_items):
                     item_boxes.append({"type": "separator", "color": "#f2f2f2", "margin": "sm"})
+            
+            # 如果有超過的項目，加一行淡色文字提示
+            if hidden_count > 0:
+                item_boxes.append({
+                    "type": "text",
+                    "text": f"...還有其他 {hidden_count} 檔微幅異動",
+                    "size": "xs",
+                    "color": "#95a5a6",
+                    "align": "center",
+                    "margin": "md",
+                    "weight": "bold"
+                })
             
             body_contents.append({"type": "box", "layout": "vertical", "contents": item_boxes})
             body_contents.append({"type": "separator", "margin": "md", "color": "#eeeeee"})
