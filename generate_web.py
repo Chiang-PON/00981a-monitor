@@ -1,9 +1,8 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (原生資料條完美對齊版)
+"""generate_web.py — 自動生成靜態網頁儀表板 (原生資料條完美對齊修復版)
 
 讀取 history/ 下的 CSV 檔案，計算每日籌碼異動。
 - 捨棄 Chart.js，改用原生 HTML/CSS Data Bars 達成完美的「名字靠左、數字靠右」版面。
-- 數字直接附帶於名字後方，並區分紅綠色。
-- ETF 名稱旁直接顯示當前查詢的日期。
+- 修復：下方詳細清單的減碼數字正確顯示為負號 (-)。
 - 極簡淺色主題，無 Emoji，完美支援手機響應式排版。
 """
 
@@ -294,11 +293,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             
             const maxVal = Math.max(...formattedItems.map(i => Math.abs(i.trueVal)));
 
-            // 💎 核心：動態生成原生 HTML 資料條
+            // 動態生成原生 HTML 資料條
             let chartHTML = '<div class="flex flex-col space-y-1.5 mt-2">';
             
             formattedItems.forEach(item => {
                 const isBuy = item.trueVal > 0;
+                // 自動處理字串的正負號顯示
                 const valStr = isBuy ? `+${item.trueVal.toLocaleString()}` : item.trueVal.toLocaleString();
                 const textColor = isBuy ? 'text-red-600' : 'text-green-600';
                 const bgColor = isBuy ? 'bg-red-500' : 'bg-green-500';
@@ -324,8 +324,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             chartHTML += '</div>';
             chartContainer.innerHTML = chartHTML;
 
-            // 更新下方詳細清單
-            const fillSection = (sectionId, items, colorClass, isOut=false) => {
+            // 💎 更新下方詳細清單 (修正正負號邏輯)
+            const fillSection = (sectionId, items, colorClass, sign) => {
                 const wrap = document.getElementById(`list-${sectionId}`);
                 const list = document.getElementById(`items-${sectionId}`);
                 list.innerHTML = '';
@@ -333,7 +333,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 if(items && items.length > 0) {
                     wrap.classList.remove('hidden');
                     items.forEach(i => {
-                        const valStr = isOut ? `出清 ${i.diff.toLocaleString()}` : `+${i.diff.toLocaleString()}`;
+                        const valStr = `${sign}${i.diff.toLocaleString()}`;
                         list.innerHTML += `<div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
                             <span class="font-medium">${i.name}</span>
                             <span class="${colorClass} font-mono font-semibold">${valStr}</span>
@@ -344,9 +344,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 }
             };
 
-            fillSection('new', etfData.new_buy, 'text-red-600');
-            fillSection('inc', etfData.increased, 'text-red-600');
-            fillSection('dec', etfData.decreased, 'text-green-600', false);
+            // 確保這裡分別傳入正確的符號
+            fillSection('new', etfData.new_buy, 'text-red-600', '+');
+            fillSection('inc', etfData.increased, 'text-red-600', '+');
+            fillSection('dec', etfData.decreased, 'text-green-600', '-');
             
             const outWrap = document.getElementById('list-out');
             const outList = document.getElementById('items-out');
@@ -370,7 +371,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (原生完美對齊資料條版)...")
+    print("🚀 開始產出 Web Dashboard (原生完美對齊資料條修復版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
