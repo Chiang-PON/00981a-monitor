@@ -1,6 +1,6 @@
 """main.py — 主動式 ETF 家族監控系統 (全景高質感版)
 
-追蹤 0050 及 00980A, 00981A, 00982A, 00984A, 00985A 的每日持股變化。
+追蹤 0050 及 00980A, 00981A, 00982A, 00984A, 00985A, 009816 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
 極簡設計：完美對齊、微弱輔助線、移除所有 Emoji 提升專業財經質感。
 智慧突破：解除顯示筆數限制 (100% 完整呈現)，利用動態容量計算自動拆分多則訊息避開 50KB 限制。
@@ -39,7 +39,8 @@ logger = logging.getLogger("ETF-Monitor")
 # ═══════════════════════════════
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
 
-ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00984A", "00985A"]
+# 💎 加入 009816
+ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00984A", "00985A", "009816"]
 
 # 移除 Emoji，保留專業高質感文字
 ETF_THEMES: dict[str, str] = {
@@ -48,7 +49,8 @@ ETF_THEMES: dict[str, str] = {
     "00981A": "科技增長 (統一台股增長)",
     "00982A": "強勢動能 (群益精選強棒)",
     "00984A": "高息成長 (安聯台灣高息)",
-    "00985A": "增強市值 (野村台灣增強50)"
+    "00985A": "增強市值 (野村台灣增強50)",
+    "009816": "專屬監控 (009816)"
 }
 
 URL_TEMPLATE: str = "https://www.pocket.tw/etf/tw/{}/fundholding/"
@@ -269,7 +271,7 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
     etf_code = res["etf"]
     body_contents = []
     
-    theme_text = ETF_THEMES.get(etf_code, "主動式 ETF")
+    theme_text = ETF_THEMES.get(etf_code, "專屬監控 ETF")
     
     header_box = {
         "type": "box", "layout": "vertical", "backgroundColor": "#1e272e", "paddingAll": "15px",
