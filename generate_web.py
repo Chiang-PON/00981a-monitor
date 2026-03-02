@@ -1,8 +1,8 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (極簡淺色圖表版)
+"""generate_web.py — 自動生成靜態網頁儀表板 (個股籌碼動態圖表版)
 
 讀取 history/ 下的 CSV 檔案，計算每日籌碼異動。
-- 移除總結區塊，專注於單一 ETF 深度分析。
-- 導入 Chart.js 繪製「每日買賣超柱狀圖」(紅柱向上、綠柱向下)。
+- 圖表邏輯修正：X 軸為「當日有異動的個股」，Y 軸為「買賣張數」。
+- 紅柱向上代表買進 (新進場/加碼)，綠柱向下代表賣出 (減碼/出清)。
 - 極簡淺色主題，無 Emoji，支援手機響應式排版。
 """
 
@@ -133,7 +133,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .tab-active { background-color: #0f172a; color: #ffffff; font-weight: bold; border-color: #0f172a; }
         .tab-inactive { background-color: #ffffff; color: #64748b; border-color: #cbd5e1; }
         .card { background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; }
-        select { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 1rem; outline: none; cursor: pointer; }
+        select { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 1rem; outline: none; cursor: pointer; font-weight: 500; }
         select:focus { border-color: #94a3b8; }
         
         /* 隱藏滾動條但保留滾動功能 (針對手機版 Tab) */
@@ -146,30 +146,30 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         
         <header class="mb-8">
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">ETF 籌碼監控儀表板</h1>
-            <p class="text-slate-500 mt-2 text-sm">主動式基金持股異動追蹤</p>
+            <p class="text-slate-500 mt-2 text-sm">主動式基金持股異動深度解析</p>
         </header>
 
         <div id="etf-tabs" class="flex overflow-x-auto hide-scrollbar gap-2 mb-8 pb-2"></div>
 
         <div class="card mb-8">
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center border-b border-slate-200 pb-4 mb-6 gap-4">
-                <div class="flex items-center gap-4">
-                    <h2 id="current-etf-title" class="text-2xl font-bold text-slate-800">載入中...</h2>
-                    <select id="date-selector" onchange="changeDate()"></select>
-                </div>
+            <div class="flex flex-row justify-between items-center border-b border-slate-200 pb-4 mb-6">
+                <h2 id="current-etf-title" class="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">載入中...</h2>
+                <select id="date-selector" onchange="changeDate()"></select>
             </div>
 
             <div class="mb-10">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4">歷史買賣超趨勢 (張數)</h3>
-                <div class="w-full h-64 md:h-80">
-                    <canvas id="trendChart"></canvas>
+                <h3 class="text-lg font-semibold text-slate-700 mb-4">當日個股操作趨勢</h3>
+                <div class="w-full overflow-x-auto hide-scrollbar">
+                    <div id="chart-container" class="h-72 md:h-96 min-w-[600px]">
+                        <canvas id="trendChart"></canvas>
+                    </div>
                 </div>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b border-slate-200 pb-2">當日異動明細</h3>
                 
-                <div id="empty-state" class="text-center text-slate-400 py-10 hidden">該日無籌碼異動</div>
+                <div id="empty-state" class="text-center text-slate-400 py-10 hidden">當日無籌碼異動</div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-6">
@@ -203,12 +203,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     <script>
         const db = __DB_JSON__;
-        // 取得所有日期並排序 (由新到舊)
         const availableDatesDesc = Object.keys(db).sort().reverse();
-        // 取得所有日期並排序 (由舊到新，供圖表使用)
-        const availableDatesAsc = Object.keys(db).sort();
         
-        // 收集所有出現過的 ETF
         let allETFs = new Set();
         Object.values(db).forEach(dateData => {
             Object.keys(dateData).forEach(etf => allETFs.add(etf));
@@ -225,7 +221,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 return;
             }
             
-            // 建立日期下拉選單
             const sel = document.getElementById('date-selector');
             availableDatesDesc.forEach(date => {
                 const opt = document.createElement('option');
@@ -240,7 +235,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function changeDate() {
             currentDate = document.getElementById('date-selector').value;
-            updateDetailsList(); // 只更新下方清單，圖表保持顯示所有歷史
+            updateDashboard();
         }
 
         function selectETF(etf) {
@@ -265,32 +260,60 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function updateDashboard() {
             document.getElementById('current-etf-title').textContent = currentETF;
-            updateChart();
-            updateDetailsList();
+            updateChartAndList();
         }
 
-        function updateChart() {
-            const labels = [];
-            const buyData = [];
-            const sellData = [];
-
-            availableDatesAsc.forEach(date => {
-                const etfData = db[date] && db[date][currentETF];
-                let buySum = 0;
-                let sellSum = 0;
-                
-                if (etfData) {
-                    (etfData.new_buy || []).forEach(item => buySum += item.diff);
-                    (etfData.increased || []).forEach(item => buySum += item.diff);
-                    (etfData.sold_out || []).forEach(item => sellSum += item.diff);
-                    (etfData.decreased || []).forEach(item => sellSum += item.diff);
+        function updateChartAndList() {
+            const dataToday = db[currentDate] || {};
+            const etfData = dataToday[currentETF];
+            const emptyState = document.getElementById('empty-state');
+            const sections = ['new', 'inc', 'dec', 'out'];
+            const chartContainer = document.getElementById('chart-container');
+            
+            if(!etfData || (!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length)) {
+                // 如果當天沒動作，隱藏圖表與清單
+                emptyState.classList.remove('hidden');
+                sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
+                chartContainer.style.display = 'none';
+                if (chartInstance) {
+                    chartInstance.destroy();
+                    chartInstance = null;
                 }
-                
-                // 只取 MM-DD 作為 X 軸標籤
-                labels.push(date.substring(5)); 
-                buyData.push(buySum);
-                sellData.push(-sellSum); // 賣出設為負值以向下生長
+                return;
+            }
+
+            // 有動作，顯示畫面
+            emptyState.classList.add('hidden');
+            chartContainer.style.display = 'block';
+
+            // 準備畫圖資料 (將買進與賣出全部集中)
+            let buyItems = [...(etfData.new_buy || []), ...(etfData.increased || [])];
+            let sellItems = [...(etfData.decreased || []), ...(etfData.sold_out || [])];
+
+            // 排序：買方張數多的排前面，賣方張數多的排後面
+            buyItems.sort((a, b) => b.diff - a.diff);
+            sellItems.sort((a, b) => b.diff - a.diff);
+
+            // 合併陣列，為了圖表好看，我們把買放左邊，賣放右邊
+            let chartLabels = [];
+            let chartData = [];
+            let bgColors = [];
+
+            buyItems.forEach(item => {
+                chartLabels.push(item.name);
+                chartData.push(item.diff);
+                bgColors.push('rgba(239, 68, 68, 0.85)'); // 柔和的紅色
             });
+
+            sellItems.forEach(item => {
+                chartLabels.push(item.name);
+                chartData.push(-item.diff); // 賣出加上負號，讓柱子往下生長
+                bgColors.push('rgba(34, 197, 94, 0.85)'); // 柔和的綠色
+            });
+
+            // 根據資料筆數動態調整圖表寬度 (確保如果股票太多，不會擠在一起)
+            const minWidth = Math.max(600, chartLabels.length * 35); 
+            chartContainer.style.minWidth = `${minWidth}px`;
 
             if (chartInstance) {
                 chartInstance.destroy();
@@ -300,74 +323,53 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '買進總張數',
-                            data: buyData,
-                            backgroundColor: '#ef4444', // Tailwind red-500
-                            borderRadius: 4,
-                            borderSkipped: false
-                        },
-                        {
-                            label: '賣出總張數',
-                            data: sellData,
-                            backgroundColor: '#22c55e', // Tailwind green-500
-                            borderRadius: 4,
-                            borderSkipped: false
-                        }
-                    ]
+                    labels: chartLabels,
+                    datasets: [{
+                        label: '操作張數',
+                        data: chartData,
+                        backgroundColor: bgColors,
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    scales: {
-                        x: { 
-                            stacked: true,
-                            grid: { display: false, drawBorder: false }
-                        },
-                        y: { 
-                            stacked: true,
-                            grid: { color: '#f1f5f9', drawBorder: false },
-                            ticks: {
-                                callback: function(value) {
-                                    return Math.abs(value); // Y 軸標籤不顯示負號
+                    plugins: {
+                        legend: { display: false }, // 顏色已經說明一切，不需要圖例
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw;
+                                    const sign = val > 0 ? '+' : '';
+                                    return ` ${sign}${val.toLocaleString()} 張`;
                                 }
                             }
                         }
                     },
-                    plugins: {
-                        legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + Math.abs(context.raw).toLocaleString() + ' 張';
+                    scales: {
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                color: '#64748b'
+                            }
+                        },
+                        y: {
+                            grid: { color: '#f1f5f9', drawBorder: false },
+                            ticks: {
+                                color: '#64748b',
+                                callback: function(value) {
+                                    return value.toLocaleString(); // 顯示正負號，保留千分位
                                 }
                             }
                         }
                     }
                 }
             });
-        }
 
-        function updateDetailsList() {
-            const dataToday = db[currentDate] || {};
-            const etfData = dataToday[currentETF];
-            const emptyState = document.getElementById('empty-state');
-            const sections = ['new', 'inc', 'dec', 'out'];
-            
-            if(!etfData || (!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length)) {
-                emptyState.classList.remove('hidden');
-                sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-
+            // 更新下方詳細清單
             const fillSection = (sectionId, items, colorClass, isOut=false) => {
                 const wrap = document.getElementById(`list-${sectionId}`);
                 const list = document.getElementById(`items-${sectionId}`);
@@ -387,12 +389,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 }
             };
 
-            // 買方紅字，賣方綠字，已離場灰字
             fillSection('new', etfData.new_buy, 'text-red-600');
             fillSection('inc', etfData.increased, 'text-red-600');
             fillSection('dec', etfData.decreased, 'text-green-600', false);
             
-            // 已離場的顯示邏輯稍微不同
             const outWrap = document.getElementById('list-out');
             const outList = document.getElementById('items-out');
             outList.innerHTML = '';
@@ -415,7 +415,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (淺色圖表版)...")
+    print("🚀 開始產出 Web Dashboard (個股操作圖表版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
