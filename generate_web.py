@@ -1,9 +1,10 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (橫向高可讀性圖表版)
+"""generate_web.py — 自動生成靜態網頁儀表板 (原生資料條完美對齊版)
 
 讀取 history/ 下的 CSV 檔案，計算每日籌碼異動。
-- 升級為「橫向條形圖 (Horizontal Bar Chart)」，解決股票過多時 X 軸文字擠壓斜放的問題。
-- 圖表高度隨股票數量「動態自適應」，保證 100% 完整顯示且不擁擠。
-- 大買排上面 (紅柱向右)，大賣排下面 (綠柱向左)，呈現法人級多空視覺。
+- 捨棄 Chart.js，改用原生 HTML/CSS Data Bars 達成完美的「名字靠左、數字靠右」版面。
+- 數字直接附帶於名字後方，並區分紅綠色。
+- ETF 名稱旁直接顯示當前查詢的日期。
+- 極簡淺色主題，無 Emoji，完美支援手機響應式排版。
 """
 
 import os
@@ -126,14 +127,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETF 籌碼監控儀表板</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background-color: #f8fafc; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .tab-btn { transition: all 0.2s ease-in-out; white-space: nowrap; }
         .tab-active { background-color: #0f172a; color: #ffffff; font-weight: bold; border-color: #0f172a; }
         .tab-inactive { background-color: #ffffff; color: #64748b; border-color: #cbd5e1; }
         .card { background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; }
-        select { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 1rem; outline: none; cursor: pointer; font-weight: 500; }
+        select { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 0.95rem; outline: none; cursor: pointer; font-weight: 500; }
         select:focus { border-color: #94a3b8; }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -141,7 +141,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </style>
 </head>
 <body class="pb-20 pt-6">
-    <div class="max-w-5xl mx-auto p-4 md:p-6">
+    <div class="max-w-4xl mx-auto p-4 md:p-6">
         
         <header class="mb-8">
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">ETF 籌碼監控儀表板</h1>
@@ -151,18 +151,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div id="etf-tabs" class="flex overflow-x-auto hide-scrollbar gap-2 mb-8 pb-2"></div>
 
         <div class="card mb-8">
-            <div class="flex flex-row justify-between items-center border-b border-slate-200 pb-4 mb-6">
-                <h2 id="current-etf-title" class="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">載入中...</h2>
-                <select id="date-selector" onchange="changeDate()"></select>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b border-slate-200 pb-4 mb-6 gap-4">
+                <div class="flex items-baseline gap-3">
+                    <h2 id="current-etf-title" class="text-3xl font-bold text-slate-800 tracking-tight">載入中...</h2>
+                    <span id="current-date-display" class="text-lg text-slate-500 font-medium"></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-500">切換日期</span>
+                    <select id="date-selector" onchange="changeDate()"></select>
+                </div>
             </div>
 
             <div class="mb-10">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4">當日個股操作趨勢 (張數)</h3>
-                <div class="w-full relative">
-                    <div id="chart-container" style="height: 400px; width: 100%;">
-                        <canvas id="trendChart"></canvas>
+                <h3 class="text-lg font-semibold text-slate-700 mb-4">當日個股操作趨勢</h3>
+                <div id="chart-container" class="w-full">
                     </div>
-                </div>
             </div>
 
             <div>
@@ -210,7 +213,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         
         let currentDate = availableDatesDesc[0];
         let currentETF = etfList[0];
-        let chartInstance = null;
 
         function init() {
             if(availableDatesDesc.length === 0) {
@@ -257,6 +259,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function updateDashboard() {
             document.getElementById('current-etf-title').textContent = currentETF;
+            document.getElementById('current-date-display').textContent = currentDate;
             updateChartAndList();
         }
 
@@ -270,101 +273,58 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if(!etfData || (!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length)) {
                 emptyState.classList.remove('hidden');
                 sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
-                chartContainer.style.display = 'none';
-                if (chartInstance) {
-                    chartInstance.destroy();
-                    chartInstance = null;
-                }
+                chartContainer.innerHTML = '<div class="text-slate-400 py-4">本日無操作資料</div>';
                 return;
             }
 
             emptyState.classList.add('hidden');
-            chartContainer.style.display = 'block';
 
-            // 將買賣資料合併並標註真實數值 (買為正，賣為負)
+            // 準備資料
             let formattedItems = [];
             
             [...(etfData.new_buy || []), ...(etfData.increased || [])].forEach(i => {
                 formattedItems.push({ name: i.name, trueVal: i.diff });
             });
-            
             [...(etfData.decreased || []), ...(etfData.sold_out || [])].forEach(i => {
                 formattedItems.push({ name: i.name, trueVal: -i.diff });
             });
 
-            // 嚴格依照真實數值排序：大買排最上面，大賣排最下面
+            // 依照買賣力道排序
             formattedItems.sort((a, b) => b.trueVal - a.trueVal);
+            
+            const maxVal = Math.max(...formattedItems.map(i => Math.abs(i.trueVal)));
 
-            let chartLabels = [];
-            let chartData = [];
-            let bgColors = [];
-
+            // 💎 核心：動態生成原生 HTML 資料條
+            let chartHTML = '<div class="flex flex-col space-y-1.5 mt-2">';
+            
             formattedItems.forEach(item => {
-                chartLabels.push(item.name);
-                chartData.push(item.trueVal);
-                bgColors.push(item.trueVal > 0 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(34, 197, 94, 0.85)');
+                const isBuy = item.trueVal > 0;
+                const valStr = isBuy ? `+${item.trueVal.toLocaleString()}` : item.trueVal.toLocaleString();
+                const textColor = isBuy ? 'text-red-600' : 'text-green-600';
+                const bgColor = isBuy ? 'bg-red-500' : 'bg-green-500';
+                
+                // 避免長條圖過小看不見，設定最低 0.5% 寬度
+                const widthPct = Math.max((Math.abs(item.trueVal) / maxVal) * 100, 0.5);
+
+                chartHTML += `
+                <div class="flex items-center text-sm md:text-base py-1 hover:bg-slate-50 rounded-md transition-colors">
+                    
+                    <div class="w-48 md:w-60 flex-shrink-0 flex items-center pr-3 md:pr-4 border-r border-slate-300 mr-3 md:mr-4">
+                        <span class="font-medium text-slate-700 w-24 md:w-32 truncate text-left">${item.name}</span>
+                        
+                        <span class="font-mono font-bold ${textColor} flex-grow text-right tracking-tight">${valStr}</span>
+                    </div>
+
+                    <div class="flex-grow h-5 md:h-6 flex items-center pr-2">
+                        <div class="${bgColor} h-full rounded-sm opacity-80" style="width: ${widthPct}%"></div>
+                    </div>
+                </div>
+                `;
             });
+            chartHTML += '</div>';
+            chartContainer.innerHTML = chartHTML;
 
-            // 💎 核心魔法：根據股票數量動態調整畫布高度 (每筆預留 28px)
-            const requiredHeight = Math.max(300, chartLabels.length * 28);
-            chartContainer.style.height = `${requiredHeight}px`;
-
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: '操作張數',
-                        data: chartData,
-                        backgroundColor: bgColors,
-                        borderRadius: 4,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', // 💎 將柱狀圖轉為橫向
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const val = context.raw;
-                                    const sign = val > 0 ? '+' : '';
-                                    return ` ${sign}${val.toLocaleString()} 張`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { // 數值軸 (現在在下方)
-                            grid: { color: '#f1f5f9', drawBorder: false },
-                            ticks: {
-                                color: '#64748b',
-                                callback: function(value) {
-                                    return value.toLocaleString(); 
-                                }
-                            }
-                        },
-                        y: { // 股票名稱軸 (現在在左側)
-                            grid: { display: false, drawBorder: false },
-                            ticks: {
-                                autoSkip: false, // 💎 強制顯示所有股票名稱，絕不省略
-                                color: '#334155',
-                                font: { size: 13, weight: '500' }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // 下方詳細清單更新邏輯
+            // 更新下方詳細清單
             const fillSection = (sectionId, items, colorClass, isOut=false) => {
                 const wrap = document.getElementById(`list-${sectionId}`);
                 const list = document.getElementById(`items-${sectionId}`);
@@ -410,7 +370,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (橫向高可讀性圖表版)...")
+    print("🚀 開始產出 Web Dashboard (原生完美對齊資料條版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
