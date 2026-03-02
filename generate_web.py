@@ -1,9 +1,9 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (個股籌碼動態圖表版)
+"""generate_web.py — 自動生成靜態網頁儀表板 (橫向高可讀性圖表版)
 
 讀取 history/ 下的 CSV 檔案，計算每日籌碼異動。
-- 圖表邏輯修正：X 軸為「當日有異動的個股」，Y 軸為「買賣張數」。
-- 紅柱向上代表買進 (新進場/加碼)，綠柱向下代表賣出 (減碼/出清)。
-- 極簡淺色主題，無 Emoji，支援手機響應式排版。
+- 升級為「橫向條形圖 (Horizontal Bar Chart)」，解決股票過多時 X 軸文字擠壓斜放的問題。
+- 圖表高度隨股票數量「動態自適應」，保證 100% 完整顯示且不擁擠。
+- 大買排上面 (紅柱向右)，大賣排下面 (綠柱向左)，呈現法人級多空視覺。
 """
 
 import os
@@ -136,7 +136,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         select { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 1rem; outline: none; cursor: pointer; font-weight: 500; }
         select:focus { border-color: #94a3b8; }
         
-        /* 隱藏滾動條但保留滾動功能 (針對手機版 Tab) */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -158,9 +157,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </div>
 
             <div class="mb-10">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4">當日個股操作趨勢</h3>
-                <div class="w-full overflow-x-auto hide-scrollbar">
-                    <div id="chart-container" class="h-72 md:h-96 min-w-[600px]">
+                <h3 class="text-lg font-semibold text-slate-700 mb-4">當日個股操作趨勢 (張數)</h3>
+                <div class="w-full relative">
+                    <div id="chart-container" style="height: 400px; width: 100%;">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
@@ -177,7 +176,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             <h4 class="text-red-600 font-bold text-base mb-3 bg-red-50 inline-block px-3 py-1 rounded">新進場</h4>
                             <div id="items-new" class="space-y-2 text-slate-700"></div>
                         </div>
-                        
                         <div id="list-inc" class="hidden">
                             <h4 class="text-red-600 font-bold text-base mb-3 bg-red-50 inline-block px-3 py-1 rounded">加碼</h4>
                             <div id="items-inc" class="space-y-2 text-slate-700"></div>
@@ -189,7 +187,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             <h4 class="text-green-600 font-bold text-base mb-3 bg-green-50 inline-block px-3 py-1 rounded">減碼</h4>
                             <div id="items-dec" class="space-y-2 text-slate-700"></div>
                         </div>
-                        
                         <div id="list-out" class="hidden">
                             <h4 class="text-slate-500 font-bold text-base mb-3 bg-slate-100 inline-block px-3 py-1 rounded">已離場</h4>
                             <div id="items-out" class="space-y-2 text-slate-500"></div>
@@ -271,7 +268,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const chartContainer = document.getElementById('chart-container');
             
             if(!etfData || (!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length)) {
-                // 如果當天沒動作，隱藏圖表與清單
                 emptyState.classList.remove('hidden');
                 sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
                 chartContainer.style.display = 'none';
@@ -282,38 +278,36 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 return;
             }
 
-            // 有動作，顯示畫面
             emptyState.classList.add('hidden');
             chartContainer.style.display = 'block';
 
-            // 準備畫圖資料 (將買進與賣出全部集中)
-            let buyItems = [...(etfData.new_buy || []), ...(etfData.increased || [])];
-            let sellItems = [...(etfData.decreased || []), ...(etfData.sold_out || [])];
+            // 將買賣資料合併並標註真實數值 (買為正，賣為負)
+            let formattedItems = [];
+            
+            [...(etfData.new_buy || []), ...(etfData.increased || [])].forEach(i => {
+                formattedItems.push({ name: i.name, trueVal: i.diff });
+            });
+            
+            [...(etfData.decreased || []), ...(etfData.sold_out || [])].forEach(i => {
+                formattedItems.push({ name: i.name, trueVal: -i.diff });
+            });
 
-            // 排序：買方張數多的排前面，賣方張數多的排後面
-            buyItems.sort((a, b) => b.diff - a.diff);
-            sellItems.sort((a, b) => b.diff - a.diff);
+            // 嚴格依照真實數值排序：大買排最上面，大賣排最下面
+            formattedItems.sort((a, b) => b.trueVal - a.trueVal);
 
-            // 合併陣列，為了圖表好看，我們把買放左邊，賣放右邊
             let chartLabels = [];
             let chartData = [];
             let bgColors = [];
 
-            buyItems.forEach(item => {
+            formattedItems.forEach(item => {
                 chartLabels.push(item.name);
-                chartData.push(item.diff);
-                bgColors.push('rgba(239, 68, 68, 0.85)'); // 柔和的紅色
+                chartData.push(item.trueVal);
+                bgColors.push(item.trueVal > 0 ? 'rgba(239, 68, 68, 0.85)' : 'rgba(34, 197, 94, 0.85)');
             });
 
-            sellItems.forEach(item => {
-                chartLabels.push(item.name);
-                chartData.push(-item.diff); // 賣出加上負號，讓柱子往下生長
-                bgColors.push('rgba(34, 197, 94, 0.85)'); // 柔和的綠色
-            });
-
-            // 根據資料筆數動態調整圖表寬度 (確保如果股票太多，不會擠在一起)
-            const minWidth = Math.max(600, chartLabels.length * 35); 
-            chartContainer.style.minWidth = `${minWidth}px`;
+            // 💎 核心魔法：根據股票數量動態調整畫布高度 (每筆預留 28px)
+            const requiredHeight = Math.max(300, chartLabels.length * 28);
+            chartContainer.style.height = `${requiredHeight}px`;
 
             if (chartInstance) {
                 chartInstance.destroy();
@@ -333,10 +327,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // 💎 將柱狀圖轉為橫向
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }, // 顏色已經說明一切，不需要圖例
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -348,28 +343,28 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         }
                     },
                     scales: {
-                        x: {
-                            grid: { display: false, drawBorder: false },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                color: '#64748b'
-                            }
-                        },
-                        y: {
+                        x: { // 數值軸 (現在在下方)
                             grid: { color: '#f1f5f9', drawBorder: false },
                             ticks: {
                                 color: '#64748b',
                                 callback: function(value) {
-                                    return value.toLocaleString(); // 顯示正負號，保留千分位
+                                    return value.toLocaleString(); 
                                 }
+                            }
+                        },
+                        y: { // 股票名稱軸 (現在在左側)
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                autoSkip: false, // 💎 強制顯示所有股票名稱，絕不省略
+                                color: '#334155',
+                                font: { size: 13, weight: '500' }
                             }
                         }
                     }
                 }
             });
 
-            // 更新下方詳細清單
+            // 下方詳細清單更新邏輯
             const fillSection = (sectionId, items, colorClass, isOut=false) => {
                 const wrap = document.getElementById(`list-${sectionId}`);
                 const list = document.getElementById(`items-${sectionId}`);
@@ -415,7 +410,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (個股操作圖表版)...")
+    print("🚀 開始產出 Web Dashboard (橫向高可讀性圖表版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
