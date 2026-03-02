@@ -1,10 +1,9 @@
-"""main.py — 主動式 ETF 家族監控系統 (長輩友善主題版)
+"""main.py — 主動式 ETF 家族監控系統 (全景高質感版)
 
 追蹤 0050 及 00980A, 00981A, 00982A, 00984A, 00985A 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
-極簡設計：完美對齊、微弱輔助線。
-智慧突破：動態計算 JSON 容量，避開 50KB 限制。
-孝親優化：加入各 ETF 專屬的中文主題與名稱標籤，提升閱讀體驗。
+極簡設計：完美對齊、微弱輔助線、移除所有 Emoji 提升專業財經質感。
+智慧突破：解除顯示筆數限制 (100% 完整呈現)，利用動態容量計算自動拆分多則訊息避開 50KB 限制。
 """
 
 import argparse
@@ -40,17 +39,16 @@ logger = logging.getLogger("ETF-Monitor")
 # ═══════════════════════════════
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
 
-# 💎 調整監控清單
 ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00984A", "00985A"]
 
-# 💎 專屬主題標籤 (顯示於卡片標題下方)
+# 移除 Emoji，保留專業高質感文字
 ETF_THEMES: dict[str, str] = {
-    "0050": "🇹🇼 大盤指標 (元大台灣50)",
-    "00980A": "📈 成長配息 (野村智慧優選)",
-    "00981A": "🚀 科技增長 (統一台股增長)",
-    "00982A": "🔥 強勢動能 (群益精選強棒)",
-    "00984A": "💰 高息成長 (安聯台灣高息)",
-    "00985A": "💪 增強市值 (野村台灣增強50)"
+    "0050": "大盤指標 (元大台灣50)",
+    "00980A": "成長配息 (野村智慧優選)",
+    "00981A": "科技增長 (統一台股增長)",
+    "00982A": "強勢動能 (群益精選強棒)",
+    "00984A": "高息成長 (安聯台灣高息)",
+    "00985A": "增強市值 (野村台灣增強50)"
 }
 
 URL_TEMPLATE: str = "https://www.pocket.tw/etf/tw/{}/fundholding/"
@@ -271,15 +269,13 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
     etf_code = res["etf"]
     body_contents = []
     
-    # 💎 提取這檔 ETF 的專屬中文主題標籤
-    theme_text = ETF_THEMES.get(etf_code, "📊 主動式 ETF")
+    theme_text = ETF_THEMES.get(etf_code, "主動式 ETF")
     
     header_box = {
         "type": "box", "layout": "vertical", "backgroundColor": "#1e272e", "paddingAll": "15px",
         "contents": [
             {"type": "text", "text": report_date, "color": "#95a5a6", "size": "xs", "weight": "bold", "margin": "none"},
             {"type": "text", "text": etf_code, "weight": "bold", "size": "xl", "color": "#ffffff", "margin": "sm"},
-            # 💎 新增的主題標籤區塊 (暖金橘色，醒目且有質感)
             {"type": "text", "text": theme_text, "weight": "bold", "size": "sm", "color": "#f39c12", "margin": "xs"}
         ]
     }
@@ -295,12 +291,8 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
             body_contents.append({"type": "text", "text": title, "color": title_color, "weight": "bold", "size": "sm", "margin": margin_top})
             item_boxes = []
             
-            # 限制最多顯示 12 筆，剩下的收合成提示文字
-            MAX_ITEMS = 12
-            display_items = items[:MAX_ITEMS]
-            hidden_count = len(items) - MAX_ITEMS
-
-            for i, (name, val) in enumerate(display_items):
+            # 💎 無限制！直接遍歷所有項目，完整輸出
+            for i, (name, val) in enumerate(items):
                 item_boxes.append({
                     "type": "box", "layout": "horizontal", "spacing": "sm", "margin": "xs",
                     "contents": [
@@ -311,20 +303,8 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
                 })
                 
                 # 每 5 行插入微弱輔助線
-                if (i + 1) % 5 == 0 and (i + 1) < len(display_items):
+                if (i + 1) % 5 == 0 and (i + 1) < len(items):
                     item_boxes.append({"type": "separator", "color": "#f2f2f2", "margin": "sm"})
-            
-            # 如果有超過的項目，加一行淡色文字提示
-            if hidden_count > 0:
-                item_boxes.append({
-                    "type": "text",
-                    "text": f"...還有其他 {hidden_count} 檔微幅異動",
-                    "size": "xs",
-                    "color": "#95a5a6",
-                    "align": "center",
-                    "margin": "md",
-                    "weight": "bold"
-                })
             
             body_contents.append({"type": "box", "layout": "vertical", "contents": item_boxes})
             body_contents.append({"type": "separator", "margin": "md", "color": "#eeeeee"})
@@ -362,7 +342,7 @@ def build_flex_payloads(results: list[dict], report_date: str) -> list[dict]:
         if current_bubbles and (current_size + bubble_size > SAFE_SIZE_LIMIT):
             flex_messages.append({
                 "type": "flex",
-                "altText": f"📊 每日籌碼異動 ({report_date})",
+                "altText": f"每日籌碼異動 ({report_date})",
                 "contents": {"type": "carousel", "contents": current_bubbles}
             })
             current_bubbles = []
@@ -375,7 +355,7 @@ def build_flex_payloads(results: list[dict], report_date: str) -> list[dict]:
     if current_bubbles:
         flex_messages.append({
             "type": "flex",
-            "altText": f"📊 每日籌碼異動 ({report_date})",
+            "altText": f"每日籌碼異動 ({report_date})",
             "contents": {"type": "carousel", "contents": current_bubbles}
         })
 
@@ -397,7 +377,7 @@ def send_flex_messages(payloads: list[dict]) -> None:
             if not resp.ok:
                 logger.error(f"LINE 發送失敗: {resp.status_code} - {resp.text}")
             else:
-                logger.info(f"✅ 第 {i//5 + 1} 批 Flex Message 發送成功！")
+                logger.info(f"成功發送第 {i//5 + 1} 批 Flex Message！")
         except Exception as e:
             logger.error("LINE 連線錯誤: %s", e)
 
@@ -410,12 +390,12 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.force and not is_trading_day():
-        logger.info("🏖️ 今天不是交易日，跳過執行")
+        logger.info("今天不是交易日，跳過執行")
         return
 
     os.makedirs(HISTORY_DIR, exist_ok=True)
     today_str = datetime.now().strftime("%Y-%m-%d")
-    logger.info(f"📋 執行每日籌碼異動報告 ({today_str})")
+    logger.info(f"執行每日籌碼異動報告 ({today_str})")
     
     results = []
     for etf in ETF_LIST:
