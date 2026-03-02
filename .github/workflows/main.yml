@@ -2,14 +2,13 @@ name: 主動式ETF 監控
 
 on:
   schedule:
-    # 台灣時間每天 18:00 (UTC 10:00) 執行
-    - cron: '00 10 * * *'
-  workflow_dispatch: # 允許手動觸發按鈕
+    - cron: '00 10 * * *' # 台灣時間每天 18:00
+  workflow_dispatch:
 
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # 防止爬蟲卡住浪費額度
+    timeout-minutes: 15
     
     steps:
       - name: Checkout Repository
@@ -25,15 +24,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas requests beautifulsoup4 selenium webdriver-manager
 
-      - name: Run script (執行爬蟲)
+      - name: Run Crawler and LINE Notification
         env:
           LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
-        run: python main.py --force # 在 Actions 裡固定加上 force 以防時區誤判假日
+        run: python main.py --force
 
-      - name: Commit and Push Data (存檔回倉庫)
+      - name: Generate Web Dashboard (生成網頁)
+        run: python generate_web.py
+
+      - name: Commit and Push Data and Web
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add history/
-          # 如果沒有變更就不會報錯
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update ETF history data [skip ci]" && git push)
+          git add history/ index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update ETF history and Web Dashboard [skip ci]" && git push)
