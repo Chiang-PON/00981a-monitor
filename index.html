@@ -1,159 +1,213 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ETF 籌碼決策終端</title>
+    <title>MONITOR TERMINAL</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 香檳金奢華配色體系 */
+        /* 💎 Cyber-Terminal 炫砲配色體系 */
         :root {
-            --bg-page: #fafaf5;
-            --card-bg: #fdfdfa;
-            --accent-gold: #c4a77d;
-            --accent-gold-dark: #a68b63;
-            --text-primary: #4a3a2a;
-            --text-secondary: #8c7b6a;
-            --border-light: #f3efea;
-            --rose-accent: #dc2626;
-            --emerald-accent: #059669;
+            --bg-base: #050505;
+            --bg-panel: #0d0d0d;
+            --bg-panel-hover: #141414;
+            --border-dim: #262626;
+            --text-main: #f4f4f5;
+            --text-dim: #84848f;
+            
+            /* 霓虹特效色 */
+            --neon-buy: #00ff9d; /* 科技螢光綠 */
+            --neon-sell: #ff2a5f; /* 警示螢光紅 */
+            --neon-blue: #00f0ff; /* 賽博龐克藍 */
         }
 
         body {
-            background-color: var(--bg-page);
-            color: var(--text-primary);
-            font-family: "Inter", "Noto Sans TC", sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: "Noto Sans TC", sans-serif;
             min-height: 100vh;
+            /* 微弱的掃描線背景增加科技感 */
+            background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 4px;
         }
 
-        .tab-btn { transition: all 0.2s ease-in-out; white-space: nowrap; font-size: 0.95rem; }
-        
+        /* 強制數字與英文使用等寬字體 */
+        .font-mono { font-family: "JetBrains Mono", monospace; }
+
+        /* 💎 面板與框線 */
+        .panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-dim);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 💎 發光文字特效 */
+        .glow-buy { 
+            color: var(--neon-buy); 
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); 
+        }
+        .glow-sell { 
+            color: var(--neon-sell); 
+            text-shadow: 0 0 10px rgba(255, 42, 95, 0.3); 
+        }
+        .glow-blue { 
+            color: var(--neon-blue); 
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3); 
+        }
+
+        /* 💎 發光資料條 */
+        .bar-buy { 
+            background-color: var(--neon-buy); 
+            box-shadow: 0 0 12px rgba(0, 255, 157, 0.4); 
+        }
+        .bar-sell { 
+            background-color: var(--neon-sell); 
+            box-shadow: 0 0 12px rgba(255, 42, 95, 0.4); 
+        }
+
+        /* 💎 終端機按鈕 */
+        .tab-btn {
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
         .tab-active {
-            background: linear-gradient(135deg, #4a3a2a 0%, #2a1f14 100%);
-            color: #ffffff;
-            font-weight: 700;
-            border-color: #2a1f14;
-            box-shadow: 0 4px 6px -1px rgba(74, 58, 42, 0.2);
+            background: #1a1a1a;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05);
         }
-
         .tab-inactive {
-            background-color: #ffffff;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-light);
+            background-color: var(--bg-base);
+            color: var(--text-dim);
+            border: 1px solid var(--border-dim);
         }
         .tab-inactive:hover {
-            background-color: #fffaf0;
-            color: var(--text-primary);
-            border-color: var(--accent-gold);
+            border-color: #555;
+            color: #fff;
         }
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 25px -5px rgba(196, 167, 125, 0.1), 0 8px 10px -6px rgba(196, 167, 125, 0.05);
-            border: 1px solid var(--border-light);
-        }
-
+        /* 表單元素重置 */
         select, input[type="text"] {
-            background-color: #ffffff;
-            color: var(--text-primary);
-            border: 1px solid var(--border-light);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            border: 1px solid var(--border-dim);
             outline: none;
             transition: border-color 0.2s;
         }
         select:hover, select:focus, input[type="text"]:focus {
-            border-color: var(--accent-gold);
-            background-color: #fffaf0;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
         }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .data-row:hover { background-color: #fffaf0 !important; }
         
-        .section-label {
-            font-size: 1.05rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
+        /* 懸停效果 */
+        .data-row:hover { background-color: var(--bg-panel-hover) !important; }
+
+        /* 呼吸燈動畫 */
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 255, 157, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+        }
+        .live-dot {
+            height: 8px; width: 8px;
+            background-color: var(--neon-buy);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s infinite;
         }
     </style>
 </head>
-<body class="pb-24 pt-8">
-    <div class="max-w-5xl mx-auto px-4 md:px-6">
-        
-        <header class="mb-10">
-            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-800">ETF 籌碼決策終端</h1>
-            <p class="text-slate-500 mt-2 text-sm md:text-base font-medium tracking-wide">主動式基金持股異動深度解析</p>
-            <div class="h-1 w-24 bg-gradient-to-r from-[#c4a77d] to-[#e6d5b8] rounded-full mt-4"></div>
-        </header>
+<body class="pb-24 pt-6">
 
-        <div class="mb-8">
-            <div id="etf-tabs" class="flex overflow-x-auto hide-scrollbar gap-2 pb-2 px-1"></div>
+    <nav class="w-full border-b border-[#262626] bg-[#050505] fixed top-0 z-50 flex justify-between items-center px-4 md:px-8 py-3">
+        <div class="flex items-center gap-4">
+            <span class="live-dot"></span>
+            <span class="font-mono text-sm tracking-widest font-bold glow-buy">SYSTEM.LIVE</span>
+            <span class="text-[#444] hidden md:inline">|</span>
+            <h1 class="text-lg font-black tracking-[0.2em] text-white">MONITOR <span class="text-[#444] font-mono text-xs">v3.0</span></h1>
+        </div>
+        <div class="flex items-center gap-4 font-mono text-xs text-[#84848f]">
+            <span id="live-clock" class="hidden md:inline">Loading...</span>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 md:px-6 mt-20">
+
+        <div class="mb-6 flex overflow-x-auto hide-scrollbar gap-2 pb-2">
+            <div id="etf-tabs" class="flex gap-2"></div>
         </div>
 
-        <div class="card mb-8">
+        <div class="panel p-5 md:p-8">
             
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pb-6 mb-8 border-b border-[#f3efea]">
-                <div class="flex items-baseline gap-4">
-                    <h2 id="current-etf-title" class="text-3xl font-extrabold text-[#4a3a2a] tracking-tight">載入中...</h2>
-                    <span id="current-date-display" class="text-lg text-[#8c7b6a] font-medium tracking-wide"></span>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-8 border-b border-[#262626]">
+                <div class="flex flex-col gap-1">
+                    <span class="font-mono text-xs text-[#555] tracking-widest uppercase">TARGET_ASSET</span>
+                    <div class="flex items-baseline gap-3">
+                        <h2 id="current-etf-title" class="text-3xl md:text-4xl font-black text-white tracking-wider">---</h2>
+                        <span id="current-date-display" class="font-mono text-lg glow-blue"></span>
+                    </div>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="relative flex items-center bg-white border border-[#f3efea] rounded-md px-3 py-2 focus-within:border-[#c4a77d] transition-colors shadow-sm w-full sm:w-auto">
-                        <svg class="w-4 h-4 text-[#8c7b6a] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="個股雷達反查..." class="bg-transparent text-sm w-full sm:w-32 placeholder-[#b5a898] text-[#4a3a2a] font-medium">
+                    <div class="relative flex items-center bg-[#0a0a0a] border border-[#262626] px-3 py-1.5 focus-within:border-[#00f0ff] transition-colors">
+                        <span class="text-[#555] font-mono mr-2">></span>
+                        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-[#444] text-[#fff]">
                     </div>
                     
-                    <div class="flex items-center bg-white border border-[#f3efea] rounded-md px-3 py-2 shadow-sm hover:border-[#c4a77d] transition-colors">
-                        <select id="date-selector" onchange="changeDate()" class="bg-transparent text-sm font-bold text-[#4a3a2a] cursor-pointer pr-2 border-none p-0 m-0"></select>
+                    <div class="flex items-center bg-[#0a0a0a] border border-[#262626] px-2 py-1.5 hover:border-[#555] transition-colors">
+                        <select id="date-selector" onchange="changeDate()" class="bg-transparent text-sm font-mono text-[#fff] cursor-pointer pr-2 border-none appearance-none"></select>
                     </div>
                 </div>
             </div>
 
             <div id="normal-view">
+                
                 <div class="mb-12">
-                    <h3 class="section-label text-[#4a3a2a] mb-5 flex items-center">
-                        <span class="w-1.5 h-5 bg-[#c4a77d] rounded-full mr-3"></span>
-                        當日個股操作趨勢
+                    <h3 class="font-mono text-xs text-[#84848f] tracking-[0.2em] mb-4 flex items-center">
+                        <span class="text-[#444] mr-2">///</span> VOLUME_FLOW
                     </h3>
-                    <div id="chart-container" class="w-full rounded-xl border border-[#f3efea] overflow-hidden bg-white shadow-sm">
-                    </div>
+                    <div id="chart-container" class="w-full bg-[#0a0a0a] border border-[#1a1a1a]">
+                        </div>
                 </div>
 
                 <div>
-                    <h3 class="section-label text-[#4a3a2a] mb-6 flex items-center border-b border-[#f3efea] pb-3">
-                        <span class="w-1.5 h-5 bg-[#c4a77d] rounded-full mr-3"></span>
-                        異動明細總覽
+                    <h3 class="font-mono text-xs text-[#84848f] tracking-[0.2em] mb-4 flex items-center border-b border-[#262626] pb-2">
+                        <span class="text-[#444] mr-2">///</span> TICKER_BREAKDOWN
                     </h3>
                     
-                    <div id="empty-state" class="text-center text-[#8c7b6a] py-16 bg-[#fafaf5] rounded-xl border border-dashed border-[#e6d5b8] hidden">
-                        <p class="text-sm font-medium tracking-wide">當日無任何籌碼異動</p>
+                    <div id="empty-state" class="text-center font-mono text-[#555] py-12 bg-[#0a0a0a] border border-dashed border-[#262626] hidden">
+                        > NO_DATA_DETECTED_
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
                         <div class="flex flex-col gap-8">
                             <div id="list-new" class="hidden">
-                                <h4 class="text-[#dc2626] font-bold text-sm tracking-widest uppercase mb-3 border-l-2 border-[#dc2626] pl-2">新進場建倉</h4>
-                                <div id="items-new" class="flex flex-col border-t border-[#f3efea] mt-1"></div>
+                                <h4 class="font-mono glow-buy text-sm tracking-widest mb-3 border-l-2 border-[var(--neon-buy)] pl-2">INITIATE_POSITION</h4>
+                                <div id="items-new" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
                             </div>
                             <div id="list-inc" class="hidden">
-                                <h4 class="text-[#dc2626] font-bold text-sm tracking-widest uppercase mb-3 border-l-2 border-[#f87171] pl-2">加碼買進</h4>
-                                <div id="items-inc" class="flex flex-col border-t border-[#f3efea] mt-1"></div>
+                                <h4 class="font-mono glow-buy text-sm tracking-widest mb-3 border-l-2 border-[var(--neon-buy)] pl-2">ACCUMULATE</h4>
+                                <div id="items-inc" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
                             </div>
                         </div>
 
                         <div class="flex flex-col gap-8">
                             <div id="list-dec" class="hidden">
-                                <h4 class="text-[#059669] font-bold text-sm tracking-widest uppercase mb-3 border-l-2 border-[#059669] pl-2">減碼調節</h4>
-                                <div id="items-dec" class="flex flex-col border-t border-[#f3efea] mt-1"></div>
+                                <h4 class="font-mono glow-sell text-sm tracking-widest mb-3 border-l-2 border-[var(--neon-sell)] pl-2">REDUCE_EXPOSURE</h4>
+                                <div id="items-dec" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
                             </div>
                             <div id="list-out" class="hidden">
-                                <h4 class="text-[#8c7b6a] font-bold text-sm tracking-widest uppercase mb-3 border-l-2 border-[#8c7b6a] pl-2">完全出清</h4>
-                                <div id="items-out" class="flex flex-col border-t border-[#f3efea] mt-1"></div>
+                                <h4 class="font-mono text-[#84848f] text-sm tracking-widest mb-3 border-l-2 border-[#555] pl-2">LIQUIDATE</h4>
+                                <div id="items-out" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
                             </div>
                         </div>
                     </div>
@@ -161,20 +215,28 @@
             </div>
 
             <div id="search-view" class="hidden">
-                <h3 class="section-label text-[#4a3a2a] mb-6 flex items-center border-b border-[#f3efea] pb-3">
-                    <span class="w-1.5 h-5 bg-[#c4a77d] rounded-full mr-3"></span>
-                    雷達搜尋結果
+                <h3 class="font-mono text-xs text-[#84848f] tracking-[0.2em] mb-4 flex items-center border-b border-[#262626] pb-2">
+                    <span class="text-[#444] mr-2">///</span> RADAR_SCAN_RESULTS
                 </h3>
-                <div id="search-results-list" class="flex flex-col border-t border-[#f3efea] mt-1"></div>
+                <div id="search-results-list" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
             </div>
 
         </div>
     </div>
 
     <script>
-        const db = {"2026-02-25": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [{"name": "台玻", "diff": 2174, "weight": 0.57}, {"name": "欣興", "diff": 271, "weight": 3.03}, {"name": "台達電", "diff": 142, "weight": 6.89}, {"name": "南電", "diff": 101, "weight": 3.42}, {"name": "精測", "diff": 29, "weight": 1.61}], "decreased": [{"name": "富喬", "diff": 3007, "weight": 0.28}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "超豐", "diff": 80, "weight": 2.39}, {"name": "欣銓", "diff": 62, "weight": 3.41}, {"name": "矽格", "diff": 56, "weight": 2.71}, {"name": "光洋科", "diff": 42, "weight": 0.88}, {"name": "楠梓電", "diff": 38, "weight": 1.32}, {"name": "文曄", "diff": 33, "weight": 2.55}, {"name": "建準", "diff": 29, "weight": 1.51}, {"name": "興勤", "diff": 26, "weight": 1.81}, {"name": "京元電", "diff": 22, "weight": 2.49}, {"name": "高技", "diff": 18, "weight": 1.77}, {"name": "亞翔", "diff": 15, "weight": 3.67}, {"name": "台積電", "diff": 13, "weight": 8.92}, {"name": "致茂", "diff": 7, "weight": 3.3}, {"name": "台達電", "diff": 6, "weight": 3.05}, {"name": "緯創", "diff": 6, "weight": 0.52}, {"name": "緯穎", "diff": 4, "weight": 5.25}, {"name": "奇鋐", "diff": 4, "weight": 2.77}, {"name": "台光電", "diff": 4, "weight": 3.4}, {"name": "國巨", "diff": 4, "weight": 0.38}, {"name": "宜鼎", "diff": 3, "weight": 0.7}, {"name": "日月光投控", "diff": 3, "weight": 0.42}, {"name": "川湖", "diff": 2, "weight": 0.58}, {"name": "勤誠", "diff": 1, "weight": 1.57}, {"name": "金像電", "diff": 1, "weight": 0.4}], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [{"name": "研華", "diff": 171, "weight": 3.31}, {"name": "鴻海", "diff": 132, "weight": 2.03}, {"name": "遠傳電信", "diff": 81, "weight": 2.96}, {"name": "嘉澤端子", "diff": 77, "weight": 4.54}, {"name": "新應材", "diff": 53, "weight": 2.45}, {"name": "中華電信", "diff": 41, "weight": 3.75}, {"name": "文曄", "diff": 40, "weight": 3.11}, {"name": "致茂", "diff": 24, "weight": 1.71}, {"name": "欣興", "diff": 18, "weight": 2.14}, {"name": "世芯", "diff": 18, "weight": 1.57}, {"name": "台達電", "diff": 2, "weight": 2.15}, {"name": "台積電", "diff": 2, "weight": 19.93}, {"name": "聯發科", "diff": 1, "weight": 3.04}], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [{"name": "加州太平洋生技公司", "diff": 10, "weight": 0.09}, {"name": "BitMine Immersion Technologi", "diff": 5, "weight": 0.81}, {"name": "Circle Internet Group Inc", "diff": 3, "weight": 1.87}, {"name": "輝達", "diff": 1, "weight": 2.19}], "decreased": [{"name": "美國施羅丁格公司", "diff": 10, "weight": 0.11}]}}, "2026-02-26": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [{"name": "雙鴻", "diff": 76, "weight": 0.13}], "sold_out": [], "increased": [{"name": "欣興", "diff": 932, "weight": 3.83}, {"name": "順達", "diff": 612, "weight": 0.57}, {"name": "南電", "diff": 580, "weight": 3.88}, {"name": "京元電", "diff": 390, "weight": 1.32}, {"name": "漢唐", "diff": 311, "weight": 0.93}, {"name": "新日興", "diff": 299, "weight": 0.43}, {"name": "精測", "diff": 22, "weight": 1.65}], "decreased": [{"name": "南亞", "diff": 6260, "weight": 0.0}, {"name": "台化", "diff": 5789, "weight": 0.0}, {"name": "富喬", "diff": 1567, "weight": 0.0}, {"name": "信驊", "diff": 50, "weight": 1.91}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "緯穎", "diff": 6, "weight": 5.26}], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [{"name": "采鈺", "diff": 54, "weight": 0.21}], "sold_out": [{"name": "華通", "diff": 194, "weight": 0.47}], "increased": [{"name": "文曄", "diff": 33, "weight": 3.18}, {"name": "研華", "diff": 27, "weight": 3.43}], "decreased": [{"name": "中信金", "diff": 539, "weight": 1.32}, {"name": "台燿", "diff": 58, "weight": 0.29}, {"name": "鈊象", "diff": 31, "weight": 1.29}, {"name": "廣達", "diff": 28, "weight": 1.0}, {"name": "勤誠", "diff": 27, "weight": 0.8}, {"name": "聯發科", "diff": 22, "weight": 2.66}, {"name": "華城", "diff": 17, "weight": 0.58}, {"name": "金像電", "diff": 16, "weight": 1.01}, {"name": "貿聯-KY", "diff": 16, "weight": 0.5}, {"name": "智邦", "diff": 15, "weight": 1.74}, {"name": "台光電", "diff": 8, "weight": 1.62}, {"name": "信驊", "diff": 5, "weight": 0.45}]}, "00983A": {"new_buy": [], "sold_out": [{"name": "美國施羅丁格公司", "diff": 9, "weight": 0.11}], "increased": [{"name": "BitMine Immersion Technologi", "diff": 5, "weight": 0.99}, {"name": "布洛克公司", "diff": 3, "weight": 1.49}, {"name": "Circle Internet Group Inc", "diff": 2, "weight": 2.66}, {"name": "超微半導體公司", "diff": 1, "weight": 3.33}], "decreased": []}}, "2026-02-27": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-28": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-03-01": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-03-02": {"00984A": {"new_buy": [{"name": "華航", "diff": 1333, "weight": 0.59}, {"name": "群創光電", "diff": 670, "weight": 0.43}, {"name": "永豐金控", "diff": 559, "weight": 0.41}, {"name": "台化", "diff": 351, "weight": 0.38}, {"name": "康舒", "diff": 344, "weight": 0.4}, {"name": "統一超商", "diff": 180, "weight": 0.89}, {"name": "豐泰", "diff": 167, "weight": 0.35}, {"name": "富喬", "diff": 162, "weight": 0.39}, {"name": "一詮精密", "diff": 127, "weight": 0.39}, {"name": "華新科", "diff": 114, "weight": 0.38}, {"name": "晶豪", "diff": 114, "weight": 0.43}, {"name": "精材", "diff": 91, "weight": 0.39}, {"name": "良維", "diff": 78, "weight": 0.37}, {"name": "巨漢", "diff": 57, "weight": 0.38}, {"name": "達興材", "diff": 41, "weight": 0.36}, {"name": "義隆", "diff": 40, "weight": 0.11}, {"name": "宏全國際", "diff": 40, "weight": 0.11}, {"name": "金居開發", "diff": 38, "weight": 0.24}, {"name": "致茂", "diff": 26, "weight": 0.88}, {"name": "光寶", "diff": 6, "weight": 0.02}, {"name": "精測", "diff": 5, "weight": 0.4}, {"name": "富世達", "diff": 1, "weight": 0.04}], "sold_out": [{"name": "南茂", "diff": 602, "weight": 0.95}, {"name": "鈺創", "diff": 285, "weight": 0.37}, {"name": "長興", "diff": 282, "weight": 0.43}, {"name": "世界先進", "diff": 263, "weight": 0.78}, {"name": "台虹", "diff": 198, "weight": 0.42}, {"name": "長榮鋼", "diff": 181, "weight": 0.41}, {"name": "中華電", "diff": 176, "weight": 0.52}, {"name": "創見", "diff": 70, "weight": 0.32}, {"name": "聚陽", "diff": 60, "weight": 0.42}, {"name": "愛普", "diff": 43, "weight": 0.41}, {"name": "兆聯實業", "diff": 26, "weight": 0.44}], "increased": [{"name": "華南金控", "diff": 607, "weight": 2.49}, {"name": "元大金", "diff": 553, "weight": 2.83}, {"name": "仁寶", "diff": 327, "weight": 1.22}, {"name": "台新新光金", "diff": 295, "weight": 2.26}, {"name": "至上", "diff": 289, "weight": 0.66}, {"name": "遠東新", "diff": 272, "weight": 1.37}, {"name": "凱基金控", "diff": 246, "weight": 1.81}, {"name": "廣達", "diff": 240, "weight": 4.37}, {"name": "國泰金", "diff": 234, "weight": 3.27}, {"name": "中信金", "diff": 229, "weight": 3.02}, {"name": "寶成", "diff": 216, "weight": 1.01}, {"name": "超豐", "diff": 201, "weight": 0.66}, {"name": "富邦金控", "diff": 189, "weight": 3.34}, {"name": "台灣大", "diff": 138, "weight": 3.19}, {"name": "群益證券", "diff": 130, "weight": 0.88}, {"name": "王道銀行", "diff": 129, "weight": 0.27}, {"name": "華票", "diff": 88, "weight": 0.27}, {"name": "國建", "diff": 81, "weight": 0.28}, {"name": "統一實", "diff": 72, "weight": 0.27}, {"name": "遠百", "diff": 71, "weight": 0.27}, {"name": "亞泥", "diff": 68, "weight": 1.76}, {"name": "欣銓", "diff": 63, "weight": 1.12}, {"name": "福懋", "diff": 61, "weight": 0.27}, {"name": "長華", "diff": 60, "weight": 0.26}, {"name": "中央再保", "diff": 59, "weight": 0.27}, {"name": "佳格", "diff": 56, "weight": 0.27}, {"name": "尖點", "diff": 55, "weight": 0.78}, {"name": "遠傳", "diff": 54, "weight": 1.76}, {"name": "中砂", "diff": 53, "weight": 1.04}, {"name": "日月光投控", "diff": 41, "weight": 1.07}, {"name": "統一證券", "diff": 35, "weight": 0.26}, {"name": "藥華醫藥", "diff": 25, "weight": 0.8}, {"name": "光洋科", "diff": 24, "weight": 0.44}, {"name": "瑞昱", "diff": 24, "weight": 1.57}, {"name": "慧洋-KY", "diff": 23, "weight": 0.27}, {"name": "洋基工程", "diff": 23, "weight": 0.82}, {"name": "大國鋼", "diff": 20, "weight": 0.12}, {"name": "東和鋼鐵", "diff": 19, "weight": 0.28}, {"name": "佳世達", "diff": 18, "weight": 0.12}, {"name": "新光產險", "diff": 16, "weight": 0.27}, {"name": "群聯", "diff": 14, "weight": 1.11}, {"name": "華立", "diff": 13, "weight": 0.26}, {"name": "力成", "diff": 12, "weight": 0.87}, {"name": "三陽", "diff": 10, "weight": 0.12}, {"name": "國巨", "diff": 9, "weight": 0.18}, {"name": "台達", "diff": 8, "weight": 0.99}, {"name": "台積電", "diff": 8, "weight": 4.83}, {"name": "原相", "diff": 8, "weight": 0.26}, {"name": "宜鼎國際", "diff": 6, "weight": 0.95}, {"name": "長榮海運", "diff": 6, "weight": 1.34}, {"name": "聯電", "diff": 5, "weight": 3.16}, {"name": "智邦", "diff": 5, "weight": 0.35}, {"name": "中保", "diff": 5, "weight": 0.12}, {"name": "瑞儀光電", "diff": 4, "weight": 0.11}, {"name": "旺矽", "diff": 3, "weight": 0.37}, {"name": "南寶", "diff": 2, "weight": 0.12}, {"name": "台光", "diff": 1, "weight": 1.01}, {"name": "穎崴", "diff": 1, "weight": 0.64}, {"name": "華城", "diff": 1, "weight": 0.41}, {"name": "樺漢", "diff": 1, "weight": 0.11}], "decreased": [{"name": "宏碁", "diff": 672, "weight": 0.12}, {"name": "華新", "diff": 584, "weight": 0.59}, {"name": "華邦電", "diff": 246, "weight": 0.45}, {"name": "力積電", "diff": 232, "weight": 0.45}, {"name": "長科", "diff": 222, "weight": 0.43}, {"name": "微星", "diff": 159, "weight": 0.13}, {"name": "晟德", "diff": 110, "weight": 0.01}, {"name": "文曄", "diff": 109, "weight": 1.5}, {"name": "神基", "diff": 105, "weight": 0.14}, {"name": "潤泰", "diff": 89, "weight": 0.01}, {"name": "大聯大", "diff": 63, "weight": 0.54}, {"name": "十銓", "diff": 62, "weight": 0.03}, {"name": "致伸", "diff": 57, "weight": 0.01}, {"name": "群光電能", "diff": 54, "weight": 0.01}, {"name": "台燿", "diff": 52, "weight": 0.17}, {"name": "和碩", "diff": 51, "weight": 0.82}, {"name": "群光", "diff": 50, "weight": 0.44}, {"name": "京元電", "diff": 44, "weight": 0.99}, {"name": "威剛", "diff": 36, "weight": 0.64}, {"name": "穩懋", "diff": 34, "weight": 0.88}, {"name": "世紀鋼構", "diff": 32, "weight": 0.01}, {"name": "可成", "diff": 32, "weight": 0.5}, {"name": "新普", "diff": 25, "weight": 0.14}, {"name": "全家商店", "diff": 23, "weight": 0.01}, {"name": "志聖", "diff": 15, "weight": 0.5}, {"name": "金像電", "diff": 15, "weight": 0.32}, {"name": "元大期貨", "diff": 14, "weight": 0.18}, {"name": "奇鋐", "diff": 13, "weight": 0.2}, {"name": "美時製藥", "diff": 13, "weight": 0.12}, {"name": "寶雅", "diff": 11, "weight": 0.01}, {"name": "技嘉", "diff": 11, "weight": 0.75}, {"name": "創意", "diff": 10, "weight": 0.3}, {"name": "鴻勁", "diff": 6, "weight": 0.39}]}, "00981A": {"new_buy": [], "sold_out": [{"name": "鴻海", "diff": 863, "weight": 0.32}], "increased": [{"name": "欣興", "diff": 762, "weight": 4.32}, {"name": "華星光", "diff": 400, "weight": 0.85}, {"name": "順達", "diff": 318, "weight": 0.71}, {"name": "國巨", "diff": 110, "weight": 3.01}, {"name": "貿聯-KY", "diff": 98, "weight": 4.4}, {"name": "台積電", "diff": 80, "weight": 9.15}, {"name": "奇鋐", "diff": 50, "weight": 6.39}, {"name": "京元電", "diff": 50, "weight": 1.27}, {"name": "台達電", "diff": 40, "weight": 6.73}, {"name": "智邦", "diff": 35, "weight": 5.68}, {"name": "勤誠", "diff": 30, "weight": 2.24}, {"name": "雙鴻", "diff": 30, "weight": 0.18}, {"name": "富世達", "diff": 30, "weight": 2.96}, {"name": "亞翔", "diff": 26, "weight": 1.41}, {"name": "新日興", "diff": 25, "weight": 0.44}, {"name": "優群", "diff": 20, "weight": 0.08}, {"name": "旺矽", "diff": 15, "weight": 4.39}, {"name": "緯穎", "diff": 15, "weight": 4.73}, {"name": "健策", "diff": 14, "weight": 4.38}, {"name": "世芯-KY", "diff": 8, "weight": 2.94}, {"name": "精成科", "diff": 2, "weight": 0.55}, {"name": "漢唐", "diff": 2, "weight": 0.87}, {"name": "金居", "diff": 1, "weight": 0.79}, {"name": "精測", "diff": 1, "weight": 1.58}, {"name": "東陽", "diff": 1, "weight": 0.22}, {"name": "中鋼", "diff": 1, "weight": 0.15}, {"name": "大立光", "diff": 1, "weight": 0.01}, {"name": "環球晶", "diff": 1, "weight": 0.52}, {"name": "群聯", "diff": 1, "weight": 4.68}, {"name": "穎崴", "diff": 1, "weight": 1.67}], "decreased": [{"name": "信驊", "diff": 26, "weight": 1.46}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [{"name": "BitMine Immersion Technologi", "diff": 5, "weight": 1.02}, {"name": "SoFi Technologies Inc", "diff": 4, "weight": 1.47}, {"name": "Circle Internet Group Inc", "diff": 2, "weight": 2.89}, {"name": "超微半導體公司", "diff": 1, "weight": 3.28}, {"name": "CoreWeave Inc", "diff": 1, "weight": 1.13}], "decreased": []}}, "2026-03-03": {"00984A": {"new_buy": [{"name": "聯亞光電", "diff": 16, "weight": 0.54}, {"name": "光聖", "diff": 9, "weight": 0.48}, {"name": "健策", "diff": 1, "weight": 0.07}], "sold_out": [{"name": "晟德", "diff": 12, "weight": 0.01}, {"name": "潤泰", "diff": 9, "weight": 0.01}, {"name": "十銓", "diff": 6, "weight": 0.03}, {"name": "致伸", "diff": 6, "weight": 0.01}, {"name": "群光電能", "diff": 6, "weight": 0.01}, {"name": "世紀鋼構", "diff": 3, "weight": 0.01}, {"name": "全家商店", "diff": 2, "weight": 0.01}, {"name": "寶雅", "diff": 1, "weight": 0.01}], "increased": [{"name": "華航", "diff": 150, "weight": 0.65}, {"name": "群創光電", "diff": 72, "weight": 0.44}, {"name": "華南金控", "diff": 63, "weight": 2.57}, {"name": "永豐金控", "diff": 61, "weight": 0.47}, {"name": "元大金", "diff": 58, "weight": 2.95}, {"name": "台化", "diff": 40, "weight": 0.42}, {"name": "康舒", "diff": 39, "weight": 0.43}, {"name": "仁寶", "diff": 34, "weight": 1.22}, {"name": "至上", "diff": 33, "weight": 0.69}, {"name": "遠東新", "diff": 28, "weight": 1.41}, {"name": "台新新光金", "diff": 27, "weight": 2.36}, {"name": "廣達", "diff": 25, "weight": 4.52}, {"name": "寶成", "diff": 23, "weight": 1.03}, {"name": "國泰金", "diff": 23, "weight": 3.35}, {"name": "中信金", "diff": 22, "weight": 3.08}, {"name": "超豐", "diff": 22, "weight": 0.69}, {"name": "統一超商", "diff": 19, "weight": 1.01}, {"name": "豐泰", "diff": 18, "weight": 0.39}, {"name": "富邦金控", "diff": 17, "weight": 3.43}, {"name": "富喬", "diff": 17, "weight": 0.46}, {"name": "一詮精密", "diff": 15, "weight": 0.44}, {"name": "台灣大", "diff": 14, "weight": 3.28}, {"name": "華新科", "diff": 13, "weight": 0.4}, {"name": "晶豪", "diff": 13, "weight": 0.45}, {"name": "王道銀行", "diff": 12, "weight": 0.28}, {"name": "凱基金控", "diff": 12, "weight": 1.86}, {"name": "群益證券", "diff": 11, "weight": 0.91}, {"name": "精材", "diff": 11, "weight": 0.42}, {"name": "良維", "diff": 10, "weight": 0.43}, {"name": "國建", "diff": 8, "weight": 0.29}, {"name": "華票", "diff": 8, "weight": 0.28}, {"name": "欣銓", "diff": 8, "weight": 1.1}, {"name": "尖點", "diff": 7, "weight": 0.84}, {"name": "中央再保", "diff": 7, "weight": 0.28}, {"name": "巨漢", "diff": 7, "weight": 0.41}, {"name": "遠百", "diff": 7, "weight": 0.28}, {"name": "統一實", "diff": 7, "weight": 0.28}, {"name": "佳格", "diff": 6, "weight": 0.28}, {"name": "長華", "diff": 6, "weight": 0.27}, {"name": "遠傳", "diff": 6, "weight": 1.81}, {"name": "金居開發", "diff": 5, "weight": 0.26}, {"name": "義隆", "diff": 5, "weight": 0.13}, {"name": "達興材", "diff": 5, "weight": 0.41}, {"name": "日月光投控", "diff": 5, "weight": 1.1}, {"name": "中砂", "diff": 5, "weight": 1.1}, {"name": "宏全國際", "diff": 5, "weight": 0.13}, {"name": "福懋", "diff": 4, "weight": 0.27}, {"name": "光洋科", "diff": 3, "weight": 0.44}, {"name": "佳世達", "diff": 3, "weight": 0.12}, {"name": "大國鋼", "diff": 3, "weight": 0.13}, {"name": "昇達", "diff": 3, "weight": 0.96}, {"name": "慧洋-KY", "diff": 3, "weight": 0.29}, {"name": "藥華醫藥", "diff": 3, "weight": 0.86}, {"name": "洋基工程", "diff": 3, "weight": 0.85}, {"name": "統一證券", "diff": 3, "weight": 0.27}, {"name": "東和鋼鐵", "diff": 3, "weight": 0.3}, {"name": "瑞昱", "diff": 3, "weight": 1.58}, {"name": "群聯", "diff": 2, "weight": 1.12}, {"name": "力成", "diff": 2, "weight": 0.82}, {"name": "新光產險", "diff": 2, "weight": 0.29}, {"name": "國巨", "diff": 2, "weight": 0.18}, {"name": "矽格", "diff": 1, "weight": 0.42}, {"name": "瑞儀光電", "diff": 1, "weight": 0.1}, {"name": "台光", "diff": 1, "weight": 1.05}, {"name": "亞泥", "diff": 1, "weight": 1.76}, {"name": "南寶", "diff": 1, "weight": 0.13}, {"name": "群光", "diff": 1, "weight": 0.45}, {"name": "台達", "diff": 1, "weight": 0.97}, {"name": "原相", "diff": 1, "weight": 0.27}, {"name": "宜鼎國際", "diff": 1, "weight": 0.95}, {"name": "華城", "diff": 1, "weight": 0.42}, {"name": "樺漢", "diff": 1, "weight": 0.12}, {"name": "旺矽", "diff": 1, "weight": 0.45}, {"name": "華立", "diff": 1, "weight": 0.26}, {"name": "三陽", "diff": 1, "weight": 0.13}, {"name": "智邦", "diff": 1, "weight": 0.39}, {"name": "中保", "diff": 1, "weight": 0.13}], "decreased": [{"name": "長榮航", "diff": 56, "weight": 0.87}, {"name": "南亞", "diff": 23, "weight": 0.85}, {"name": "景碩", "diff": 3, "weight": 0.46}, {"name": "新普", "diff": 2, "weight": 0.12}, {"name": "華碩", "diff": 2, "weight": 1.06}]}, "00981A": {"new_buy": [], "sold_out": [], "increased": [{"name": "國巨", "diff": 660, "weight": 3.12}, {"name": "貿聯-KY", "diff": 80, "weight": 4.93}], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "緯穎", "diff": 40, "weight": 6.19}], "decreased": [{"name": "台燿", "diff": 152, "weight": 1.74}]}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "009816": {"new_buy": [], "sold_out": [], "increased": [{"name": "台新新光金", "diff": 3186, "weight": 2.1}, {"name": "凱基金", "diff": 2208, "weight": 1.23}, {"name": "永豐金", "diff": 1861, "weight": 1.61}, {"name": "元大金", "diff": 1672, "weight": 2.06}, {"name": "中信金", "diff": 1534, "weight": 2.14}, {"name": "華南金", "diff": 1384, "weight": 1.32}, {"name": "國泰金", "diff": 1034, "weight": 2.09}, {"name": "鴻海", "diff": 966, "weight": 5.78}, {"name": "台積電", "diff": 900, "weight": 43.02}, {"name": "玉山金", "diff": 784, "weight": 0.71}, {"name": "第一金", "diff": 582, "weight": 0.45}, {"name": "兆豐金", "diff": 581, "weight": 0.61}, {"name": "聯電", "diff": 577, "weight": 0.94}, {"name": "合庫金", "diff": 567, "weight": 0.36}, {"name": "富邦金", "diff": 495, "weight": 1.2}, {"name": "南亞", "diff": 275, "weight": 0.61}, {"name": "中華電", "diff": 249, "weight": 0.9}, {"name": "統一", "diff": 238, "weight": 0.46}, {"name": "台達電", "diff": 167, "weight": 5.85}, {"name": "日月光投控", "diff": 161, "weight": 1.52}, {"name": "緯創", "diff": 152, "weight": 0.52}, {"name": "廣達", "diff": 135, "weight": 1.04}, {"name": "遠傳", "diff": 124, "weight": 0.3}, {"name": "聯發科", "diff": 120, "weight": 5.68}, {"name": "台塑化", "diff": 119, "weight": 0.18}, {"name": "台灣大", "diff": 112, "weight": 0.32}, {"name": "光寶科", "diff": 106, "weight": 0.45}, {"name": "長榮", "diff": 105, "weight": 0.59}, {"name": "國巨", "diff": 94, "weight": 0.69}, {"name": "京元電", "diff": 80, "weight": 0.45}, {"name": "藥華藥", "diff": 43, "weight": 0.78}, {"name": "華碩", "diff": 34, "weight": 0.47}, {"name": "欣興", "diff": 29, "weight": 2.01}, {"name": "致茂", "diff": 29, "weight": 0.63}, {"name": "研華", "diff": 25, "weight": 0.22}, {"name": "瑞昱", "diff": 25, "weight": 0.3}, {"name": "智邦", "diff": 24, "weight": 0.91}, {"name": "金像電", "diff": 16, "weight": 0.33}, {"name": "奇鋐", "diff": 16, "weight": 0.77}, {"name": "台光電", "diff": 16, "weight": 0.98}, {"name": "鴻勁", "diff": 12, "weight": 0.6}, {"name": "華城", "diff": 12, "weight": 0.29}, {"name": "貿聯-KY", "diff": 9, "weight": 0.41}, {"name": "緯穎", "diff": 6, "weight": 0.63}, {"name": "大立光", "diff": 6, "weight": 0.35}, {"name": "健策", "diff": 5, "weight": 0.42}, {"name": "創意", "diff": 4, "weight": 0.28}, {"name": "世芯-KY", "diff": 4, "weight": 0.33}, {"name": "川湖", "diff": 3, "weight": 0.3}], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [{"name": "采鈺", "diff": 319, "weight": 1.61}, {"name": "遠傳電信", "diff": 250, "weight": 3.28}, {"name": "嘉澤端子", "diff": 10, "weight": 4.47}], "decreased": [{"name": "中信金", "diff": 421, "weight": 1.03}, {"name": "文曄", "diff": 162, "weight": 2.81}, {"name": "欣銓", "diff": 103, "weight": 0.4}, {"name": "鴻海", "diff": 73, "weight": 1.72}, {"name": "力成", "diff": 52, "weight": 0.82}, {"name": "欣興", "diff": 51, "weight": 1.92}, {"name": "日月光投資控股", "diff": 47, "weight": 1.73}, {"name": "致茂", "diff": 18, "weight": 1.64}, {"name": "智邦", "diff": 18, "weight": 1.5}, {"name": "金像電", "diff": 16, "weight": 0.81}, {"name": "力旺", "diff": 12, "weight": 0.36}, {"name": "聯發科", "diff": 10, "weight": 2.33}, {"name": "台達電", "diff": 9, "weight": 1.91}, {"name": "奇鋐", "diff": 9, "weight": 1.5}, {"name": "穎崴", "diff": 6, "weight": 0.89}, {"name": "台光電", "diff": 6, "weight": 1.42}, {"name": "台積電", "diff": 5, "weight": 19.4}]}, "0050": {"new_buy": [], "sold_out": [], "increased": [{"name": "台積電", "diff": 2276, "weight": 64.16}, {"name": "台新新光金", "diff": 2032, "weight": 0.75}, {"name": "中信金", "diff": 1649, "weight": 1.28}, {"name": "玉山金", "diff": 1432, "weight": 0.73}, {"name": "凱基金", "diff": 1422, "weight": 0.46}, {"name": "鴻海", "diff": 1139, "weight": 3.79}, {"name": "兆豐金", "diff": 1103, "weight": 0.65}, {"name": "聯電", "diff": 1088, "weight": 0.99}, {"name": "中鋼", "diff": 1057, "weight": 0.31}, {"name": "元大金", "diff": 1017, "weight": 0.7}, {"name": "第一金", "diff": 1013, "weight": 0.44}, {"name": "永豐金", "diff": 979, "weight": 0.53}, {"name": "合庫金", "diff": 977, "weight": 0.34}, {"name": "國泰金", "diff": 874, "weight": 0.99}, {"name": "華南金", "diff": 868, "weight": 0.46}, {"name": "富邦金", "diff": 779, "weight": 1.06}, {"name": "南亞", "diff": 460, "weight": 0.57}, {"name": "統一", "diff": 460, "weight": 0.49}, {"name": "台塑", "diff": 391, "weight": 0.28}, {"name": "中華電", "diff": 356, "weight": 0.71}, {"name": "日月光投控", "diff": 306, "weight": 1.6}, {"name": "緯創", "diff": 283, "weight": 0.54}, {"name": "廣達", "diff": 247, "weight": 1.06}, {"name": "光寶科", "diff": 181, "weight": 0.44}, {"name": "台達電", "diff": 180, "weight": 3.52}, {"name": "遠傳", "diff": 166, "weight": 0.23}, {"name": "國巨", "diff": 144, "weight": 0.59}, {"name": "聯發科", "diff": 137, "weight": 3.63}, {"name": "萬海", "diff": 132, "weight": 0.17}, {"name": "台灣大", "diff": 132, "weight": 0.21}, {"name": "台塑化", "diff": 111, "weight": 0.09}, {"name": "南亞科", "diff": 105, "weight": 0.39}, {"name": "長榮", "diff": 101, "weight": 0.32}, {"name": "康霈", "diff": 93, "weight": 0.2}, {"name": "華碩", "diff": 64, "weight": 0.48}, {"name": "聯詠", "diff": 54, "weight": 0.3}, {"name": "統一超", "diff": 50, "weight": 0.16}, {"name": "智邦", "diff": 46, "weight": 0.95}, {"name": "瑞昱", "diff": 46, "weight": 0.31}, {"name": "研華", "diff": 43, "weight": 0.21}, {"name": "致茂", "diff": 41, "weight": 0.7}, {"name": "奇鋐", "diff": 30, "weight": 0.79}, {"name": "和泰車", "diff": 26, "weight": 0.21}, {"name": "台光電", "diff": 26, "weight": 0.89}, {"name": "貿聯-KY", "diff": 17, "weight": 0.4}, {"name": "緯穎", "diff": 10, "weight": 0.58}, {"name": "大立光", "diff": 9, "weight": 0.32}, {"name": "健策", "diff": 8, "weight": 0.34}, {"name": "世芯-KY", "diff": 7, "weight": 0.36}, {"name": "川湖", "diff": 5, "weight": 0.25}], "decreased": []}}, "2026-02-11": {"00981A": {"new_buy": [], "sold_out": [], "increased": [{"name": "鴻海", "diff": 862, "weight": 0.32}, {"name": "京元電", "diff": 449, "weight": 0.88}, {"name": "世芯-KY", "diff": 19, "weight": 3.12}], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [{"name": "保瑞", "diff": 100, "weight": 0.18}], "increased": [{"name": "勤誠", "diff": 370, "weight": 1.82}], "decreased": [{"name": "立隆電", "diff": 182, "weight": 0.54}, {"name": "創見", "diff": 100, "weight": 0.33}]}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-12": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-13": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-14": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-15": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-16": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-17": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-18": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-19": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-20": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-21": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-22": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-23": {"00981A": {"new_buy": [], "sold_out": [{"name": "祥碩", "diff": 140, "weight": 0.29}], "increased": [{"name": "台玻", "diff": 1757, "weight": 0.33}, {"name": "京元電", "diff": 527, "weight": 1.17}, {"name": "華星光", "diff": 490, "weight": 0.48}, {"name": "台達電", "diff": 391, "weight": 6.35}, {"name": "漢唐", "diff": 59, "weight": 0.36}, {"name": "旺矽", "diff": 36, "weight": 4.74}], "decreased": [{"name": "川湖", "diff": 39, "weight": 0.01}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": [{"name": "立隆電", "diff": 300, "weight": 0.45}]}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-24": {"00981A": {"new_buy": [], "sold_out": [{"name": "玉山金", "diff": 2, "weight": 0.0}], "increased": [{"name": "南電", "diff": 90, "weight": 3.14}, {"name": "欣興", "diff": 13, "weight": 2.86}], "decreased": [{"name": "東陽", "diff": 34, "weight": 0.25}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "超豐", "diff": 71, "weight": 2.45}, {"name": "欣銓", "diff": 55, "weight": 3.55}, {"name": "矽格", "diff": 53, "weight": 2.66}, {"name": "光洋科", "diff": 37, "weight": 0.91}, {"name": "楠梓電", "diff": 34, "weight": 1.3}, {"name": "文曄", "diff": 30, "weight": 2.59}, {"name": "建準", "diff": 27, "weight": 1.49}, {"name": "興勤", "diff": 24, "weight": 1.83}, {"name": "京元電", "diff": 19, "weight": 2.6}, {"name": "高技", "diff": 16, "weight": 1.85}, {"name": "亞翔", "diff": 13, "weight": 3.68}, {"name": "台積電", "diff": 12, "weight": 8.94}, {"name": "台燿", "diff": 7, "weight": 2.07}, {"name": "致茂", "diff": 6, "weight": 3.31}, {"name": "台達電", "diff": 5, "weight": 3.02}, {"name": "創見", "diff": 4, "weight": 0.33}, {"name": "奇鋐", "diff": 4, "weight": 2.63}, {"name": "日月光投控", "diff": 3, "weight": 0.42}, {"name": "緯穎", "diff": 3, "weight": 5.09}, {"name": "台光電", "diff": 3, "weight": 3.33}, {"name": "國巨", "diff": 3, "weight": 0.39}, {"name": "宜鼎", "diff": 2, "weight": 0.74}, {"name": "勤誠", "diff": 1, "weight": 1.56}, {"name": "金像電", "diff": 1, "weight": 0.41}, {"name": "雙鴻", "diff": 1, "weight": 1.81}], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [{"name": "玉山金", "diff": 182, "weight": 1.61}, {"name": "中信金", "diff": 177, "weight": 2.44}, {"name": "華邦電", "diff": 74, "weight": 2.43}, {"name": "鴻海", "diff": 69, "weight": 4.01}, {"name": "富邦金", "diff": 68, "weight": 1.61}, {"name": "大成鋼", "diff": 62, "weight": 0.57}, {"name": "緯創", "diff": 50, "weight": 1.61}, {"name": "致伸", "diff": 40, "weight": 0.84}, {"name": "文曄", "diff": 36, "weight": 1.62}, {"name": "廣達", "diff": 34, "weight": 2.37}, {"name": "欣銓", "diff": 33, "weight": 1.28}, {"name": "台積電", "diff": 20, "weight": 9.55}, {"name": "京元電", "diff": 19, "weight": 1.57}, {"name": "健鼎", "diff": 14, "weight": 1.39}, {"name": "金像電", "diff": 13, "weight": 2.62}, {"name": "台達電", "diff": 13, "weight": 4.57}, {"name": "聚陽", "diff": 12, "weight": 0.98}, {"name": "達興材", "diff": 11, "weight": 1.26}, {"name": "凡甲", "diff": 11, "weight": 0.76}, {"name": "台燿", "diff": 11, "weight": 1.58}, {"name": "技嘉", "diff": 11, "weight": 0.63}, {"name": "勤誠", "diff": 10, "weight": 1.93}, {"name": "崇越", "diff": 9, "weight": 0.84}, {"name": "瑞昱", "diff": 8, "weight": 0.97}, {"name": "聯發科", "diff": 7, "weight": 3.29}, {"name": "智邦", "diff": 7, "weight": 2.44}, {"name": "奇鋐", "diff": 7, "weight": 2.6}, {"name": "鈊象", "diff": 6, "weight": 0.96}, {"name": "高力", "diff": 6, "weight": 1.28}, {"name": "貿聯-KY", "diff": 6, "weight": 1.98}, {"name": "寶雅", "diff": 6, "weight": 0.73}, {"name": "國巨", "diff": 6, "weight": 0.5}, {"name": "致茂", "diff": 5, "weight": 1.73}, {"name": "富世達", "diff": 4, "weight": 1.37}, {"name": "華城", "diff": 4, "weight": 1.0}, {"name": "川湖", "diff": 3, "weight": 2.14}, {"name": "亞德客", "diff": 3, "weight": 0.9}, {"name": "鴻勁", "diff": 3, "weight": 3.3}, {"name": "緯穎", "diff": 3, "weight": 2.46}, {"name": "群聯", "diff": 3, "weight": 1.55}, {"name": "旺矽", "diff": 2, "weight": 1.57}, {"name": "新應材", "diff": 2, "weight": 0.43}, {"name": "創意", "diff": 2, "weight": 1.04}, {"name": "健策", "diff": 2, "weight": 1.62}], "decreased": []}}};
+        // 💎 即時終端機時間
+        function updateClock() {
+            const now = new Date();
+            const utc = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            document.getElementById('live-clock').textContent = utc;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const db = {"2026-02-25": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [{"name": "台玻", "diff": 2174, "weight": 0.57}, {"name": "欣興", "diff": 271, "weight": 3.03}, {"name": "台達電", "diff": 142, "weight": 6.89}, {"name": "南電", "diff": 101, "weight": 3.42}, {"name": "精測", "diff": 29, "weight": 1.61}], "decreased": [{"name": "富喬", "diff": 3007, "weight": 0.28}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "超豐", "diff": 80, "weight": 2.39}, {"name": "欣銓", "diff": 62, "weight": 3.41}, {"name": "矽格", "diff": 56, "weight": 2.71}, {"name": "光洋科", "diff": 42, "weight": 0.88}, {"name": "楠梓電", "diff": 38, "weight": 1.32}, {"name": "文曄", "diff": 33, "weight": 2.55}, {"name": "建準", "diff": 29, "weight": 1.51}, {"name": "興勤", "diff": 26, "weight": 1.81}, {"name": "京元電", "diff": 22, "weight": 2.49}, {"name": "高技", "diff": 18, "weight": 1.77}, {"name": "亞翔", "diff": 15, "weight": 3.67}, {"name": "台積電", "diff": 13, "weight": 8.92}, {"name": "致茂", "diff": 7, "weight": 3.3}, {"name": "緯創", "diff": 6, "weight": 0.52}, {"name": "台達電", "diff": 6, "weight": 3.05}, {"name": "國巨", "diff": 4, "weight": 0.38}, {"name": "台光電", "diff": 4, "weight": 3.4}, {"name": "緯穎", "diff": 4, "weight": 5.25}, {"name": "奇鋐", "diff": 4, "weight": 2.77}, {"name": "宜鼎", "diff": 3, "weight": 0.7}, {"name": "日月光投控", "diff": 3, "weight": 0.42}, {"name": "川湖", "diff": 2, "weight": 0.58}, {"name": "金像電", "diff": 1, "weight": 0.4}, {"name": "勤誠", "diff": 1, "weight": 1.57}], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [{"name": "研華", "diff": 171, "weight": 3.31}, {"name": "鴻海", "diff": 132, "weight": 2.03}, {"name": "遠傳電信", "diff": 81, "weight": 2.96}, {"name": "嘉澤端子", "diff": 77, "weight": 4.54}, {"name": "新應材", "diff": 53, "weight": 2.45}, {"name": "中華電信", "diff": 41, "weight": 3.75}, {"name": "文曄", "diff": 40, "weight": 3.11}, {"name": "致茂", "diff": 24, "weight": 1.71}, {"name": "世芯", "diff": 18, "weight": 1.57}, {"name": "欣興", "diff": 18, "weight": 2.14}, {"name": "台積電", "diff": 2, "weight": 19.93}, {"name": "台達電", "diff": 2, "weight": 2.15}, {"name": "聯發科", "diff": 1, "weight": 3.04}], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [{"name": "加州太平洋生技公司", "diff": 10, "weight": 0.09}, {"name": "BitMine Immersion Technologi", "diff": 5, "weight": 0.81}, {"name": "Circle Internet Group Inc", "diff": 3, "weight": 1.87}, {"name": "輝達", "diff": 1, "weight": 2.19}], "decreased": [{"name": "美國施羅丁格公司", "diff": 10, "weight": 0.11}]}}, "2026-02-26": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [{"name": "雙鴻", "diff": 76, "weight": 0.13}], "sold_out": [], "increased": [{"name": "欣興", "diff": 932, "weight": 3.83}, {"name": "順達", "diff": 612, "weight": 0.57}, {"name": "南電", "diff": 580, "weight": 3.88}, {"name": "京元電", "diff": 390, "weight": 1.32}, {"name": "漢唐", "diff": 311, "weight": 0.93}, {"name": "新日興", "diff": 299, "weight": 0.43}, {"name": "精測", "diff": 22, "weight": 1.65}], "decreased": [{"name": "南亞", "diff": 6260, "weight": 0.0}, {"name": "台化", "diff": 5789, "weight": 0.0}, {"name": "富喬", "diff": 1567, "weight": 0.0}, {"name": "信驊", "diff": 50, "weight": 1.91}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "緯穎", "diff": 6, "weight": 5.26}], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [{"name": "采鈺", "diff": 54, "weight": 0.21}], "sold_out": [{"name": "華通", "diff": 194, "weight": 0.47}], "increased": [{"name": "文曄", "diff": 33, "weight": 3.18}, {"name": "研華", "diff": 27, "weight": 3.43}], "decreased": [{"name": "中信金", "diff": 539, "weight": 1.32}, {"name": "台燿", "diff": 58, "weight": 0.29}, {"name": "鈊象", "diff": 31, "weight": 1.29}, {"name": "廣達", "diff": 28, "weight": 1.0}, {"name": "勤誠", "diff": 27, "weight": 0.8}, {"name": "聯發科", "diff": 22, "weight": 2.66}, {"name": "華城", "diff": 17, "weight": 0.58}, {"name": "貿聯-KY", "diff": 16, "weight": 0.5}, {"name": "金像電", "diff": 16, "weight": 1.01}, {"name": "智邦", "diff": 15, "weight": 1.74}, {"name": "台光電", "diff": 8, "weight": 1.62}, {"name": "信驊", "diff": 5, "weight": 0.45}]}, "00983A": {"new_buy": [], "sold_out": [{"name": "美國施羅丁格公司", "diff": 9, "weight": 0.11}], "increased": [{"name": "BitMine Immersion Technologi", "diff": 5, "weight": 0.99}, {"name": "布洛克公司", "diff": 3, "weight": 1.49}, {"name": "Circle Internet Group Inc", "diff": 2, "weight": 2.66}, {"name": "超微半導體公司", "diff": 1, "weight": 3.33}], "decreased": []}}, "2026-02-27": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-28": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-03-01": {"00984A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-03-02": {"00984A": {"new_buy": [{"name": "華航", "diff": 1333, "weight": 0.59}, {"name": "群創光電", "diff": 670, "weight": 0.43}, {"name": "永豐金控", "diff": 559, "weight": 0.41}, {"name": "台化", "diff": 351, "weight": 0.38}, {"name": "康舒", "diff": 344, "weight": 0.4}, {"name": "統一超商", "diff": 180, "weight": 0.89}, {"name": "豐泰", "diff": 167, "weight": 0.35}, {"name": "富喬", "diff": 162, "weight": 0.39}, {"name": "一詮精密", "diff": 127, "weight": 0.39}, {"name": "晶豪", "diff": 114, "weight": 0.43}, {"name": "華新科", "diff": 114, "weight": 0.38}, {"name": "精材", "diff": 91, "weight": 0.39}, {"name": "良維", "diff": 78, "weight": 0.37}, {"name": "巨漢", "diff": 57, "weight": 0.38}, {"name": "達興材", "diff": 41, "weight": 0.36}, {"name": "宏全國際", "diff": 40, "weight": 0.11}, {"name": "義隆", "diff": 40, "weight": 0.11}, {"name": "金居開發", "diff": 38, "weight": 0.24}, {"name": "致茂", "diff": 26, "weight": 0.88}, {"name": "光寶", "diff": 6, "weight": 0.02}, {"name": "精測", "diff": 5, "weight": 0.4}, {"name": "富世達", "diff": 1, "weight": 0.04}], "sold_out": [{"name": "南茂", "diff": 602, "weight": 0.95}, {"name": "鈺創", "diff": 285, "weight": 0.37}, {"name": "長興", "diff": 282, "weight": 0.43}, {"name": "世界先進", "diff": 263, "weight": 0.78}, {"name": "台虹", "diff": 198, "weight": 0.42}, {"name": "長榮鋼", "diff": 181, "weight": 0.41}, {"name": "中華電", "diff": 176, "weight": 0.52}, {"name": "創見", "diff": 70, "weight": 0.32}, {"name": "聚陽", "diff": 60, "weight": 0.42}, {"name": "愛普", "diff": 43, "weight": 0.41}, {"name": "兆聯實業", "diff": 26, "weight": 0.44}], "increased": [{"name": "華南金控", "diff": 607, "weight": 2.49}, {"name": "元大金", "diff": 553, "weight": 2.83}, {"name": "仁寶", "diff": 327, "weight": 1.22}, {"name": "台新新光金", "diff": 295, "weight": 2.26}, {"name": "至上", "diff": 289, "weight": 0.66}, {"name": "遠東新", "diff": 272, "weight": 1.37}, {"name": "凱基金控", "diff": 246, "weight": 1.81}, {"name": "廣達", "diff": 240, "weight": 4.37}, {"name": "國泰金", "diff": 234, "weight": 3.27}, {"name": "中信金", "diff": 229, "weight": 3.02}, {"name": "寶成", "diff": 216, "weight": 1.01}, {"name": "超豐", "diff": 201, "weight": 0.66}, {"name": "富邦金控", "diff": 189, "weight": 3.34}, {"name": "台灣大", "diff": 138, "weight": 3.19}, {"name": "群益證券", "diff": 130, "weight": 0.88}, {"name": "王道銀行", "diff": 129, "weight": 0.27}, {"name": "華票", "diff": 88, "weight": 0.27}, {"name": "國建", "diff": 81, "weight": 0.28}, {"name": "統一實", "diff": 72, "weight": 0.27}, {"name": "遠百", "diff": 71, "weight": 0.27}, {"name": "亞泥", "diff": 68, "weight": 1.76}, {"name": "欣銓", "diff": 63, "weight": 1.12}, {"name": "福懋", "diff": 61, "weight": 0.27}, {"name": "長華", "diff": 60, "weight": 0.26}, {"name": "中央再保", "diff": 59, "weight": 0.27}, {"name": "佳格", "diff": 56, "weight": 0.27}, {"name": "尖點", "diff": 55, "weight": 0.78}, {"name": "遠傳", "diff": 54, "weight": 1.76}, {"name": "中砂", "diff": 53, "weight": 1.04}, {"name": "日月光投控", "diff": 41, "weight": 1.07}, {"name": "統一證券", "diff": 35, "weight": 0.26}, {"name": "藥華醫藥", "diff": 25, "weight": 0.8}, {"name": "光洋科", "diff": 24, "weight": 0.44}, {"name": "瑞昱", "diff": 24, "weight": 1.57}, {"name": "洋基工程", "diff": 23, "weight": 0.82}, {"name": "慧洋-KY", "diff": 23, "weight": 0.27}, {"name": "大國鋼", "diff": 20, "weight": 0.12}, {"name": "東和鋼鐵", "diff": 19, "weight": 0.28}, {"name": "佳世達", "diff": 18, "weight": 0.12}, {"name": "新光產險", "diff": 16, "weight": 0.27}, {"name": "群聯", "diff": 14, "weight": 1.11}, {"name": "華立", "diff": 13, "weight": 0.26}, {"name": "力成", "diff": 12, "weight": 0.87}, {"name": "三陽", "diff": 10, "weight": 0.12}, {"name": "國巨", "diff": 9, "weight": 0.18}, {"name": "台達", "diff": 8, "weight": 0.99}, {"name": "原相", "diff": 8, "weight": 0.26}, {"name": "台積電", "diff": 8, "weight": 4.83}, {"name": "宜鼎國際", "diff": 6, "weight": 0.95}, {"name": "長榮海運", "diff": 6, "weight": 1.34}, {"name": "聯電", "diff": 5, "weight": 3.16}, {"name": "智邦", "diff": 5, "weight": 0.35}, {"name": "中保", "diff": 5, "weight": 0.12}, {"name": "瑞儀光電", "diff": 4, "weight": 0.11}, {"name": "旺矽", "diff": 3, "weight": 0.37}, {"name": "南寶", "diff": 2, "weight": 0.12}, {"name": "台光", "diff": 1, "weight": 1.01}, {"name": "穎崴", "diff": 1, "weight": 0.64}, {"name": "華城", "diff": 1, "weight": 0.41}, {"name": "樺漢", "diff": 1, "weight": 0.11}], "decreased": [{"name": "宏碁", "diff": 672, "weight": 0.12}, {"name": "華新", "diff": 584, "weight": 0.59}, {"name": "華邦電", "diff": 246, "weight": 0.45}, {"name": "力積電", "diff": 232, "weight": 0.45}, {"name": "長科", "diff": 222, "weight": 0.43}, {"name": "微星", "diff": 159, "weight": 0.13}, {"name": "晟德", "diff": 110, "weight": 0.01}, {"name": "文曄", "diff": 109, "weight": 1.5}, {"name": "神基", "diff": 105, "weight": 0.14}, {"name": "潤泰", "diff": 89, "weight": 0.01}, {"name": "大聯大", "diff": 63, "weight": 0.54}, {"name": "十銓", "diff": 62, "weight": 0.03}, {"name": "致伸", "diff": 57, "weight": 0.01}, {"name": "群光電能", "diff": 54, "weight": 0.01}, {"name": "台燿", "diff": 52, "weight": 0.17}, {"name": "和碩", "diff": 51, "weight": 0.82}, {"name": "群光", "diff": 50, "weight": 0.44}, {"name": "京元電", "diff": 44, "weight": 0.99}, {"name": "威剛", "diff": 36, "weight": 0.64}, {"name": "穩懋", "diff": 34, "weight": 0.88}, {"name": "世紀鋼構", "diff": 32, "weight": 0.01}, {"name": "可成", "diff": 32, "weight": 0.5}, {"name": "新普", "diff": 25, "weight": 0.14}, {"name": "全家商店", "diff": 23, "weight": 0.01}, {"name": "志聖", "diff": 15, "weight": 0.5}, {"name": "金像電", "diff": 15, "weight": 0.32}, {"name": "元大期貨", "diff": 14, "weight": 0.18}, {"name": "美時製藥", "diff": 13, "weight": 0.12}, {"name": "奇鋐", "diff": 13, "weight": 0.2}, {"name": "寶雅", "diff": 11, "weight": 0.01}, {"name": "技嘉", "diff": 11, "weight": 0.75}, {"name": "創意", "diff": 10, "weight": 0.3}, {"name": "鴻勁", "diff": 6, "weight": 0.39}]}, "00981A": {"new_buy": [], "sold_out": [{"name": "鴻海", "diff": 863, "weight": 0.32}], "increased": [{"name": "欣興", "diff": 762, "weight": 4.32}, {"name": "華星光", "diff": 400, "weight": 0.85}, {"name": "順達", "diff": 318, "weight": 0.71}, {"name": "國巨", "diff": 110, "weight": 3.01}, {"name": "貿聯-KY", "diff": 98, "weight": 4.4}, {"name": "台積電", "diff": 80, "weight": 9.15}, {"name": "京元電", "diff": 50, "weight": 1.27}, {"name": "奇鋐", "diff": 50, "weight": 6.39}, {"name": "台達電", "diff": 40, "weight": 6.73}, {"name": "智邦", "diff": 35, "weight": 5.68}, {"name": "富世達", "diff": 30, "weight": 2.96}, {"name": "雙鴻", "diff": 30, "weight": 0.18}, {"name": "勤誠", "diff": 30, "weight": 2.24}, {"name": "亞翔", "diff": 26, "weight": 1.41}, {"name": "新日興", "diff": 25, "weight": 0.44}, {"name": "優群", "diff": 20, "weight": 0.08}, {"name": "緯穎", "diff": 15, "weight": 4.73}, {"name": "旺矽", "diff": 15, "weight": 4.39}, {"name": "健策", "diff": 14, "weight": 4.38}, {"name": "世芯-KY", "diff": 8, "weight": 2.94}, {"name": "精成科", "diff": 2, "weight": 0.55}, {"name": "漢唐", "diff": 2, "weight": 0.87}, {"name": "東陽", "diff": 1, "weight": 0.22}, {"name": "群聯", "diff": 1, "weight": 4.68}, {"name": "精測", "diff": 1, "weight": 1.58}, {"name": "大立光", "diff": 1, "weight": 0.01}, {"name": "中鋼", "diff": 1, "weight": 0.15}, {"name": "金居", "diff": 1, "weight": 0.79}, {"name": "環球晶", "diff": 1, "weight": 0.52}, {"name": "穎崴", "diff": 1, "weight": 1.67}], "decreased": [{"name": "信驊", "diff": 26, "weight": 1.46}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00983A": {"new_buy": [], "sold_out": [], "increased": [{"name": "BitMine Immersion Technologi", "diff": 5, "weight": 1.02}, {"name": "SoFi Technologies Inc", "diff": 4, "weight": 1.47}, {"name": "Circle Internet Group Inc", "diff": 2, "weight": 2.89}, {"name": "超微半導體公司", "diff": 1, "weight": 3.28}, {"name": "CoreWeave Inc", "diff": 1, "weight": 1.13}], "decreased": []}}, "2026-03-03": {"00984A": {"new_buy": [{"name": "聯亞光電", "diff": 16, "weight": 0.54}, {"name": "光聖", "diff": 9, "weight": 0.48}, {"name": "健策", "diff": 1, "weight": 0.07}], "sold_out": [{"name": "晟德", "diff": 12, "weight": 0.01}, {"name": "潤泰", "diff": 9, "weight": 0.01}, {"name": "十銓", "diff": 6, "weight": 0.03}, {"name": "致伸", "diff": 6, "weight": 0.01}, {"name": "群光電能", "diff": 6, "weight": 0.01}, {"name": "世紀鋼構", "diff": 3, "weight": 0.01}, {"name": "全家商店", "diff": 2, "weight": 0.01}, {"name": "寶雅", "diff": 1, "weight": 0.01}], "increased": [{"name": "華航", "diff": 150, "weight": 0.65}, {"name": "群創光電", "diff": 72, "weight": 0.44}, {"name": "華南金控", "diff": 63, "weight": 2.57}, {"name": "永豐金控", "diff": 61, "weight": 0.47}, {"name": "元大金", "diff": 58, "weight": 2.95}, {"name": "台化", "diff": 40, "weight": 0.42}, {"name": "康舒", "diff": 39, "weight": 0.43}, {"name": "仁寶", "diff": 34, "weight": 1.22}, {"name": "至上", "diff": 33, "weight": 0.69}, {"name": "遠東新", "diff": 28, "weight": 1.41}, {"name": "台新新光金", "diff": 27, "weight": 2.36}, {"name": "廣達", "diff": 25, "weight": 4.52}, {"name": "寶成", "diff": 23, "weight": 1.03}, {"name": "國泰金", "diff": 23, "weight": 3.35}, {"name": "中信金", "diff": 22, "weight": 3.08}, {"name": "超豐", "diff": 22, "weight": 0.69}, {"name": "統一超商", "diff": 19, "weight": 1.01}, {"name": "豐泰", "diff": 18, "weight": 0.39}, {"name": "富喬", "diff": 17, "weight": 0.46}, {"name": "富邦金控", "diff": 17, "weight": 3.43}, {"name": "一詮精密", "diff": 15, "weight": 0.44}, {"name": "台灣大", "diff": 14, "weight": 3.28}, {"name": "晶豪", "diff": 13, "weight": 0.45}, {"name": "華新科", "diff": 13, "weight": 0.4}, {"name": "王道銀行", "diff": 12, "weight": 0.28}, {"name": "凱基金控", "diff": 12, "weight": 1.86}, {"name": "精材", "diff": 11, "weight": 0.42}, {"name": "群益證券", "diff": 11, "weight": 0.91}, {"name": "良維", "diff": 10, "weight": 0.43}, {"name": "欣銓", "diff": 8, "weight": 1.1}, {"name": "華票", "diff": 8, "weight": 0.28}, {"name": "國建", "diff": 8, "weight": 0.29}, {"name": "遠百", "diff": 7, "weight": 0.28}, {"name": "中央再保", "diff": 7, "weight": 0.28}, {"name": "尖點", "diff": 7, "weight": 0.84}, {"name": "統一實", "diff": 7, "weight": 0.28}, {"name": "巨漢", "diff": 7, "weight": 0.41}, {"name": "長華", "diff": 6, "weight": 0.27}, {"name": "佳格", "diff": 6, "weight": 0.28}, {"name": "遠傳", "diff": 6, "weight": 1.81}, {"name": "宏全國際", "diff": 5, "weight": 0.13}, {"name": "義隆", "diff": 5, "weight": 0.13}, {"name": "日月光投控", "diff": 5, "weight": 1.1}, {"name": "達興材", "diff": 5, "weight": 0.41}, {"name": "金居開發", "diff": 5, "weight": 0.26}, {"name": "中砂", "diff": 5, "weight": 1.1}, {"name": "福懋", "diff": 4, "weight": 0.27}, {"name": "大國鋼", "diff": 3, "weight": 0.13}, {"name": "洋基工程", "diff": 3, "weight": 0.85}, {"name": "藥華醫藥", "diff": 3, "weight": 0.86}, {"name": "慧洋-KY", "diff": 3, "weight": 0.29}, {"name": "佳世達", "diff": 3, "weight": 0.12}, {"name": "昇達", "diff": 3, "weight": 0.96}, {"name": "統一證券", "diff": 3, "weight": 0.27}, {"name": "東和鋼鐵", "diff": 3, "weight": 0.3}, {"name": "光洋科", "diff": 3, "weight": 0.44}, {"name": "瑞昱", "diff": 3, "weight": 1.58}, {"name": "群聯", "diff": 2, "weight": 1.12}, {"name": "力成", "diff": 2, "weight": 0.82}, {"name": "新光產險", "diff": 2, "weight": 0.29}, {"name": "國巨", "diff": 2, "weight": 0.18}, {"name": "群光", "diff": 1, "weight": 0.45}, {"name": "智邦", "diff": 1, "weight": 0.39}, {"name": "華立", "diff": 1, "weight": 0.26}, {"name": "中保", "diff": 1, "weight": 0.13}, {"name": "台達", "diff": 1, "weight": 0.97}, {"name": "原相", "diff": 1, "weight": 0.27}, {"name": "亞泥", "diff": 1, "weight": 1.76}, {"name": "台光", "diff": 1, "weight": 1.05}, {"name": "三陽", "diff": 1, "weight": 0.13}, {"name": "宜鼎國際", "diff": 1, "weight": 0.95}, {"name": "華城", "diff": 1, "weight": 0.42}, {"name": "樺漢", "diff": 1, "weight": 0.12}, {"name": "瑞儀光電", "diff": 1, "weight": 0.1}, {"name": "南寶", "diff": 1, "weight": 0.13}, {"name": "旺矽", "diff": 1, "weight": 0.45}, {"name": "矽格", "diff": 1, "weight": 0.42}], "decreased": [{"name": "長榮航", "diff": 56, "weight": 0.87}, {"name": "南亞", "diff": 23, "weight": 0.85}, {"name": "景碩", "diff": 3, "weight": 0.46}, {"name": "華碩", "diff": 2, "weight": 1.06}, {"name": "新普", "diff": 2, "weight": 0.12}]}, "00981A": {"new_buy": [], "sold_out": [], "increased": [{"name": "國巨", "diff": 660, "weight": 3.12}, {"name": "貿聯-KY", "diff": 80, "weight": 4.93}], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "緯穎", "diff": 40, "weight": 6.19}], "decreased": [{"name": "台燿", "diff": 152, "weight": 1.74}]}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "009816": {"new_buy": [], "sold_out": [], "increased": [{"name": "台新新光金", "diff": 3186, "weight": 2.1}, {"name": "凱基金", "diff": 2208, "weight": 1.23}, {"name": "永豐金", "diff": 1861, "weight": 1.61}, {"name": "元大金", "diff": 1672, "weight": 2.06}, {"name": "中信金", "diff": 1534, "weight": 2.14}, {"name": "華南金", "diff": 1384, "weight": 1.32}, {"name": "國泰金", "diff": 1034, "weight": 2.09}, {"name": "鴻海", "diff": 966, "weight": 5.78}, {"name": "台積電", "diff": 900, "weight": 43.02}, {"name": "玉山金", "diff": 784, "weight": 0.71}, {"name": "第一金", "diff": 582, "weight": 0.45}, {"name": "兆豐金", "diff": 581, "weight": 0.61}, {"name": "聯電", "diff": 577, "weight": 0.94}, {"name": "合庫金", "diff": 567, "weight": 0.36}, {"name": "富邦金", "diff": 495, "weight": 1.2}, {"name": "南亞", "diff": 275, "weight": 0.61}, {"name": "中華電", "diff": 249, "weight": 0.9}, {"name": "統一", "diff": 238, "weight": 0.46}, {"name": "台達電", "diff": 167, "weight": 5.85}, {"name": "日月光投控", "diff": 161, "weight": 1.52}, {"name": "緯創", "diff": 152, "weight": 0.52}, {"name": "廣達", "diff": 135, "weight": 1.04}, {"name": "遠傳", "diff": 124, "weight": 0.3}, {"name": "聯發科", "diff": 120, "weight": 5.68}, {"name": "台塑化", "diff": 119, "weight": 0.18}, {"name": "台灣大", "diff": 112, "weight": 0.32}, {"name": "光寶科", "diff": 106, "weight": 0.45}, {"name": "長榮", "diff": 105, "weight": 0.59}, {"name": "國巨", "diff": 94, "weight": 0.69}, {"name": "京元電", "diff": 80, "weight": 0.45}, {"name": "藥華藥", "diff": 43, "weight": 0.78}, {"name": "華碩", "diff": 34, "weight": 0.47}, {"name": "致茂", "diff": 29, "weight": 0.63}, {"name": "欣興", "diff": 29, "weight": 2.01}, {"name": "研華", "diff": 25, "weight": 0.22}, {"name": "瑞昱", "diff": 25, "weight": 0.3}, {"name": "智邦", "diff": 24, "weight": 0.91}, {"name": "台光電", "diff": 16, "weight": 0.98}, {"name": "金像電", "diff": 16, "weight": 0.33}, {"name": "奇鋐", "diff": 16, "weight": 0.77}, {"name": "鴻勁", "diff": 12, "weight": 0.6}, {"name": "華城", "diff": 12, "weight": 0.29}, {"name": "貿聯-KY", "diff": 9, "weight": 0.41}, {"name": "大立光", "diff": 6, "weight": 0.35}, {"name": "緯穎", "diff": 6, "weight": 0.63}, {"name": "健策", "diff": 5, "weight": 0.42}, {"name": "創意", "diff": 4, "weight": 0.28}, {"name": "世芯-KY", "diff": 4, "weight": 0.33}, {"name": "川湖", "diff": 3, "weight": 0.3}], "decreased": []}, "00985A": {"new_buy": [], "sold_out": [], "increased": [{"name": "采鈺", "diff": 319, "weight": 1.61}, {"name": "遠傳電信", "diff": 250, "weight": 3.28}, {"name": "嘉澤端子", "diff": 10, "weight": 4.47}], "decreased": [{"name": "中信金", "diff": 421, "weight": 1.03}, {"name": "文曄", "diff": 162, "weight": 2.81}, {"name": "欣銓", "diff": 103, "weight": 0.4}, {"name": "鴻海", "diff": 73, "weight": 1.72}, {"name": "力成", "diff": 52, "weight": 0.82}, {"name": "欣興", "diff": 51, "weight": 1.92}, {"name": "日月光投資控股", "diff": 47, "weight": 1.73}, {"name": "智邦", "diff": 18, "weight": 1.5}, {"name": "致茂", "diff": 18, "weight": 1.64}, {"name": "金像電", "diff": 16, "weight": 0.81}, {"name": "力旺", "diff": 12, "weight": 0.36}, {"name": "聯發科", "diff": 10, "weight": 2.33}, {"name": "台達電", "diff": 9, "weight": 1.91}, {"name": "奇鋐", "diff": 9, "weight": 1.5}, {"name": "台光電", "diff": 6, "weight": 1.42}, {"name": "穎崴", "diff": 6, "weight": 0.89}, {"name": "台積電", "diff": 5, "weight": 19.4}]}, "0050": {"new_buy": [], "sold_out": [], "increased": [{"name": "台積電", "diff": 2276, "weight": 64.16}, {"name": "台新新光金", "diff": 2032, "weight": 0.75}, {"name": "中信金", "diff": 1649, "weight": 1.28}, {"name": "玉山金", "diff": 1432, "weight": 0.73}, {"name": "凱基金", "diff": 1422, "weight": 0.46}, {"name": "鴻海", "diff": 1139, "weight": 3.79}, {"name": "兆豐金", "diff": 1103, "weight": 0.65}, {"name": "聯電", "diff": 1088, "weight": 0.99}, {"name": "中鋼", "diff": 1057, "weight": 0.31}, {"name": "元大金", "diff": 1017, "weight": 0.7}, {"name": "第一金", "diff": 1013, "weight": 0.44}, {"name": "永豐金", "diff": 979, "weight": 0.53}, {"name": "合庫金", "diff": 977, "weight": 0.34}, {"name": "國泰金", "diff": 874, "weight": 0.99}, {"name": "華南金", "diff": 868, "weight": 0.46}, {"name": "富邦金", "diff": 779, "weight": 1.06}, {"name": "統一", "diff": 460, "weight": 0.49}, {"name": "南亞", "diff": 460, "weight": 0.57}, {"name": "台塑", "diff": 391, "weight": 0.28}, {"name": "中華電", "diff": 356, "weight": 0.71}, {"name": "日月光投控", "diff": 306, "weight": 1.6}, {"name": "緯創", "diff": 283, "weight": 0.54}, {"name": "廣達", "diff": 247, "weight": 1.06}, {"name": "光寶科", "diff": 181, "weight": 0.44}, {"name": "台達電", "diff": 180, "weight": 3.52}, {"name": "遠傳", "diff": 166, "weight": 0.23}, {"name": "國巨", "diff": 144, "weight": 0.59}, {"name": "聯發科", "diff": 137, "weight": 3.63}, {"name": "台灣大", "diff": 132, "weight": 0.21}, {"name": "萬海", "diff": 132, "weight": 0.17}, {"name": "台塑化", "diff": 111, "weight": 0.09}, {"name": "南亞科", "diff": 105, "weight": 0.39}, {"name": "長榮", "diff": 101, "weight": 0.32}, {"name": "康霈", "diff": 93, "weight": 0.2}, {"name": "華碩", "diff": 64, "weight": 0.48}, {"name": "聯詠", "diff": 54, "weight": 0.3}, {"name": "統一超", "diff": 50, "weight": 0.16}, {"name": "智邦", "diff": 46, "weight": 0.95}, {"name": "瑞昱", "diff": 46, "weight": 0.31}, {"name": "研華", "diff": 43, "weight": 0.21}, {"name": "致茂", "diff": 41, "weight": 0.7}, {"name": "奇鋐", "diff": 30, "weight": 0.79}, {"name": "和泰車", "diff": 26, "weight": 0.21}, {"name": "台光電", "diff": 26, "weight": 0.89}, {"name": "貿聯-KY", "diff": 17, "weight": 0.4}, {"name": "緯穎", "diff": 10, "weight": 0.58}, {"name": "大立光", "diff": 9, "weight": 0.32}, {"name": "健策", "diff": 8, "weight": 0.34}, {"name": "世芯-KY", "diff": 7, "weight": 0.36}, {"name": "川湖", "diff": 5, "weight": 0.25}], "decreased": []}}, "2026-02-11": {"00981A": {"new_buy": [], "sold_out": [], "increased": [{"name": "鴻海", "diff": 862, "weight": 0.32}, {"name": "京元電", "diff": 449, "weight": 0.88}, {"name": "世芯-KY", "diff": 19, "weight": 3.12}], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [{"name": "保瑞", "diff": 100, "weight": 0.18}], "increased": [{"name": "勤誠", "diff": 370, "weight": 1.82}], "decreased": [{"name": "立隆電", "diff": 182, "weight": 0.54}, {"name": "創見", "diff": 100, "weight": 0.33}]}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-12": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-13": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-14": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-15": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-16": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-17": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-18": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-19": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-20": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-21": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-22": {"00981A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-23": {"00981A": {"new_buy": [], "sold_out": [{"name": "祥碩", "diff": 140, "weight": 0.29}], "increased": [{"name": "台玻", "diff": 1757, "weight": 0.33}, {"name": "京元電", "diff": 527, "weight": 1.17}, {"name": "華星光", "diff": 490, "weight": 0.48}, {"name": "台達電", "diff": 391, "weight": 6.35}, {"name": "漢唐", "diff": 59, "weight": 0.36}, {"name": "旺矽", "diff": 36, "weight": 4.74}], "decreased": [{"name": "川湖", "diff": 39, "weight": 0.01}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": [{"name": "立隆電", "diff": 300, "weight": 0.45}]}, "00980A": {"new_buy": [], "sold_out": [], "increased": [], "decreased": []}}, "2026-02-24": {"00981A": {"new_buy": [], "sold_out": [{"name": "玉山金", "diff": 2, "weight": 0.0}], "increased": [{"name": "南電", "diff": 90, "weight": 3.14}, {"name": "欣興", "diff": 13, "weight": 2.86}], "decreased": [{"name": "東陽", "diff": 34, "weight": 0.25}]}, "00982A": {"new_buy": [], "sold_out": [], "increased": [{"name": "超豐", "diff": 71, "weight": 2.45}, {"name": "欣銓", "diff": 55, "weight": 3.55}, {"name": "矽格", "diff": 53, "weight": 2.66}, {"name": "光洋科", "diff": 37, "weight": 0.91}, {"name": "楠梓電", "diff": 34, "weight": 1.3}, {"name": "文曄", "diff": 30, "weight": 2.59}, {"name": "建準", "diff": 27, "weight": 1.49}, {"name": "興勤", "diff": 24, "weight": 1.83}, {"name": "京元電", "diff": 19, "weight": 2.6}, {"name": "高技", "diff": 16, "weight": 1.85}, {"name": "亞翔", "diff": 13, "weight": 3.68}, {"name": "台積電", "diff": 12, "weight": 8.94}, {"name": "台燿", "diff": 7, "weight": 2.07}, {"name": "致茂", "diff": 6, "weight": 3.31}, {"name": "台達電", "diff": 5, "weight": 3.02}, {"name": "創見", "diff": 4, "weight": 0.33}, {"name": "奇鋐", "diff": 4, "weight": 2.63}, {"name": "國巨", "diff": 3, "weight": 0.39}, {"name": "台光電", "diff": 3, "weight": 3.33}, {"name": "緯穎", "diff": 3, "weight": 5.09}, {"name": "日月光投控", "diff": 3, "weight": 0.42}, {"name": "宜鼎", "diff": 2, "weight": 0.74}, {"name": "金像電", "diff": 1, "weight": 0.41}, {"name": "雙鴻", "diff": 1, "weight": 1.81}, {"name": "勤誠", "diff": 1, "weight": 1.56}], "decreased": []}, "00980A": {"new_buy": [], "sold_out": [], "increased": [{"name": "玉山金", "diff": 182, "weight": 1.61}, {"name": "中信金", "diff": 177, "weight": 2.44}, {"name": "華邦電", "diff": 74, "weight": 2.43}, {"name": "鴻海", "diff": 69, "weight": 4.01}, {"name": "富邦金", "diff": 68, "weight": 1.61}, {"name": "大成鋼", "diff": 62, "weight": 0.57}, {"name": "緯創", "diff": 50, "weight": 1.61}, {"name": "致伸", "diff": 40, "weight": 0.84}, {"name": "文曄", "diff": 36, "weight": 1.62}, {"name": "廣達", "diff": 34, "weight": 2.37}, {"name": "欣銓", "diff": 33, "weight": 1.28}, {"name": "台積電", "diff": 20, "weight": 9.55}, {"name": "京元電", "diff": 19, "weight": 1.57}, {"name": "健鼎", "diff": 14, "weight": 1.39}, {"name": "金像電", "diff": 13, "weight": 2.62}, {"name": "台達電", "diff": 13, "weight": 4.57}, {"name": "聚陽", "diff": 12, "weight": 0.98}, {"name": "技嘉", "diff": 11, "weight": 0.63}, {"name": "凡甲", "diff": 11, "weight": 0.76}, {"name": "台燿", "diff": 11, "weight": 1.58}, {"name": "達興材", "diff": 11, "weight": 1.26}, {"name": "勤誠", "diff": 10, "weight": 1.93}, {"name": "崇越", "diff": 9, "weight": 0.84}, {"name": "瑞昱", "diff": 8, "weight": 0.97}, {"name": "智邦", "diff": 7, "weight": 2.44}, {"name": "聯發科", "diff": 7, "weight": 3.29}, {"name": "奇鋐", "diff": 7, "weight": 2.6}, {"name": "貿聯-KY", "diff": 6, "weight": 1.98}, {"name": "國巨", "diff": 6, "weight": 0.5}, {"name": "鈊象", "diff": 6, "weight": 0.96}, {"name": "寶雅", "diff": 6, "weight": 0.73}, {"name": "高力", "diff": 6, "weight": 1.28}, {"name": "致茂", "diff": 5, "weight": 1.73}, {"name": "富世達", "diff": 4, "weight": 1.37}, {"name": "華城", "diff": 4, "weight": 1.0}, {"name": "群聯", "diff": 3, "weight": 1.55}, {"name": "亞德客", "diff": 3, "weight": 0.9}, {"name": "鴻勁", "diff": 3, "weight": 3.3}, {"name": "緯穎", "diff": 3, "weight": 2.46}, {"name": "川湖", "diff": 3, "weight": 2.14}, {"name": "新應材", "diff": 2, "weight": 0.43}, {"name": "健策", "diff": 2, "weight": 1.62}, {"name": "創意", "diff": 2, "weight": 1.04}, {"name": "旺矽", "diff": 2, "weight": 1.57}], "decreased": []}}};
         const availableDatesDesc = Object.keys(db).sort().reverse();
-        const FAMILY_TAB = "全家族共識";
+        const FAMILY_TAB = "GLOBAL_CONSENSUS"; // 全家族共識改用英文代號更搭
         
         let allETFs = new Set();
         Object.values(db).forEach(dateData => {
@@ -189,7 +251,7 @@
 
         function init() {
             if(availableDatesDesc.length === 0) {
-                document.body.innerHTML = "<h1 class='text-slate-500 text-center mt-20 text-xl font-bold'>目前尚無歷史資料。</h1>";
+                document.body.innerHTML = "<div class='text-center mt-20 font-mono text-[#555]'>> ERROR: NO_HISTORY_DATA_FOUND</div>";
                 return;
             }
             const sel = document.getElementById('date-selector');
@@ -221,14 +283,15 @@
             etfList.forEach(etf => {
                 const btn = document.createElement('button');
                 const isActive = etf === currentETF;
-                btn.className = `tab-btn px-5 py-2 rounded-full shadow-sm ${isActive ? 'tab-active' : 'tab-inactive'}`;
-                btn.textContent = etf;
+                // 銳利邊角 (rounded-none 或 sm)
+                btn.className = `tab-btn px-4 py-1.5 font-mono ${isActive ? 'tab-active' : 'tab-inactive'}`;
+                // 特殊替換文字顯示
+                btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : etf;
                 btn.onclick = () => selectETF(etf);
                 container.appendChild(btn);
             });
         }
 
-        // 計算連續買賣超
         function getStreak(etf, stockName, startDate, type) {
             if (etf === FAMILY_TAB) return 0;
             let streak = 0;
@@ -254,13 +317,14 @@
         }
 
         function updateDashboard() {
-            document.getElementById('current-etf-title').textContent = currentETF;
+            // 標題顯示處理
+            const displayTitle = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : currentETF;
+            document.getElementById('current-etf-title').textContent = displayTitle;
             document.getElementById('current-date-display').textContent = currentDate;
             
             const dataToday = db[currentDate] || {};
             let etfData = { new_buy: [], increased: [], decreased: [], sold_out: [] };
             
-            // 全家族共識聚合邏輯
             if (currentETF === FAMILY_TAB) {
                 let agg = {};
                 Object.keys(dataToday).forEach(etf => {
@@ -292,7 +356,7 @@
             if(!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length) {
                 emptyState.classList.remove('hidden');
                 sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
-                chartContainer.innerHTML = '<div class="text-[#8c7b6a] py-10 text-center text-sm font-medium">本日無操作資料</div>';
+                chartContainer.innerHTML = '<div class="font-mono text-[#555] py-8 text-center text-xs">> SIGNAL_LOST</div>';
                 return;
             }
 
@@ -305,25 +369,26 @@
             
             const maxVal = Math.max(...formattedItems.map(i => Math.abs(i.trueVal)));
 
-            // 繪製圖表
+            // 💎 繪製終端機風格資料條
             let chartHTML = '<div class="flex flex-col">';
             formattedItems.forEach((item, index) => {
                 const isBuy = item.trueVal > 0;
                 const valStr = isBuy ? `+${item.trueVal.toLocaleString()}` : item.trueVal.toLocaleString();
-                const textColor = isBuy ? 'text-[#dc2626]' : 'text-[#059669]';
-                const barColor = isBuy ? 'bg-[#dc2626]' : 'bg-[#059669]';
-                const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'; 
+                const textColor = isBuy ? 'glow-buy' : 'glow-sell';
+                const barClass = isBuy ? 'bar-buy' : 'bar-sell';
+                // 移除斑馬紋，改用純黑與極暗灰交錯
+                const bgClass = index % 2 === 0 ? 'bg-[#0d0d0d]' : 'bg-[#0a0a0a]'; 
                 const widthPct = Math.max((Math.abs(item.trueVal) / maxVal) * 100, 1);
 
                 chartHTML += `
-                <div class="data-row flex items-center py-3 px-5 ${bgClass} border-b border-[#f3efea] last:border-0 transition-colors">
-                    <div class="w-36 md:w-48 flex-shrink-0 flex justify-between items-center pr-4 border-r border-[#e6d5b8]">
-                        <span class="font-bold text-[#4a3a2a] text-[14px] truncate text-left">${item.name}</span>
-                        <span class="font-mono font-bold ${textColor} text-[14px] text-right">${valStr}</span>
+                <div class="data-row flex items-center py-2 px-4 ${bgClass} border-b border-[#1a1a1a] last:border-0 transition-colors">
+                    <div class="w-36 md:w-48 flex-shrink-0 flex justify-between items-center pr-4 border-r border-[#262626]">
+                        <span class="font-bold text-white text-[14px] truncate text-left">${item.name}</span>
+                        <span class="font-mono font-bold ${textColor} text-[13px] text-right">${valStr}</span>
                     </div>
-                    <div class="flex-grow flex items-center pl-5">
-                        <div class="w-full bg-[#f3efea] rounded-sm h-3 overflow-hidden opacity-90">
-                            <div class="${barColor} h-full rounded-sm" style="width: ${widthPct}%"></div>
+                    <div class="flex-grow flex items-center pl-4">
+                        <div class="w-full bg-[#111] h-[6px] overflow-hidden">
+                            <div class="${barClass} h-full" style="width: ${widthPct}%"></div>
                         </div>
                     </div>
                 </div>`;
@@ -331,7 +396,7 @@
             chartHTML += '</div>';
             chartContainer.innerHTML = chartHTML;
 
-            // 繪製清單 (整合權重與連續動作)
+            // 💎 繪製清單
             const fillSection = (sectionId, items, colorClass, sign, type) => {
                 const wrap = document.getElementById(`list-${sectionId}`);
                 const list = document.getElementById(`items-${sectionId}`);
@@ -340,29 +405,28 @@
                 if(items && items.length > 0) {
                     wrap.classList.remove('hidden');
                     items.forEach(i => {
-                        let valStr = sectionId === 'out' ? `出清 ${i.diff.toLocaleString()}` : `${sign}${i.diff.toLocaleString()}`;
+                        let valStr = sectionId === 'out' ? `LIQ ${i.diff.toLocaleString()}` : `${sign}${i.diff.toLocaleString()}`;
                         
                         let tagsHTML = '';
                         if (currentETF !== FAMILY_TAB) {
                             if (i.weight && i.weight > 0) {
-                                tagsHTML += `<span class="ml-2 text-[#a68b63] text-[11px] font-medium tracking-wide">(${i.weight.toFixed(2)}%)</span>`;
+                                tagsHTML += `<span class="ml-2 font-mono text-[#555] text-[10px]">W:${i.weight.toFixed(2)}%</span>`;
                             }
                             
                             const streak = getStreak(currentETF, i.name, currentDate, type);
                             if (streak >= 3) {
-                                const sc = type === 'buy' ? 'text-[#dc2626] bg-[#fef2f2] border-[#fecaca]' : 'text-[#059669] bg-[#ecfdf5] border-[#a7f3d0]';
-                                const st = type === 'buy' ? '連買' : '連賣';
-                                tagsHTML += `<span class="ml-2 px-1.5 py-[1px] border rounded-sm text-[10px] font-bold ${sc}">${st} ${streak} 日</span>`;
+                                const sc = type === 'buy' ? 'text-[var(--neon-buy)] border-[var(--neon-buy)]' : 'text-[var(--neon-sell)] border-[var(--neon-sell)]';
+                                tagsHTML += `<span class="ml-2 px-1 border font-mono text-[9px] uppercase ${sc}">STRK:${streak}</span>`;
                             }
                         }
 
                         list.innerHTML += `
-                        <div class="flex justify-between items-center py-2 px-2 border-b border-[#f3efea] last:border-0 hover:bg-[#fffaf0] transition-colors">
+                        <div class="flex justify-between items-center py-2 border-b border-[#1a1a1a] last:border-0 hover:bg-[#111] px-2 -mx-2 transition-colors">
                             <div class="flex items-center">
-                                <span class="text-[14px] font-bold text-[#4a3a2a]">${i.name}</span>
+                                <span class="text-[14px] font-bold text-white">${i.name}</span>
                                 ${tagsHTML}
                             </div>
-                            <span class="${colorClass} text-[13px] font-mono font-bold bg-white px-2 py-0.5 rounded shadow-sm border border-[#f3efea]">${valStr}</span>
+                            <span class="${colorClass} text-[13px] font-mono font-bold">${valStr}</span>
                         </div>`;
                     });
                 } else {
@@ -370,10 +434,10 @@
                 }
             };
 
-            fillSection('new', etfData.new_buy, 'text-[#dc2626]', '+', 'buy');
-            fillSection('inc', etfData.increased, 'text-[#dc2626]', '+', 'buy');
-            fillSection('dec', etfData.decreased, 'text-[#059669]', '-', 'sell');
-            fillSection('out', etfData.sold_out, 'text-[#8c7b6a]', '', 'sell');
+            fillSection('new', etfData.new_buy, 'glow-buy', '+', 'buy');
+            fillSection('inc', etfData.increased, 'glow-buy', '+', 'buy');
+            fillSection('dec', etfData.decreased, 'glow-sell', '-', 'sell');
+            fillSection('out', etfData.sold_out, 'text-[#666]', '', 'sell');
         }
 
         // 個股雷達搜尋
@@ -402,31 +466,30 @@
                 if (etf === FAMILY_TAB) return; 
                 const d = dataToday[etf];
                 let actions = [];
-                [...(d.new_buy||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: '新進場', diff: i.diff, sign: '+'}); });
-                [...(d.increased||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: '加碼', diff: i.diff, sign: '+'}); });
-                [...(d.decreased||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: '減碼', diff: i.diff, sign: '-'}); });
-                [...(d.sold_out||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: '出清', diff: i.diff, sign: '-'}); });
+                [...(d.new_buy||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: 'INIT', diff: i.diff, sign: '+'}); });
+                [...(d.increased||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: 'ACC', diff: i.diff, sign: '+'}); });
+                [...(d.decreased||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: 'RED', diff: i.diff, sign: '-'}); });
+                [...(d.sold_out||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({act: 'LIQ', diff: i.diff, sign: '-'}); });
 
                 actions.forEach(a => {
                     found = true;
                     const isBuy = a.sign === '+';
-                    const colorClass = isBuy ? 'text-[#dc2626]' : 'text-[#059669]';
-                    const bgClass = isBuy ? 'bg-[#fef2f2] border-[#fecaca]' : 'bg-[#ecfdf5] border-[#a7f3d0]';
-                    const actStyle = a.act === '出清' ? 'text-[#8c7b6a] bg-[#f8fafc] border-[#e2e8f0]' : `${colorClass} ${bgClass}`;
+                    const colorClass = isBuy ? 'glow-buy' : 'glow-sell';
+                    const actStyle = a.act === 'LIQ' ? 'text-[#555] border-[#444]' : `border border-current ${colorClass}`;
 
                     resultsContainer.innerHTML += `
-                    <div class="flex justify-between items-center py-3 px-4 border-b border-[#f3efea] hover:bg-[#fffaf0] transition-colors">
+                    <div class="flex justify-between items-center py-2.5 border-b border-[#1a1a1a] hover:bg-[#111] px-2 -mx-2 transition-colors">
                         <div class="flex items-center gap-3">
-                            <span class="font-bold text-[#4a3a2a] text-[14px] w-16">${etf}</span>
-                            <span class="px-1.5 py-[1px] rounded border text-[11px] font-bold ${actStyle}">${a.act}</span>
+                            <span class="font-bold text-white text-[14px] w-16 font-mono">${etf}</span>
+                            <span class="px-1 py-[1px] text-[10px] font-mono ${actStyle}">${a.act}</span>
                         </div>
-                        <span class="${colorClass} font-mono font-bold text-[14px] bg-white px-2 py-0.5 rounded shadow-sm border border-[#f3efea]">${a.sign}${a.diff.toLocaleString()} 張</span>
+                        <span class="${colorClass} font-mono font-bold text-[14px]">${a.sign}${a.diff.toLocaleString()}</span>
                     </div>`;
                 });
             });
 
             if (!found) {
-                resultsContainer.innerHTML = '<div class="py-12 text-center text-[#8c7b6a] text-sm font-medium">當日無此股票的操作紀錄</div>';
+                resultsContainer.innerHTML = '<div class="py-12 text-center text-[#555] font-mono text-xs">> RADAR_EMPTY</div>';
             }
         }
 
