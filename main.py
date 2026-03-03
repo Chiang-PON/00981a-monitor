@@ -1,8 +1,9 @@
-"""main.py — 主動式 ETF 家族監控系統 (雙軌戰情室 + 真實資金版)
+"""main.py — 主動式 ETF 家族監控系統 (全台主動式大集結 + 爸爸專屬推播版)
 
-追蹤 0050 及 00980A, 00981A, 00982A, 00984A, 00985A, 009816 的每日持股變化。
-- 核心升級：同步抓取 TWSE/TPEx 當日收盤價，寫入 CSV 以供真實資金流向計算。
-- 輸出升級為 LINE Flex Message，並保留一鍵開啟網頁的按鈕。
+追蹤全台灣所有主動式 ETF 的每日持股變化，作為網頁戰情室的底層數據庫。
+- 數據擴充：收錄 00980A ~ 00995A 全部主動式 ETF。
+- 分軌發送：網頁端收錄全部數據，LINE 推播僅發送長輩關注的特定清單。
+- 核心升級：同步抓取 TWSE/TPEx 當日收盤價，精準計算真實資金流向。
 """
 
 import argparse
@@ -32,13 +33,31 @@ logger = logging.getLogger("ETF-Monitor")
 
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
 
-ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00984A", "00985A", "009816"]
+# 💎 1. 爬蟲全收錄清單 (負責建立龐大的網頁資料庫)
+CRAWL_LIST: list[str] = [
+    "0050",   # 大盤
+    "00980A", "00981A", "00982A", "00983A", "00984A", 
+    "00985A", "00986A", "00987A", "00988A", "00989A", 
+    "00990A", "00991A", "00992A", "00993A", "00994A", 
+    "00995A", # 涵蓋全台灣最新 16 檔主動式 ETF
+    "009816"  # 你的專屬監控
+]
+
+# 💎 2. LINE 專屬推播清單 (爸爸只看這些)
+LINE_NOTIFY_LIST: list[str] = [
+    "0050", "00980A", "00981A", "00982A", "00984A", "00985A", "009816"
+]
 
 ETF_THEMES: dict[str, str] = {
     "0050": "大盤指標 (元大台灣50)", "00980A": "成長配息 (野村智慧優選)",
     "00981A": "科技增長 (統一台股增長)", "00982A": "強勢動能 (群益精選強棒)",
-    "00984A": "高息成長 (安聯台灣高息)", "00985A": "增強市值 (野村台灣增強50)",
-    "009816": "專屬監控 (009816)"
+    "00983A": "創新科技 (中信ARK創新)", "00984A": "高息成長 (安聯台灣高息)",
+    "00985A": "增強市值 (野村台灣增強50)", "00986A": "龍頭成長 (台新龍頭成長)",
+    "00987A": "優勢成長 (台新優勢成長)", "00988A": "全球創新 (統一全球創新)",
+    "00989A": "美國科技 (摩根美國科技)", "00990A": "AI新經濟 (元大AI新經濟)",
+    "00991A": "未來50 (復華未來50)", "00992A": "科技創新 (群益科技創新)",
+    "00993A": "安聯台灣 (安聯台灣)", "00994A": "台股優選 (第一金台股優)",
+    "00995A": "台灣卓越 (中信台灣卓越)", "009816": "專屬監控 (009816)"
 }
 
 URL_TEMPLATE: str = "https://www.pocket.tw/etf/tw/{}/fundholding/"
@@ -85,7 +104,6 @@ def is_trading_day(date: Optional[datetime] = None) -> bool:
     if date.strftime("%Y-%m-%d") in TW_HOLIDAYS_2026: return False
     return True
 
-# 💎 核心新增：從證交所與櫃買中心抓取當日報價
 def fetch_tw_stock_prices() -> dict:
     prices = {}
     logger.info("開始抓取 TWSE/TPEx 報價以計算資金流向...")
@@ -159,7 +177,6 @@ def fetch_data(etf_code: str, prices_dict: dict) -> list[dict]:
                             
                             if code and not should_skip:
                                 try:
-                                    # 💎 寫入當日報價
                                     current_price = prices_dict.get(code, 0.0)
                                     data.append({
                                         "code": code, "name": name,
@@ -339,7 +356,7 @@ def send_flex_messages(payloads: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true", help="強制執行（忽略假日）")
-    args = parser.parse_args()
+    args = parser.parseargs()
 
     if not args.force and not is_trading_day():
         logger.info("今天不是交易日，跳過執行")
@@ -352,16 +369,20 @@ def main() -> None:
     # 執行報價抓取，供後續使用
     prices_dict = fetch_tw_stock_prices()
     
-    results = []
-    for etf in ETF_LIST:
+    results_for_line = []
+    
+    # 💎 走訪全台灣所有主動式 ETF
+    for etf in CRAWL_LIST:
         try:
             res = process_etf(etf, prices_dict)
-            results.append(res)
+            # 💎 只有在爸爸專屬清單內的，才會進入 LINE 推播陣列
+            if etf in LINE_NOTIFY_LIST:
+                results_for_line.append(res)
         except Exception as e:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
 
-    if results:
-        payloads = build_flex_payloads(results, today_str)
+    if results_for_line:
+        payloads = build_flex_payloads(results_for_line, today_str)
         send_flex_messages(payloads)
     else:
         if LINE_TOKEN:
