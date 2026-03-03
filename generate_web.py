@@ -1,9 +1,9 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (原生資料條完美對齊修復版)
+"""generate_web.py — 自動生成靜態網頁儀表板 (專業機構 UI 升級版)
 
 讀取 history/ 下的 CSV 檔案，計算每日籌碼異動。
-- 捨棄 Chart.js，改用原生 HTML/CSS Data Bars 達成完美的「名字靠左、數字靠右」版面。
-- 修復：下方詳細清單的減碼數字正確顯示為負號 (-)。
-- 極簡淺色主題，無 Emoji，完美支援手機響應式排版。
+- 修正 UI 空虛感：優化排版，將名稱與數值緊湊對齊，消除過度留白。
+- 增加圖表軌道：資料條新增淺灰色背景軌道，提升視覺層次感。
+- 移除多餘分隔符號，優化卡片陰影與字體粗細，呈現專業法人終端機質感。
 """
 
 import os
@@ -127,71 +127,82 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <title>ETF 籌碼監控儀表板</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #f8fafc; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f1f5f9; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .tab-btn { transition: all 0.2s ease-in-out; white-space: nowrap; }
-        .tab-active { background-color: #0f172a; color: #ffffff; font-weight: bold; border-color: #0f172a; }
+        .tab-active { background-color: #0f172a; color: #ffffff; font-weight: bold; border-color: #0f172a; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .tab-inactive { background-color: #ffffff; color: #64748b; border-color: #cbd5e1; }
-        .card { background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; }
-        select { background-color: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 0.95rem; outline: none; cursor: pointer; font-weight: 500; }
-        select:focus { border-color: #94a3b8; }
+        .tab-inactive:hover { background-color: #f8fafc; color: #0f172a; }
+        .card { background-color: #ffffff; border-radius: 16px; padding: 28px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); border: 1px solid #e2e8f0; }
+        select { background-color: #f8fafc; color: #0f172a; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 0.95rem; outline: none; cursor: pointer; font-weight: 600; transition: border-color 0.2s; }
+        select:hover, select:focus { border-color: #64748b; }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 資料列滑過效果 */
+        .data-row:hover { background-color: #f8fafc; }
     </style>
 </head>
-<body class="pb-20 pt-6">
+<body class="pb-20 pt-8">
     <div class="max-w-4xl mx-auto p-4 md:p-6">
         
-        <header class="mb-8">
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">ETF 籌碼監控儀表板</h1>
-            <p class="text-slate-500 mt-2 text-sm">主動式基金持股異動深度解析</p>
+        <header class="mb-10 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">ETF 籌碼監控儀表板</h1>
+            <p class="text-slate-500 mt-2 text-sm md:text-base font-medium">主動式基金持股異動深度解析</p>
         </header>
 
-        <div id="etf-tabs" class="flex overflow-x-auto hide-scrollbar gap-2 mb-8 pb-2"></div>
+        <div id="etf-tabs" class="flex overflow-x-auto hide-scrollbar gap-3 mb-8 pb-2 px-1"></div>
 
         <div class="card mb-8">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end border-b border-slate-200 pb-4 mb-6 gap-4">
-                <div class="flex items-baseline gap-3">
-                    <h2 id="current-etf-title" class="text-3xl font-bold text-slate-800 tracking-tight">載入中...</h2>
-                    <span id="current-date-display" class="text-lg text-slate-500 font-medium"></span>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b border-slate-200 pb-5 mb-8 gap-4">
+                <div class="flex items-baseline gap-4">
+                    <h2 id="current-etf-title" class="text-4xl font-black text-slate-800 tracking-tight">載入中...</h2>
+                    <span id="current-date-display" class="text-xl text-slate-400 font-semibold"></span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-slate-500">切換日期</span>
+                <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span class="text-sm text-slate-500 font-medium pl-2">歷史切換</span>
                     <select id="date-selector" onchange="changeDate()"></select>
                 </div>
             </div>
 
-            <div class="mb-10">
-                <h3 class="text-lg font-semibold text-slate-700 mb-4">當日個股操作趨勢</h3>
-                <div id="chart-container" class="w-full">
+            <div class="mb-12">
+                <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    📊 當日個股操作趨勢
+                </h3>
+                <div id="chart-container" class="w-full bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
                     </div>
             </div>
 
             <div>
-                <h3 class="text-lg font-semibold text-slate-700 mb-4 border-b border-slate-200 pb-2">當日異動明細</h3>
+                <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-200 pb-3">
+                    📋 異動明細總覽
+                </h3>
                 
-                <div id="empty-state" class="text-center text-slate-400 py-10 hidden">當日無籌碼異動</div>
+                <div id="empty-state" class="text-center text-slate-400 py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200 hidden">
+                    <span class="text-2xl block mb-2">📭</span>
+                    當日無任何籌碼異動
+                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                    <div class="space-y-8">
                         <div id="list-new" class="hidden">
-                            <h4 class="text-red-600 font-bold text-base mb-3 bg-red-50 inline-block px-3 py-1 rounded">新進場</h4>
-                            <div id="items-new" class="space-y-2 text-slate-700"></div>
+                            <h4 class="text-red-600 font-extrabold text-sm tracking-widest uppercase mb-4 border-l-4 border-red-500 pl-3">新進場建倉</h4>
+                            <div id="items-new" class="space-y-1"></div>
                         </div>
                         <div id="list-inc" class="hidden">
-                            <h4 class="text-red-600 font-bold text-base mb-3 bg-red-50 inline-block px-3 py-1 rounded">加碼</h4>
-                            <div id="items-inc" class="space-y-2 text-slate-700"></div>
+                            <h4 class="text-red-500 font-extrabold text-sm tracking-widest uppercase mb-4 border-l-4 border-red-400 pl-3">加碼買進</h4>
+                            <div id="items-inc" class="space-y-1"></div>
                         </div>
                     </div>
 
-                    <div class="space-y-6">
+                    <div class="space-y-8">
                         <div id="list-dec" class="hidden">
-                            <h4 class="text-green-600 font-bold text-base mb-3 bg-green-50 inline-block px-3 py-1 rounded">減碼</h4>
-                            <div id="items-dec" class="space-y-2 text-slate-700"></div>
+                            <h4 class="text-emerald-600 font-extrabold text-sm tracking-widest uppercase mb-4 border-l-4 border-emerald-500 pl-3">減碼獲利/停損</h4>
+                            <div id="items-dec" class="space-y-1"></div>
                         </div>
                         <div id="list-out" class="hidden">
-                            <h4 class="text-slate-500 font-bold text-base mb-3 bg-slate-100 inline-block px-3 py-1 rounded">已離場</h4>
-                            <div id="items-out" class="space-y-2 text-slate-500"></div>
+                            <h4 class="text-slate-500 font-extrabold text-sm tracking-widest uppercase mb-4 border-l-4 border-slate-400 pl-3">完全出清</h4>
+                            <div id="items-out" class="space-y-1"></div>
                         </div>
                     </div>
                 </div>
@@ -215,7 +226,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function init() {
             if(availableDatesDesc.length === 0) {
-                document.body.innerHTML = "<h1 class='text-slate-500 text-center mt-20 text-xl'>目前尚無歷史資料。</h1>";
+                document.body.innerHTML = "<h1 class='text-slate-500 text-center mt-20 text-xl font-bold'>目前尚無歷史資料。</h1>";
                 return;
             }
             
@@ -249,7 +260,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             etfList.forEach(etf => {
                 const btn = document.createElement('button');
                 const isActive = etf === currentETF;
-                btn.className = `tab-btn px-6 py-2 border rounded-full text-sm md:text-base cursor-pointer select-none shadow-sm ${isActive ? 'tab-active' : 'tab-inactive'}`;
+                btn.className = `tab-btn px-6 py-2.5 border rounded-full text-sm md:text-base cursor-pointer select-none ${isActive ? 'tab-active' : 'tab-inactive'}`;
                 btn.textContent = etf;
                 btn.onclick = () => selectETF(etf);
                 container.appendChild(btn);
@@ -272,13 +283,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if(!etfData || (!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length)) {
                 emptyState.classList.remove('hidden');
                 sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
-                chartContainer.innerHTML = '<div class="text-slate-400 py-4">本日無操作資料</div>';
+                chartContainer.innerHTML = '<div class="text-slate-400 py-8 text-center bg-slate-50">本日無操作資料</div>';
                 return;
             }
 
             emptyState.classList.add('hidden');
 
-            // 準備資料
             let formattedItems = [];
             
             [...(etfData.new_buy || []), ...(etfData.increased || [])].forEach(i => {
@@ -288,43 +298,43 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 formattedItems.push({ name: i.name, trueVal: -i.diff });
             });
 
-            // 依照買賣力道排序
             formattedItems.sort((a, b) => b.trueVal - a.trueVal);
-            
             const maxVal = Math.max(...formattedItems.map(i => Math.abs(i.trueVal)));
 
-            // 動態生成原生 HTML 資料條
-            let chartHTML = '<div class="flex flex-col space-y-1.5 mt-2">';
+            // 💎 核心升級：專業緊湊排版 + 背景軌道
+            let chartHTML = '<div class="flex flex-col">';
             
-            formattedItems.forEach(item => {
+            formattedItems.forEach((item, index) => {
                 const isBuy = item.trueVal > 0;
-                // 自動處理字串的正負號顯示
                 const valStr = isBuy ? `+${item.trueVal.toLocaleString()}` : item.trueVal.toLocaleString();
-                const textColor = isBuy ? 'text-red-600' : 'text-green-600';
-                const bgColor = isBuy ? 'bg-red-500' : 'bg-green-500';
+                // 色系微調，使用更沉穩的紅與綠
+                const textColor = isBuy ? 'text-rose-600' : 'text-emerald-600';
+                const barColor = isBuy ? 'bg-rose-500' : 'bg-emerald-500';
+                const bgClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'; // 斑馬紋底色
                 
-                // 避免長條圖過小看不見，設定最低 0.5% 寬度
-                const widthPct = Math.max((Math.abs(item.trueVal) / maxVal) * 100, 0.5);
+                const widthPct = Math.max((Math.abs(item.trueVal) / maxVal) * 100, 1);
 
                 chartHTML += `
-                <div class="flex items-center text-sm md:text-base py-1 hover:bg-slate-50 rounded-md transition-colors">
+                <div class="data-row flex items-center text-sm md:text-base py-3 px-4 ${bgClass} border-b border-slate-100 last:border-0 transition-colors">
                     
-                    <div class="w-48 md:w-60 flex-shrink-0 flex items-center pr-3 md:pr-4 border-r border-slate-300 mr-3 md:mr-4">
-                        <span class="font-medium text-slate-700 w-24 md:w-32 truncate text-left">${item.name}</span>
-                        
-                        <span class="font-mono font-bold ${textColor} flex-grow text-right tracking-tight">${valStr}</span>
+                    <div class="w-40 md:w-52 flex-shrink-0 flex justify-between items-center pr-4 border-r border-slate-200">
+                        <span class="font-bold text-slate-700 w-20 md:w-28 truncate text-left">${item.name}</span>
+                        <span class="font-mono font-bold ${textColor} text-right">${valStr}</span>
                     </div>
 
-                    <div class="flex-grow h-5 md:h-6 flex items-center pr-2">
-                        <div class="${bgColor} h-full rounded-sm opacity-80" style="width: ${widthPct}%"></div>
+                    <div class="flex-grow flex items-center pl-4">
+                        <div class="w-full bg-slate-100 rounded-r-md h-6 overflow-hidden">
+                            <div class="${barColor} h-full rounded-r-md" style="width: ${widthPct}%"></div>
+                        </div>
                     </div>
+                    
                 </div>
                 `;
             });
             chartHTML += '</div>';
             chartContainer.innerHTML = chartHTML;
 
-            // 💎 更新下方詳細清單 (修正正負號邏輯)
+            // 💎 下方詳細清單也同步升級質感 (移除底線，改用簡潔清單)
             const fillSection = (sectionId, items, colorClass, sign) => {
                 const wrap = document.getElementById(`list-${sectionId}`);
                 const list = document.getElementById(`items-${sectionId}`);
@@ -334,9 +344,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     wrap.classList.remove('hidden');
                     items.forEach(i => {
                         const valStr = `${sign}${i.diff.toLocaleString()}`;
-                        list.innerHTML += `<div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
-                            <span class="font-medium">${i.name}</span>
-                            <span class="${colorClass} font-mono font-semibold">${valStr}</span>
+                        list.innerHTML += `
+                        <div class="flex justify-between items-center py-1.5 hover:bg-slate-50 px-2 rounded -mx-2 transition-colors">
+                            <span class="font-bold text-slate-700">${i.name}</span>
+                            <span class="${colorClass} font-mono font-bold bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">${valStr}</span>
                         </div>`;
                     });
                 } else {
@@ -344,10 +355,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 }
             };
 
-            // 確保這裡分別傳入正確的符號
-            fillSection('new', etfData.new_buy, 'text-red-600', '+');
-            fillSection('inc', etfData.increased, 'text-red-600', '+');
-            fillSection('dec', etfData.decreased, 'text-green-600', '-');
+            fillSection('new', etfData.new_buy, 'text-rose-600', '+');
+            fillSection('inc', etfData.increased, 'text-rose-600', '+');
+            fillSection('dec', etfData.decreased, 'text-emerald-600', '-');
             
             const outWrap = document.getElementById('list-out');
             const outList = document.getElementById('items-out');
@@ -355,9 +365,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if(etfData.sold_out && etfData.sold_out.length > 0) {
                 outWrap.classList.remove('hidden');
                 etfData.sold_out.forEach(i => {
-                    outList.innerHTML += `<div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
-                        <span class="font-medium">${i.name}</span>
-                        <span class="text-slate-500 font-mono font-semibold">出清 ${i.diff.toLocaleString()}</span>
+                    outList.innerHTML += `
+                    <div class="flex justify-between items-center py-1.5 hover:bg-slate-50 px-2 rounded -mx-2 transition-colors">
+                        <span class="font-bold text-slate-700">${i.name}</span>
+                        <span class="text-slate-500 font-mono font-bold bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">出清 ${i.diff.toLocaleString()}</span>
                     </div>`;
                 });
             } else {
@@ -371,7 +382,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (原生完美對齊資料條修復版)...")
+    print("🚀 開始產出 Web Dashboard (專業機構 UI 升級版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
