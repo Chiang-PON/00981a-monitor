@@ -1,10 +1,10 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (Cyber-Terminal 戰情室版)
+"""generate_web.py — 自動生成靜態網頁儀表板 (雙軌戰情室版：預設淺色 + 台灣紅綠邏輯)
 
 讀取 history/ 下的 CSV 檔案，計算每日籌碼異動。
-- 視覺全面重構：致敬 WorldMonitor / 彭博終端機，採用純黑底色與霓虹發光特效。
-- 導入 JetBrains Mono 等寬字體，強化科技感與數據對齊。
-- 加入 LIVE 閃爍指示燈與即時終端機時間，提升沉浸式體驗。
-- 無 Emoji，介面銳利化 (移除過度圓角)，呈現駭客級高質感。
+- 新增主題切換 (Light/Dark Mode)：右上角無縫切換，預設為適合長輩閱讀的高對比淺色模式。
+- 台股色彩邏輯：買進(紅)、賣出(綠)。淺色模式為沉穩實色，深色模式帶有霓虹發光特效。
+- 視覺致敬 WorldMonitor，保留等寬字體對齊與科技感版面，支援手機響應式。
+- 無 Emoji，採用純 SVG 圖示，展現絕對專業。
 """
 
 import os
@@ -120,7 +120,7 @@ def process_all_data():
     return database
 
 HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="zh-TW" class="dark">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -130,19 +130,67 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 💎 Cyber-Terminal 炫砲配色體系 */
+        /* 💎 雙軌主題系統設定 */
         :root {
+            /* 預設淺色模式 (適合長輩) */
+            --bg-base: #f4f4f5;
+            --bg-nav: #ffffff;
+            --bg-panel: #ffffff;
+            --bg-panel-hover: #fafafa;
+            --bg-row-even: #ffffff;
+            --bg-row-odd: #fafafa;
+            
+            --border-dim: #e4e4e7;
+            --border-focus: #2563eb;
+            
+            --text-main: #18181b;
+            --text-dim: #71717a;
+            
+            /* 台股邏輯：紅買綠賣 (淺色沉穩實色) */
+            --color-buy: #dc2626; /* 經典紅 */
+            --color-sell: #059669; /* 經典綠 */
+            --color-accent: #2563eb;
+            
+            /* 淺色無光暈特效 */
+            --shadow-buy: none;
+            --shadow-sell: none;
+            --shadow-accent: none;
+            --box-shadow-buy: none;
+            --box-shadow-sell: none;
+            
+            --shadow-panel: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --bar-track: #f4f4f5;
+        }
+
+        [data-theme="dark"] {
+            /* 戰情室深色模式 (駭客炫砲) */
             --bg-base: #050505;
+            --bg-nav: #050505;
             --bg-panel: #0d0d0d;
             --bg-panel-hover: #141414;
+            --bg-row-even: #0d0d0d;
+            --bg-row-odd: #0a0a0a;
+            
             --border-dim: #262626;
+            --border-focus: #00f0ff;
+            
             --text-main: #f4f4f5;
             --text-dim: #84848f;
             
-            /* 霓虹特效色 */
-            --neon-buy: #00ff9d; /* 科技螢光綠 */
-            --neon-sell: #ff2a5f; /* 警示螢光紅 */
-            --neon-blue: #00f0ff; /* 賽博龐克藍 */
+            /* 台股邏輯：紅買綠賣 (深色螢光霓虹) */
+            --color-buy: #ff2a5f; /* 霓虹雷射紅 */
+            --color-sell: #00ff9d; /* 賽博螢光綠 */
+            --color-accent: #00f0ff;
+            
+            /* 深色光暈特效 */
+            --shadow-buy: 0 0 10px rgba(255, 42, 95, 0.4);
+            --shadow-sell: 0 0 10px rgba(0, 255, 157, 0.4);
+            --shadow-accent: 0 0 10px rgba(0, 240, 255, 0.4);
+            --box-shadow-buy: 0 0 12px rgba(255, 42, 95, 0.3);
+            --box-shadow-sell: 0 0 12px rgba(0, 255, 157, 0.3);
+            
+            --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --bar-track: #111111;
         }
 
         body {
@@ -150,46 +198,44 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             color: var(--text-main);
             font-family: "Noto Sans TC", sans-serif;
             min-height: 100vh;
-            /* 微弱的掃描線背景增加科技感 */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        [data-theme="dark"] body {
             background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
             background-size: 100% 4px;
         }
 
-        /* 強制數字與英文使用等寬字體 */
         .font-mono { font-family: "JetBrains Mono", monospace; }
 
-        /* 💎 面板與框線 */
-        .panel {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-dim);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        }
+        /* 動態樣式綁定 */
+        .theme-nav { background-color: var(--bg-nav); border-color: var(--border-dim); }
+        .theme-panel { background-color: var(--bg-panel); border-color: var(--border-dim); box-shadow: var(--shadow-panel); }
+        .theme-border { border-color: var(--border-dim); }
+        .theme-text { color: var(--text-main); }
+        .theme-text-dim { color: var(--text-dim); }
+        .theme-bg-input { background-color: var(--bg-base); color: var(--text-main); border-color: var(--border-dim); }
+        .theme-bg-input:focus-within, .theme-bg-input:hover { border-color: var(--border-focus); }
+        
+        .row-even { background-color: var(--bg-row-even); border-color: var(--border-dim); }
+        .row-odd { background-color: var(--bg-row-odd); border-color: var(--border-dim); }
+        .row-hover:hover { background-color: var(--bg-panel-hover); }
 
-        /* 💎 發光文字特效 */
-        .glow-buy { 
-            color: var(--neon-buy); 
-            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3); 
-        }
-        .glow-sell { 
-            color: var(--neon-sell); 
-            text-shadow: 0 0 10px rgba(255, 42, 95, 0.3); 
-        }
-        .glow-blue { 
-            color: var(--neon-blue); 
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3); 
-        }
+        .bar-track { background-color: var(--bar-track); }
 
-        /* 💎 發光資料條 */
-        .bar-buy { 
-            background-color: var(--neon-buy); 
-            box-shadow: 0 0 12px rgba(0, 255, 157, 0.4); 
-        }
-        .bar-sell { 
-            background-color: var(--neon-sell); 
-            box-shadow: 0 0 12px rgba(255, 42, 95, 0.4); 
-        }
+        /* 顏色邏輯綁定 (紅買綠賣) */
+        .text-buy { color: var(--color-buy); text-shadow: var(--shadow-buy); }
+        .text-sell { color: var(--color-sell); text-shadow: var(--shadow-sell); }
+        .text-accent { color: var(--color-accent); text-shadow: var(--shadow-accent); }
+        
+        .bg-buy { background-color: var(--color-buy); box-shadow: var(--box-shadow-buy); }
+        .bg-sell { background-color: var(--color-sell); box-shadow: var(--box-shadow-sell); }
+        
+        .border-buy { border-color: var(--color-buy); }
+        .border-sell { border-color: var(--color-sell); }
+        .border-accent { border-color: var(--color-accent); }
 
-        /* 💎 終端機按鈕 */
+        /* 終端機 Tabs */
         .tab-btn {
             transition: all 0.2s;
             white-space: nowrap;
@@ -198,9 +244,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             text-transform: uppercase;
         }
         .tab-active {
+            background-color: var(--text-main);
+            color: var(--bg-panel);
+            font-weight: 700;
+        }
+        [data-theme="dark"] .tab-active {
             background: #1a1a1a;
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
+            color: var(--color-accent);
+            border: 1px solid var(--color-accent);
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05);
         }
         .tab-inactive {
@@ -209,55 +260,50 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             border: 1px solid var(--border-dim);
         }
         .tab-inactive:hover {
-            border-color: #555;
-            color: #fff;
+            border-color: var(--text-main);
+            color: var(--text-main);
         }
 
-        /* 表單元素重置 */
-        select, input[type="text"] {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            border: 1px solid var(--border-dim);
-            outline: none;
-            transition: border-color 0.2s;
+        /* 呼吸燈動畫 (紅色買進指示燈) */
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
         }
-        select:hover, select:focus, input[type="text"]:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        [data-theme="dark"] @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 42, 95, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 42, 95, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 42, 95, 0); }
+        }
+        .live-dot {
+            height: 8px; width: 8px;
+            background-color: var(--color-buy);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s infinite;
         }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* 懸停效果 */
-        .data-row:hover { background-color: var(--bg-panel-hover) !important; }
-
-        /* 呼吸燈動畫 */
-        @keyframes pulse-dot {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 255, 157, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
-        }
-        .live-dot {
-            height: 8px; width: 8px;
-            background-color: var(--neon-buy);
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse-dot 2s infinite;
-        }
+        input, select { outline: none; }
     </style>
 </head>
 <body class="pb-24 pt-6">
 
-    <nav class="w-full border-b border-[#262626] bg-[#050505] fixed top-0 z-50 flex justify-between items-center px-4 md:px-8 py-3">
+    <nav class="w-full theme-nav border-b fixed top-0 z-50 flex justify-between items-center px-4 md:px-8 py-3 transition-colors">
         <div class="flex items-center gap-4">
             <span class="live-dot"></span>
-            <span class="font-mono text-sm tracking-widest font-bold glow-buy">SYSTEM.LIVE</span>
-            <span class="text-[#444] hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] text-white">MONITOR <span class="text-[#444] font-mono text-xs">v3.0</span></h1>
+            <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
+            <span class="theme-text-dim hidden md:inline">|</span>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v4.0</span></h1>
         </div>
-        <div class="flex items-center gap-4 font-mono text-xs text-[#84848f]">
+        <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
+            <button onclick="toggleTheme()" class="p-1.5 rounded-md theme-border border hover:theme-text transition-colors" title="切換深淺模式">
+                <svg id="icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
         </div>
     </nav>
 
@@ -267,25 +313,25 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div id="etf-tabs" class="flex gap-2"></div>
         </div>
 
-        <div class="panel p-5 md:p-8">
+        <div class="theme-panel border rounded-xl p-5 md:p-8 transition-colors">
             
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-8 border-b border-[#262626]">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-8 theme-border border-b">
                 <div class="flex flex-col gap-1">
-                    <span class="font-mono text-xs text-[#555] tracking-widest uppercase">TARGET_ASSET</span>
+                    <span class="font-mono text-xs theme-text-dim tracking-widest uppercase">TARGET_ASSET</span>
                     <div class="flex items-baseline gap-3">
-                        <h2 id="current-etf-title" class="text-3xl md:text-4xl font-black text-white tracking-wider">---</h2>
-                        <span id="current-date-display" class="font-mono text-lg glow-blue"></span>
+                        <h2 id="current-etf-title" class="text-3xl md:text-4xl font-black theme-text tracking-wider">---</h2>
+                        <span id="current-date-display" class="font-mono text-lg text-accent"></span>
                     </div>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="relative flex items-center bg-[#0a0a0a] border border-[#262626] px-3 py-1.5 focus-within:border-[#00f0ff] transition-colors">
-                        <span class="text-[#555] font-mono mr-2">></span>
-                        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-[#444] text-[#fff]">
+                    <div class="theme-bg-input border rounded-md flex items-center px-3 py-1.5 transition-colors">
+                        <span class="theme-text-dim font-mono mr-2">></span>
+                        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-gray-400 theme-text border-none">
                     </div>
                     
-                    <div class="flex items-center bg-[#0a0a0a] border border-[#262626] px-2 py-1.5 hover:border-[#555] transition-colors">
-                        <select id="date-selector" onchange="changeDate()" class="bg-transparent text-sm font-mono text-[#fff] cursor-pointer pr-2 border-none appearance-none"></select>
+                    <div class="theme-bg-input border rounded-md flex items-center px-2 py-1.5 transition-colors">
+                        <select id="date-selector" onchange="changeDate()" class="bg-transparent text-sm font-mono theme-text cursor-pointer pr-2 border-none appearance-none"></select>
                     </div>
                 </div>
             </div>
@@ -293,42 +339,42 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div id="normal-view">
                 
                 <div class="mb-12">
-                    <h3 class="font-mono text-xs text-[#84848f] tracking-[0.2em] mb-4 flex items-center">
-                        <span class="text-[#444] mr-2">///</span> VOLUME_FLOW
+                    <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center">
+                        <span class="theme-text-dim opacity-50 mr-2">///</span> VOLUME_FLOW
                     </h3>
-                    <div id="chart-container" class="w-full bg-[#0a0a0a] border border-[#1a1a1a]">
+                    <div id="chart-container" class="w-full theme-bg-base border theme-border rounded-lg overflow-hidden">
                         </div>
                 </div>
 
                 <div>
-                    <h3 class="font-mono text-xs text-[#84848f] tracking-[0.2em] mb-4 flex items-center border-b border-[#262626] pb-2">
-                        <span class="text-[#444] mr-2">///</span> TICKER_BREAKDOWN
+                    <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center border-b theme-border pb-2">
+                        <span class="theme-text-dim opacity-50 mr-2">///</span> TICKER_BREAKDOWN
                     </h3>
                     
-                    <div id="empty-state" class="text-center font-mono text-[#555] py-12 bg-[#0a0a0a] border border-dashed border-[#262626] hidden">
+                    <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
                         > NO_DATA_DETECTED_
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
                         <div class="flex flex-col gap-8">
                             <div id="list-new" class="hidden">
-                                <h4 class="font-mono glow-buy text-sm tracking-widest mb-3 border-l-2 border-[var(--neon-buy)] pl-2">INITIATE_POSITION</h4>
-                                <div id="items-new" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
+                                <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-2 border-buy pl-2">INITIATE_POSITION</h4>
+                                <div id="items-new" class="flex flex-col border-t theme-border mt-1"></div>
                             </div>
                             <div id="list-inc" class="hidden">
-                                <h4 class="font-mono glow-buy text-sm tracking-widest mb-3 border-l-2 border-[var(--neon-buy)] pl-2">ACCUMULATE</h4>
-                                <div id="items-inc" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
+                                <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-2 border-buy pl-2">ACCUMULATE</h4>
+                                <div id="items-inc" class="flex flex-col border-t theme-border mt-1"></div>
                             </div>
                         </div>
 
                         <div class="flex flex-col gap-8">
                             <div id="list-dec" class="hidden">
-                                <h4 class="font-mono glow-sell text-sm tracking-widest mb-3 border-l-2 border-[var(--neon-sell)] pl-2">REDUCE_EXPOSURE</h4>
-                                <div id="items-dec" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
+                                <h4 class="font-mono text-sell text-sm font-bold tracking-widest mb-3 border-l-2 border-sell pl-2">REDUCE_EXPOSURE</h4>
+                                <div id="items-dec" class="flex flex-col border-t theme-border mt-1"></div>
                             </div>
                             <div id="list-out" class="hidden">
-                                <h4 class="font-mono text-[#84848f] text-sm tracking-widest mb-3 border-l-2 border-[#555] pl-2">LIQUIDATE</h4>
-                                <div id="items-out" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
+                                <h4 class="font-mono theme-text-dim text-sm font-bold tracking-widest mb-3 border-l-2 theme-border pl-2">LIQUIDATE</h4>
+                                <div id="items-out" class="flex flex-col border-t theme-border mt-1"></div>
                             </div>
                         </div>
                     </div>
@@ -336,16 +382,43 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             </div>
 
             <div id="search-view" class="hidden">
-                <h3 class="font-mono text-xs text-[#84848f] tracking-[0.2em] mb-4 flex items-center border-b border-[#262626] pb-2">
-                    <span class="text-[#444] mr-2">///</span> RADAR_SCAN_RESULTS
+                <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center border-b theme-border pb-2">
+                    <span class="theme-text-dim opacity-50 mr-2">///</span> RADAR_SCAN_RESULTS
                 </h3>
-                <div id="search-results-list" class="flex flex-col border-t border-[#1a1a1a] mt-1"></div>
+                <div id="search-results-list" class="flex flex-col border-t theme-border mt-1"></div>
             </div>
 
         </div>
     </div>
 
     <script>
+        // 💎 主題切換邏輯 (預設淺色)
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+        }
+
+        function updateThemeIcons(theme) {
+            if (theme === 'dark') {
+                document.getElementById('icon-sun').classList.remove('hidden');
+                document.getElementById('icon-moon').classList.add('hidden');
+            } else {
+                document.getElementById('icon-sun').classList.add('hidden');
+                document.getElementById('icon-moon').classList.remove('hidden');
+            }
+        }
+        initTheme(); // 載入時立即執行避免閃爍
+
         // 💎 即時終端機時間
         function updateClock() {
             const now = new Date();
@@ -357,7 +430,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         const db = __DB_JSON__;
         const availableDatesDesc = Object.keys(db).sort().reverse();
-        const FAMILY_TAB = "GLOBAL_CONSENSUS"; // 全家族共識改用英文代號更搭
+        const FAMILY_TAB = "GLOBAL_CONSENSUS"; 
         
         let allETFs = new Set();
         Object.values(db).forEach(dateData => {
@@ -372,7 +445,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function init() {
             if(availableDatesDesc.length === 0) {
-                document.body.innerHTML = "<div class='text-center mt-20 font-mono text-[#555]'>> ERROR: NO_HISTORY_DATA_FOUND</div>";
+                document.body.innerHTML = "<div class='text-center mt-20 font-mono theme-text-dim'>> ERROR: NO_HISTORY_DATA_FOUND</div>";
                 return;
             }
             const sel = document.getElementById('date-selector');
@@ -404,9 +477,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             etfList.forEach(etf => {
                 const btn = document.createElement('button');
                 const isActive = etf === currentETF;
-                // 銳利邊角 (rounded-none 或 sm)
-                btn.className = `tab-btn px-4 py-1.5 font-mono ${isActive ? 'tab-active' : 'tab-inactive'}`;
-                // 特殊替換文字顯示
+                btn.className = `tab-btn px-4 py-1.5 font-mono rounded-sm border ${isActive ? 'tab-active theme-border' : 'tab-inactive'}`;
                 btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : etf;
                 btn.onclick = () => selectETF(etf);
                 container.appendChild(btn);
@@ -438,7 +509,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         function updateDashboard() {
-            // 標題顯示處理
             const displayTitle = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : currentETF;
             document.getElementById('current-etf-title').textContent = displayTitle;
             document.getElementById('current-date-display').textContent = currentDate;
@@ -477,7 +547,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if(!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length) {
                 emptyState.classList.remove('hidden');
                 sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
-                chartContainer.innerHTML = '<div class="font-mono text-[#555] py-8 text-center text-xs">> SIGNAL_LOST</div>';
+                chartContainer.innerHTML = '<div class="font-mono theme-text-dim py-8 text-center text-xs">> SIGNAL_LOST</div>';
                 return;
             }
 
@@ -490,25 +560,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             
             const maxVal = Math.max(...formattedItems.map(i => Math.abs(i.trueVal)));
 
-            // 💎 繪製終端機風格資料條
+            // 💎 繪製雙軌主題資料條 (紅買綠賣)
             let chartHTML = '<div class="flex flex-col">';
             formattedItems.forEach((item, index) => {
                 const isBuy = item.trueVal > 0;
                 const valStr = isBuy ? `+${item.trueVal.toLocaleString()}` : item.trueVal.toLocaleString();
-                const textColor = isBuy ? 'glow-buy' : 'glow-sell';
-                const barClass = isBuy ? 'bar-buy' : 'bar-sell';
-                // 移除斑馬紋，改用純黑與極暗灰交錯
-                const bgClass = index % 2 === 0 ? 'bg-[#0d0d0d]' : 'bg-[#0a0a0a]'; 
+                const textColor = isBuy ? 'text-buy' : 'text-sell';
+                const barClass = isBuy ? 'bg-buy' : 'bg-sell';
+                const bgClass = index % 2 === 0 ? 'row-even' : 'row-odd'; 
                 const widthPct = Math.max((Math.abs(item.trueVal) / maxVal) * 100, 1);
 
                 chartHTML += `
-                <div class="data-row flex items-center py-2 px-4 ${bgClass} border-b border-[#1a1a1a] last:border-0 transition-colors">
-                    <div class="w-36 md:w-48 flex-shrink-0 flex justify-between items-center pr-4 border-r border-[#262626]">
-                        <span class="font-bold text-white text-[14px] truncate text-left">${item.name}</span>
-                        <span class="font-mono font-bold ${textColor} text-[13px] text-right">${valStr}</span>
+                <div class="row-hover flex items-center py-2.5 px-4 ${bgClass} border-b theme-border last:border-0 transition-colors">
+                    <div class="w-36 md:w-48 flex-shrink-0 flex justify-between items-center pr-4 border-r theme-border">
+                        <span class="font-bold theme-text text-[14px] truncate text-left">${item.name}</span>
+                        <span class="font-mono font-bold ${textColor} text-[14px] text-right">${valStr}</span>
                     </div>
                     <div class="flex-grow flex items-center pl-4">
-                        <div class="w-full bg-[#111] h-[6px] overflow-hidden">
+                        <div class="w-full bar-track h-[8px] rounded-sm overflow-hidden">
                             <div class="${barClass} h-full" style="width: ${widthPct}%"></div>
                         </div>
                     </div>
@@ -531,23 +600,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         let tagsHTML = '';
                         if (currentETF !== FAMILY_TAB) {
                             if (i.weight && i.weight > 0) {
-                                tagsHTML += `<span class="ml-2 font-mono text-[#555] text-[10px]">W:${i.weight.toFixed(2)}%</span>`;
+                                tagsHTML += `<span class="ml-2 font-mono theme-text-dim text-[10px] opacity-70">W:${i.weight.toFixed(2)}%</span>`;
                             }
                             
                             const streak = getStreak(currentETF, i.name, currentDate, type);
                             if (streak >= 3) {
-                                const sc = type === 'buy' ? 'text-[var(--neon-buy)] border-[var(--neon-buy)]' : 'text-[var(--neon-sell)] border-[var(--neon-sell)]';
+                                const sc = type === 'buy' ? 'text-buy border-buy' : 'text-sell border-sell';
                                 tagsHTML += `<span class="ml-2 px-1 border font-mono text-[9px] uppercase ${sc}">STRK:${streak}</span>`;
                             }
                         }
 
                         list.innerHTML += `
-                        <div class="flex justify-between items-center py-2 border-b border-[#1a1a1a] last:border-0 hover:bg-[#111] px-2 -mx-2 transition-colors">
+                        <div class="flex justify-between items-center py-2.5 border-b theme-border last:border-0 row-hover px-2 -mx-2 transition-colors">
                             <div class="flex items-center">
-                                <span class="text-[14px] font-bold text-white">${i.name}</span>
+                                <span class="text-[14px] font-bold theme-text">${i.name}</span>
                                 ${tagsHTML}
                             </div>
-                            <span class="${colorClass} text-[13px] font-mono font-bold">${valStr}</span>
+                            <span class="${colorClass} text-[14px] font-mono font-bold">${valStr}</span>
                         </div>`;
                     });
                 } else {
@@ -555,10 +624,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 }
             };
 
-            fillSection('new', etfData.new_buy, 'glow-buy', '+', 'buy');
-            fillSection('inc', etfData.increased, 'glow-buy', '+', 'buy');
-            fillSection('dec', etfData.decreased, 'glow-sell', '-', 'sell');
-            fillSection('out', etfData.sold_out, 'text-[#666]', '', 'sell');
+            fillSection('new', etfData.new_buy, 'text-buy', '+', 'buy');
+            fillSection('inc', etfData.increased, 'text-buy', '+', 'buy');
+            fillSection('dec', etfData.decreased, 'text-sell', '-', 'sell');
+            fillSection('out', etfData.sold_out, 'theme-text-dim', '', 'sell');
         }
 
         // 個股雷達搜尋
@@ -595,14 +664,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 actions.forEach(a => {
                     found = true;
                     const isBuy = a.sign === '+';
-                    const colorClass = isBuy ? 'glow-buy' : 'glow-sell';
-                    const actStyle = a.act === 'LIQ' ? 'text-[#555] border-[#444]' : `border border-current ${colorClass}`;
+                    const colorClass = isBuy ? 'text-buy' : 'text-sell';
+                    const actStyle = a.act === 'LIQ' ? 'theme-text-dim theme-border' : `border border-current ${colorClass}`;
 
                     resultsContainer.innerHTML += `
-                    <div class="flex justify-between items-center py-2.5 border-b border-[#1a1a1a] hover:bg-[#111] px-2 -mx-2 transition-colors">
+                    <div class="flex justify-between items-center py-3 border-b theme-border row-hover px-2 -mx-2 transition-colors">
                         <div class="flex items-center gap-3">
-                            <span class="font-bold text-white text-[14px] w-16 font-mono">${etf}</span>
-                            <span class="px-1 py-[1px] text-[10px] font-mono ${actStyle}">${a.act}</span>
+                            <span class="font-bold theme-text text-[14px] w-16 font-mono">${etf}</span>
+                            <span class="px-1.5 py-[1px] rounded-sm text-[10px] font-mono ${actStyle}">${a.act}</span>
                         </div>
                         <span class="${colorClass} font-mono font-bold text-[14px]">${a.sign}${a.diff.toLocaleString()}</span>
                     </div>`;
@@ -610,17 +679,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             });
 
             if (!found) {
-                resultsContainer.innerHTML = '<div class="py-12 text-center text-[#555] font-mono text-xs">> RADAR_EMPTY</div>';
+                resultsContainer.innerHTML = '<div class="py-12 text-center theme-text-dim font-mono text-sm">> RADAR_EMPTY</div>';
             }
         }
 
+        // 初始化
         window.onload = init;
     </script>
 </body>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (Cyber-Terminal 版)...")
+    print("🚀 開始產出 Web Dashboard (雙軌戰情室版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
