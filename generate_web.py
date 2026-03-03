@@ -5,7 +5,7 @@
 2. 產業板塊輪動：加入台股產業地圖，自動結算資金淨流入/流出板塊。
 3. 雷達微型圖 (Sparklines)：搜尋結果旁直接顯示過去 5 天的連續買賣動能柱狀圖。
 4. 權重變動率：不僅顯示當前權重，更顯示對比前一日的增減幅 (+0.5%)。
-- 介面維持：雙軌主題 (Light/Dark)、台股紅綠邏輯、無 Emoji。
+- UI 升級：上方 ETF 切換按鈕改為「矩陣式排列 (Flex-wrap)」，解決標籤過多時需要滑動的問題。
 """
 
 import os
@@ -219,9 +219,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </nav>
 
     <div class="max-w-6xl mx-auto px-4 md:px-6 mt-20">
-        <div class="mb-6 flex overflow-x-auto hide-scrollbar gap-2 pb-2">
-            <div id="etf-tabs" class="flex gap-2"></div>
-        </div>
+        
+        <div id="etf-tabs" class="flex flex-wrap gap-2.5 mb-8"></div>
 
         <div class="theme-panel border rounded-xl p-5 md:p-8 transition-colors">
             
@@ -332,6 +331,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         const db = __DB_JSON__;
         const availableDatesDesc = Object.keys(db).sort().reverse();
+        const availableDatesAsc = [...availableDatesDesc].reverse();
         const FAMILY_TAB = "GLOBAL_CONSENSUS"; 
         
         let allETFs = new Set();
@@ -370,7 +370,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             });
         }
 
-        // 💎 真實資金格式化
         function formatAmount(amount_10k) {
             if (!amount_10k) return "";
             let val = Math.abs(amount_10k);
@@ -378,7 +377,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             return `(約 ${Math.round(val).toLocaleString()} 萬)`;
         }
 
-        // 💎 產生五日微型動能圖 (Sparklines)
         function getSparklineHTML(etf, stockName) {
             let data = [];
             for(let i = 4; i >= 0; i--) {
@@ -434,7 +432,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             
             const dataToday = db[currentDate] || {};
             let etfData = { new_buy: [], increased: [], decreased: [], sold_out: [] };
-            let sectorAgg = {}; // 💎 統計板塊資金流向
+            let sectorAgg = {}; 
             
             if (currentETF === FAMILY_TAB) {
                 let agg = {};
@@ -468,7 +466,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 });
             }
 
-            // 💎 繪製板塊資金流向 Top 3
             const sfContainer = document.getElementById('sector-flow-container');
             sfContainer.innerHTML = '';
             let topSectors = Object.entries(sectorAgg).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).filter(x => x[1] !== 0).slice(0, 3);
@@ -511,7 +508,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             [...(etfData.new_buy || []), ...(etfData.increased || [])].forEach(i => { formattedItems.push({ name: i.name, trueVal: i.diff, amount: i.amount }); });
             [...(etfData.decreased || []), ...(etfData.sold_out || [])].forEach(i => { formattedItems.push({ name: i.name, trueVal: -i.diff, amount: i.amount }); });
             
-            // 💎 以資金大小為第二排序條件
             formattedItems.sort((a, b) => {
                 if (a.amount && b.amount) return b.amount - a.amount;
                 return b.trueVal - a.trueVal;
@@ -560,7 +556,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         let tagsHTML = '';
                         if (currentETF !== FAMILY_TAB) {
                             if (i.weight && i.weight > 0) {
-                                // 💎 權重變動率顯示
                                 let wDiffStr = '';
                                 if (i.w_diff !== undefined && i.w_diff !== 0) {
                                     let wSign = i.w_diff > 0 ? '+' : '';
@@ -639,7 +634,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     const colorClass = isBuy ? 'text-buy' : 'text-sell';
                     const actStyle = a.act === 'LIQ' ? 'theme-text-dim theme-border' : `border border-current ${colorClass}`;
                     
-                    // 💎 生成五日微型動能圖
                     const sparkline = getSparklineHTML(etf, a.name);
 
                     resultsContainer.innerHTML += `
@@ -665,7 +659,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (雙軌決策完全體)...")
+    print("🚀 開始產出 Web Dashboard (雙軌決策完全體 - 矩陣按鈕版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
