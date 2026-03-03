@@ -1,9 +1,10 @@
-"""main.py — 主動式 ETF 家族監控系統 (全景高質感版)
+"""main.py — 主動式 ETF 家族監控系統 (全景高質感 + 網頁導航版)
 
 追蹤 0050 及 00980A, 00981A, 00982A, 00984A, 00985A, 009816 的每日持股變化。
 輸出升級為 LINE Flex Message (Carousel 卡片格式)。
 極簡設計：完美對齊、微弱輔助線、移除所有 Emoji 提升專業財經質感。
-智慧突破：解除顯示筆數限制 (100% 完整呈現)，利用動態容量計算自動拆分多則訊息避開 50KB 限制。
+智慧突破：解除顯示筆數限制，動態容量計算拆分訊息避開 50KB 限制。
+網頁導航：在訊息底部加入 Quick Reply 按鈕，一鍵開啟 Web Dashboard。
 """
 
 import argparse
@@ -39,7 +40,6 @@ logger = logging.getLogger("ETF-Monitor")
 # ═══════════════════════════════
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
 
-# 💎 加入 009816
 ETF_LIST: list[str] = ["0050", "00980A", "00981A", "00982A", "00984A", "00985A", "009816"]
 
 # 移除 Emoji，保留專業高質感文字
@@ -59,6 +59,9 @@ CRAWL_MAX_RETRIES: int = 2
 CRAWL_PAGE_LOAD_WAIT: float = 5.0
 CRAWL_SCROLL_WAIT: float = 3.0
 CRAWL_SCROLL_ROUNDS: int = 3
+
+# 你的專屬 Web Dashboard 網址
+WEB_DASHBOARD_URL: str = "https://chiang-pon.github.io/00981a-monitor/"
 
 # 台灣國定假日（2026 年）
 TW_HOLIDAYS_2026: set[str] = {
@@ -293,7 +296,6 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
             body_contents.append({"type": "text", "text": title, "color": title_color, "weight": "bold", "size": "sm", "margin": margin_top})
             item_boxes = []
             
-            # 💎 無限制！直接遍歷所有項目，完整輸出
             for i, (name, val) in enumerate(items):
                 item_boxes.append({
                     "type": "box", "layout": "horizontal", "spacing": "sm", "margin": "xs",
@@ -304,7 +306,6 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
                     ]
                 })
                 
-                # 每 5 行插入微弱輔助線
                 if (i + 1) % 5 == 0 and (i + 1) < len(items):
                     item_boxes.append({"type": "separator", "color": "#f2f2f2", "margin": "sm"})
             
@@ -325,27 +326,39 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
     }
 
 # ═══════════════════════════════
-# 建立多個 Payload (動態分流，避開 50KB)
+# 建立多個 Payload (含 Quick Reply 網頁導航)
 # ═══════════════════════════════
 def build_flex_payloads(results: list[dict], report_date: str) -> list[dict]:
-    """將多張卡片打包，若容量過大則自動切分成多個 Carousel 訊息"""
     bubbles = [build_single_bubble(res, report_date) for res in results]
     flex_messages = []
     
     current_bubbles = []
     current_size = 0
-    SAFE_SIZE_LIMIT = 40000 # 安全閾值 40KB (官方極限 50KB)
+    SAFE_SIZE_LIMIT = 40000
+
+    # 💎 準備專屬的 Quick Reply 按鈕結構
+    quick_reply_block = {
+        "items": [
+            {
+                "type": "action",
+                "action": {
+                    "type": "uri",
+                    "label": "💻 開啟動態圖表網頁",
+                    "uri": WEB_DASHBOARD_URL
+                }
+            }
+        ]
+    }
 
     for bubble in bubbles:
-        # 計算單張卡片編碼後的 Byte 大小
         bubble_size = len(json.dumps(bubble, ensure_ascii=False).encode('utf-8'))
         
-        # 若加上這張卡片會超過 40KB，則把現有的打包成一則訊息，並開新的一單
         if current_bubbles and (current_size + bubble_size > SAFE_SIZE_LIMIT):
             flex_messages.append({
                 "type": "flex",
                 "altText": f"每日籌碼異動 ({report_date})",
-                "contents": {"type": "carousel", "contents": current_bubbles}
+                "contents": {"type": "carousel", "contents": current_bubbles},
+                "quickReply": quick_reply_block  # 💎 綁定按鈕
             })
             current_bubbles = []
             current_size = 0
@@ -353,23 +366,21 @@ def build_flex_payloads(results: list[dict], report_date: str) -> list[dict]:
         current_bubbles.append(bubble)
         current_size += bubble_size
 
-    # 把剩餘的打包成最後一則
     if current_bubbles:
         flex_messages.append({
             "type": "flex",
             "altText": f"每日籌碼異動 ({report_date})",
-            "contents": {"type": "carousel", "contents": current_bubbles}
+            "contents": {"type": "carousel", "contents": current_bubbles},
+            "quickReply": quick_reply_block  # 💎 綁定按鈕
         })
 
     return flex_messages
 
 def send_flex_messages(payloads: list[dict]) -> None:
-    """發送訊息，支援多個 Flex payload 同時發送"""
     if not LINE_TOKEN: return
     url = "https://api.line.me/v2/bot/message/broadcast"
     headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
     
-    # LINE 廣播一次最多能夾帶 5 個 Message Object
     for i in range(0, len(payloads), 5):
         batch = payloads[i:i+5]
         payload = {"messages": batch}
@@ -408,7 +419,6 @@ def main() -> None:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
 
     if results:
-        # 取得智慧分流後的 payload 清單
         payloads = build_flex_payloads(results, today_str)
         send_flex_messages(payloads)
     else:
