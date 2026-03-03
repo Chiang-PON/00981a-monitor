@@ -356,7 +356,7 @@ def send_flex_messages(payloads: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--force", action="store_true", help="強制執行（忽略假日）")
-    args = parser.parseargs()
+    args = parser.parse_args()
 
     if not args.force and not is_trading_day():
         logger.info("今天不是交易日，跳過執行")
