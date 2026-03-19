@@ -71,6 +71,9 @@ def process_all_data():
             try:
                 df_prev = pd.read_csv(prev_file, dtype={"code": str})
                 df_curr = pd.read_csv(curr_file, dtype={"code": str})
+                for df in (df_prev, df_curr):
+                    if "price" not in df.columns: df["price"] = 0.0
+                    if "weight" not in df.columns: df["weight"] = 0.0
                 
                 prev_codes = set(df_prev["code"].astype(str))
                 curr_codes = set(df_curr["code"].astype(str))
@@ -80,8 +83,14 @@ def process_all_data():
                 
                 def extract_info(row, df_ref):
                     shares = int(row["shares"] / 1000)
-                    weight = float(row["weight"]) if "weight" in df_ref.columns else 0.0
-                    price = float(row["price"]) if "price" in df_ref.columns and pd.notna(row["price"]) else 0.0
+                    weight = 0.0
+                    if "weight" in df_ref.columns and pd.notna(row.get("weight")):
+                        try: weight = float(row["weight"])
+                        except: pass
+                    price = 0.0
+                    if "price" in df_ref.columns and pd.notna(row.get("price")):
+                        try: price = float(row["price"])
+                        except: pass
                     return shares, weight, price
 
                 for c in (curr_codes - prev_codes):
@@ -116,10 +125,12 @@ def process_all_data():
                     elif diff < 0:
                         decreased.append({"name": c_name, "diff": abs(diff), "weight": weight_curr, "w_diff": w_diff, "amount": amount_10k, "sector": sector})
                         
-                new_buy.sort(key=lambda x: x["diff"], reverse=True)
-                sold_out.sort(key=lambda x: x["diff"], reverse=True)
-                increased.sort(key=lambda x: x["diff"], reverse=True)
-                decreased.sort(key=lambda x: x["diff"], reverse=True)
+                def sort_key(x):
+                    return (-x["diff"], -x.get("amount", 0))
+                new_buy.sort(key=sort_key)
+                sold_out.sort(key=sort_key)
+                increased.sort(key=sort_key)
+                decreased.sort(key=sort_key)
                 
                 database[curr_date][etf_code] = {
                     "new_buy": new_buy, "sold_out": sold_out,
@@ -207,7 +218,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v5.0</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.1</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -293,6 +304,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 <div id="search-results-list" class="flex flex-col border-t theme-border mt-1"></div>
             </div>
 
+            <div id="ai-agent-view" class="hidden">
+                <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center border-b theme-border pb-2">
+                    <span class="theme-text-dim opacity-50 mr-2">///</span> AI_AGENT_PROMPT_GENERATOR
+                </h3>
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="theme-bg-input border rounded-md flex items-center px-3 py-2 transition-colors flex-1 min-w-[200px]">
+                            <span class="theme-text-dim font-mono mr-2 text-sm">TICKER</span>
+                            <input type="text" id="ai-ticker-input" placeholder="2330 或 台積電" class="bg-transparent text-sm flex-1 font-mono theme-text border-none">
+                        </div>
+                        <button onclick="generateAIPrompt()" class="tab-btn px-4 py-2 font-mono rounded-sm border border-accent text-accent hover:bg-accent hover:theme-text transition-colors">
+                            [GENERATE_PROMPT]
+                        </button>
+                    </div>
+                    <div class="theme-bg-input border rounded-lg p-3 transition-colors">
+                        <textarea id="ai-prompt-output" rows="16" readonly class="w-full bg-transparent font-mono text-sm theme-text resize-none border-none focus:outline-none" placeholder="點擊 [GENERATE_PROMPT] 產生深度分析提示詞..."></textarea>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -338,6 +369,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(etf => allETFs.add(etf)); });
         let etfList = Array.from(allETFs).sort();
         etfList.unshift(FAMILY_TAB);
+        etfList.push("AI_AGENT");
         
         let currentDate = availableDatesDesc[0];
         let currentETF = etfList[0]; 
@@ -355,7 +387,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         function changeDate() { currentDate = document.getElementById('date-selector').value; handleSearch(); }
-        function selectETF(etf) { currentETF = etf; document.getElementById('search-input').value = ''; renderTabs(); handleSearch(); }
+        function selectETF(etf) {
+            currentETF = etf;
+            document.getElementById('search-input').value = '';
+            renderTabs();
+            const normalView = document.getElementById('normal-view');
+            const searchView = document.getElementById('search-view');
+            const aiView = document.getElementById('ai-agent-view');
+            const sfContainer = document.getElementById('sector-flow-container');
+            if (etf === 'AI_AGENT') {
+                normalView.classList.add('hidden');
+                searchView.classList.add('hidden');
+                aiView.classList.remove('hidden');
+                sfContainer.classList.add('hidden');
+            } else {
+                aiView.classList.add('hidden');
+                normalView.classList.remove('hidden');
+                sfContainer.classList.remove('hidden');
+                handleSearch();
+            }
+        }
 
         function renderTabs() {
             const container = document.getElementById('etf-tabs');
@@ -364,7 +415,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 const btn = document.createElement('button');
                 const isActive = etf === currentETF;
                 btn.className = `tab-btn px-4 py-1.5 font-mono rounded-sm border ${isActive ? 'tab-active theme-border' : 'tab-inactive'}`;
-                btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : etf;
+                btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : (etf === 'AI_AGENT' ? '[ AI_AGENT ]' : etf);
                 btn.onclick = () => selectETF(etf);
                 container.appendChild(btn);
             });
@@ -600,16 +651,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const val = document.getElementById('search-input').value.trim().toLowerCase();
             const normalView = document.getElementById('normal-view');
             const searchView = document.getElementById('search-view');
+            const aiView = document.getElementById('ai-agent-view');
             const sfContainer = document.getElementById('sector-flow-container');
             
+            if (currentETF === 'AI_AGENT') {
+                normalView.classList.add('hidden');
+                searchView.classList.add('hidden');
+                aiView.classList.remove('hidden');
+                sfContainer.classList.add('hidden');
+                return;
+            }
             if (!val) {
                 normalView.classList.remove('hidden');
                 searchView.classList.add('hidden');
+                aiView.classList.add('hidden');
+                sfContainer.classList.remove('hidden');
                 updateDashboard(); 
                 return;
             }
 
             normalView.classList.add('hidden');
+            aiView.classList.add('hidden');
             sfContainer.classList.add('hidden');
             searchView.classList.remove('hidden');
 
@@ -638,12 +700,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
                     resultsContainer.innerHTML += `
                     <div class="flex justify-between items-center py-3 border-b theme-border row-hover px-2 -mx-2 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold theme-text text-[14px] w-14 font-mono">${etf}</span>
-                            <span class="px-1.5 py-[1px] rounded-sm text-[10px] font-mono ${actStyle}">${a.act}</span>
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <span class="font-bold theme-text text-[14px] w-14 font-mono flex-shrink-0">${etf}</span>
+                            <span class="theme-text text-[14px] truncate">${a.name}</span>
+                            <span class="px-1.5 py-[1px] rounded-sm text-[10px] font-mono flex-shrink-0 ${actStyle}">${a.act}</span>
                             ${sparkline}
                         </div>
-                        <span class="${colorClass} font-mono font-bold text-[14px]">${a.sign}${a.diff.toLocaleString()}</span>
+                        <span class="${colorClass} font-mono font-bold text-[14px] flex-shrink-0 ml-2">${a.sign}${a.diff.toLocaleString()}</span>
                     </div>`;
                 });
             });
@@ -653,13 +716,34 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
         }
 
+        const AI_PROMPT_TEMPLATE = `1. 財務報表分析：
+分析 [TICKER] 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？
+
+2. 估值分析：
+對 [TICKER] 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股是被低估還是高估的結論。
+
+3. 成長潛力分析：
+分析 [TICKER] 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。
+
+4. 多空對峙辯論：
+請模擬兩位分析師針對 [TICKER] 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。
+
+5. 投資建議評估：
+評估今天是否該買入 [TICKER]。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
+
+        function generateAIPrompt() {
+            const ticker = document.getElementById('ai-ticker-input').value.trim() || '2330';
+            const output = document.getElementById('ai-prompt-output');
+            output.value = AI_PROMPT_TEMPLATE.replace(/\[TICKER\]/g, ticker);
+        }
+
         window.onload = init;
     </script>
 </body>
 </html>"""
 
 def main():
-    print("🚀 開始產出 Web Dashboard (雙軌決策完全體 - 矩陣按鈕版)...")
+    print("[INFO] 開始產出 Web Dashboard (v6.1 雙軌決策完全體)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
@@ -668,7 +752,7 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(final_html)
         
-    print(f"✅ 成功產出 {OUTPUT_FILE}")
+    print(f"[OK] 成功產出 {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()
