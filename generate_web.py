@@ -223,7 +223,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.2</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.3</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -731,20 +731,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
         }
 
-        const AI_PROMPT_TEMPLATE = `1. 財務報表分析：
+        const AI_PROMPT_TEMPLATE = `【系統強制指令：請務必啟動聯網搜尋 (Web Search) 功能，獲取 [股票代號] 的「今日最新股價」、「最新一季財報」與「近一週重大新聞」，並嚴格以這份最新數據為基礎進行以下分析。】
+
+1. 財務報表分析：
 分析 [股票代號] 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？
 
 2. 估值分析：
-對 [股票代號] 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股是被低估還是高估的結論。
+結合您剛剛查詢到的今日最新股價，對 [股票代號] 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股目前是被低估還是高估的結論。
 
 3. 成長潛力分析：
 分析 [股票代號] 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。
 
 4. 多空對峙辯論：
-請模擬兩位分析師針對 [股票代號] 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。
+請結合您查到的最新重大新聞，模擬兩位分析師針對 [股票代號] 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。
 
 5. 投資建議評估：
-評估今天是否該買入 [股票代號]。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
+綜合以上最新即時數據，評估今天是否該以目前市價買入 [股票代號]。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
 
         function generateAIPrompt() {
             const ticker = document.getElementById('ai-ticker-input').value.trim() || '2330';
@@ -758,7 +760,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v6.2 終極定案版)...")
+    print("[INFO] 開始產出 Web Dashboard (v6.3 終極定案版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)

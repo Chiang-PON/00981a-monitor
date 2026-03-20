@@ -1,4 +1,4 @@
-"""main.py - ETF Monitor Terminal v6.2 (Backend Crawler Engine)
+"""main.py - ETF Monitor Terminal v6.3 (Backend Crawler Engine)
 
 主動式 ETF 家族監控系統 - 外資法人級決策輔助
 - 資料庫全收錄：0050 + 00980A~00995A (16檔) + 009816
