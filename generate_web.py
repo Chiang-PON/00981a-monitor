@@ -1,11 +1,9 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (最終決策完全體 + 雙軌戰情室)
+"""generate_web.py — 自動生成靜態網頁儀表板 (最終決策完全體 + 內建 OpenAI API 引擎)
 
-整合外資 4 大核心邏輯：
-1. 真實資金換算：結合報價計算出真實的「投入金額(億/萬)」，取代純看張數。
-2. 產業板塊輪動：加入台股產業地圖，自動結算資金淨流入/流出板塊。
-3. 雷達微型圖 (Sparklines)：搜尋結果旁直接顯示過去 5 天的連續買賣動能柱狀圖。
-4. 權重變動率：不僅顯示當前權重，更顯示對比前一日的增減幅 (+0.5%)。
-- UI 升級：上方 ETF 切換按鈕改為「矩陣式排列 (Flex-wrap)」，解決標籤過多時需要滑動的問題。
+整合外資核心邏輯：
+1. 真實資金換算、產業板塊輪動、雷達微型圖 (Sparklines)、權重變動率。
+2. 內建 AI_AGENT 引擎：前端直接儲存 API Key 於 localStorage，透過 Fetch API 呼叫 gpt-4o。
+3. 強制聯網分析：Prompt 內建系統強制指令，確保估值使用最新股價與新聞。
 """
 
 import os
@@ -18,7 +16,6 @@ from datetime import datetime
 HISTORY_DIR = "history"
 OUTPUT_FILE = "index.html"
 
-# 內建台股產業地圖 (Sector Map)
 SECTOR_MAP = {
     "台積電": "半導體", "聯發科": "半導體", "京元電": "半導體", "日月光投控": "半導體", "瑞昱": "半導體", "聯電": "半導體", "世芯-KY": "半導體", "力旺": "半導體", "聯詠": "半導體", "南亞科": "半導體", "欣銓": "半導體", "精測": "半導體", "穎崴": "半導體", "旺矽": "半導體", "群聯": "半導體",
     "鴻海": "電腦週邊", "廣達": "電腦週邊", "緯創": "電腦週邊", "緯穎": "電腦週邊", "技嘉": "電腦週邊", "華碩": "電腦週邊", "英業達": "電腦週邊", "仁寶": "電腦週邊", "奇鋐": "電腦週邊", "雙鴻": "電腦週邊", "勤誠": "電腦週邊", "富世達": "電腦週邊",
@@ -190,6 +187,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .text-accent { color: var(--color-accent); text-shadow: var(--shadow-accent); }
         .bg-buy { background-color: var(--color-buy); box-shadow: var(--box-shadow-buy); }
         .bg-sell { background-color: var(--color-sell); box-shadow: var(--box-shadow-sell); }
+        .bg-accent { background-color: var(--color-accent); box-shadow: var(--shadow-accent); }
         .border-buy { border-color: var(--color-buy); }
         .border-sell { border-color: var(--color-sell); }
         .border-accent { border-color: var(--color-accent); }
@@ -204,7 +202,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .tab-inactive:hover { border-color: var(--text-main); color: var(--text-main); }
 
         .tab-ai-agent { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #00f0ff 100%); color: #fff; border: 1px solid rgba(0, 240, 255, 0.5); font-weight: 700; box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); }
-        [data-theme="dark"] .tab-ai-agent { background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #06b6d4 100%); border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        [data-theme="dark"] .tab-ai-agent { background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #06b6d4 100%); border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); color: var(--text-main); }
         .tab-ai-agent:hover { filter: brightness(1.15); }
         .tab-ai-agent.tab-active { background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); border-color: var(--color-accent); box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); color: var(--color-accent); }
 
@@ -214,6 +212,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         input, select { outline: none; }
+        
+        /* 讓 AI 報告保有 Markdown 原有換行 */
+        .whitespace-pre-wrap { white-space: pre-wrap; }
     </style>
 </head>
 <body class="pb-24 pt-6">
@@ -223,7 +224,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.3</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.4</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -310,21 +311,34 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
             <div id="ai-agent-view" class="hidden">
                 <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center border-b theme-border pb-2">
-                    <span class="theme-text-dim opacity-50 mr-2">///</span> AI_AGENT_PROMPT_GENERATOR
+                    <span class="theme-text-dim opacity-50 mr-2">///</span> AI_ANALYSIS_PROTOCOL
                 </h3>
-                <div class="flex flex-col gap-4">
+                
+                <div class="mb-6 flex flex-wrap gap-3 items-center">
+                    <div class="theme-bg-input border rounded-md flex items-center px-3 py-2 transition-colors flex-1 min-w-[250px]">
+                        <span class="theme-text-dim font-mono mr-2 text-sm">KEY</span>
+                        <input type="password" id="api-key-input" placeholder="輸入 OpenAI API Key (僅存於本地瀏覽器)" class="bg-transparent text-sm flex-1 font-mono theme-text border-none focus:outline-none">
+                    </div>
+                    <button onclick="saveApiKey()" class="tab-btn px-4 py-2 font-mono rounded-sm border theme-border hover:theme-text transition-colors">
+                        [ SAVE_KEY ]
+                    </button>
+                    <span id="api-key-status" class="font-mono text-xs theme-text-dim ml-2"></span>
+                </div>
+
+                <div class="flex flex-col gap-4 mb-6">
                     <div class="flex flex-wrap items-center gap-3">
-                        <div class="theme-bg-input border rounded-md flex items-center px-3 py-2 transition-colors flex-1 min-w-[200px]">
+                        <div class="theme-bg-input border rounded-md flex items-center px-3 py-2 transition-colors flex-1 min-w-[200px] focus-within:border-accent">
                             <span class="theme-text-dim font-mono mr-2 text-sm">TICKER</span>
-                            <input type="text" id="ai-ticker-input" placeholder="2330 或 台積電" class="bg-transparent text-sm flex-1 font-mono theme-text border-none">
+                            <input type="text" id="ai-ticker-input" placeholder="輸入股票代號 (例: 2330 或 台積電)" class="bg-transparent text-sm flex-1 font-mono theme-text border-none focus:outline-none">
                         </div>
-                        <button onclick="generateAIPrompt()" class="tab-btn px-4 py-2 font-mono rounded-sm border border-accent text-accent hover:bg-accent hover:theme-text transition-colors">
-                            [GENERATE_PROMPT]
+                        <button id="btn-run-ai" onclick="runAIAnalysis()" class="tab-btn px-4 py-2 font-mono rounded-sm border border-accent text-accent hover:bg-accent hover:text-white transition-colors shadow-sm">
+                            [ EXECUTE_ANALYSIS ]
                         </button>
                     </div>
-                    <div class="theme-bg-input border rounded-lg p-3 transition-colors">
-                        <textarea id="ai-prompt-output" rows="16" readonly class="w-full bg-transparent font-mono text-sm theme-text resize-none border-none focus:outline-none" placeholder="點擊 [GENERATE_PROMPT] 產生深度分析提示詞..."></textarea>
-                    </div>
+                </div>
+                
+                <div class="theme-bg-input border rounded-lg p-5 transition-colors min-h-[300px]">
+                    <div id="ai-report-output" class="w-full bg-transparent font-mono text-sm theme-text border-none focus:outline-none whitespace-pre-wrap leading-relaxed">等待執行分析... (請先於上方設定 API Key 並輸入代號)</div>
                 </div>
             </div>
 
@@ -332,6 +346,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </div>
 
     <script>
+        // Theme Logic
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -356,6 +371,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
         initTheme();
 
+        // Live Clock
         function updateClock() {
             const now = new Date();
             const utc = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
@@ -368,15 +384,42 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         const availableDatesDesc = Object.keys(db).sort().reverse();
         const availableDatesAsc = [...availableDatesDesc].reverse();
         const FAMILY_TAB = "GLOBAL_CONSENSUS"; 
+        const AI_TAB = "AI_AGENT";
         
         let allETFs = new Set();
         Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(etf => allETFs.add(etf)); });
         let etfList = Array.from(allETFs).sort();
         etfList.unshift(FAMILY_TAB);
-        etfList.push("AI_AGENT");
+        etfList.push(AI_TAB);
         
         let currentDate = availableDatesDesc[0];
         let currentETF = etfList[0]; 
+
+        // 💎 API Key LocalStorage Logic
+        function initApiKey() {
+            const key = localStorage.getItem('openai_api_key');
+            if (key) {
+                document.getElementById('api-key-input').value = key;
+                document.getElementById('api-key-status').textContent = "STATUS: KEY_LOADED";
+                document.getElementById('api-key-status').className = "font-mono text-xs ml-2 text-buy";
+            } else {
+                document.getElementById('api-key-status').textContent = "STATUS: NO_KEY";
+                document.getElementById('api-key-status').className = "font-mono text-xs ml-2 theme-text-dim";
+            }
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if (key) {
+                localStorage.setItem('openai_api_key', key);
+                document.getElementById('api-key-status').textContent = "STATUS: KEY_SAVED";
+                document.getElementById('api-key-status').className = "font-mono text-xs ml-2 text-buy";
+            } else {
+                localStorage.removeItem('openai_api_key');
+                document.getElementById('api-key-status').textContent = "STATUS: KEY_CLEARED";
+                document.getElementById('api-key-status').className = "font-mono text-xs ml-2 text-sell";
+            }
+        }
 
         function init() {
             if(availableDatesDesc.length === 0) return;
@@ -388,9 +431,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             });
             renderTabs();
             updateDashboard();
+            initApiKey(); // 載入時初始化 API Key 狀態
         }
 
         function changeDate() { currentDate = document.getElementById('date-selector').value; handleSearch(); }
+        
         function selectETF(etf) {
             currentETF = etf;
             document.getElementById('search-input').value = '';
@@ -402,14 +447,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const headerControls = document.getElementById('header-controls');
             const titleEl = document.getElementById('current-etf-title');
             const dateEl = document.getElementById('current-date-display');
-            if (etf === 'AI_AGENT') {
+            if (etf === AI_TAB) {
                 normalView.classList.add('hidden');
                 searchView.classList.add('hidden');
                 aiView.classList.remove('hidden');
                 sfContainer.classList.add('hidden');
                 headerControls.classList.add('hidden');
                 titleEl.textContent = 'AI_AGENT';
-                dateEl.textContent = '';
+                dateEl.textContent = 'PROTOCOL_ACTIVE';
             } else {
                 aiView.classList.add('hidden');
                 normalView.classList.remove('hidden');
@@ -425,12 +470,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             etfList.forEach(etf => {
                 const btn = document.createElement('button');
                 const isActive = etf === currentETF;
-                const isAI = etf === 'AI_AGENT';
+                const isAI = etf === AI_TAB;
                 let cls = 'tab-btn px-4 py-1.5 font-mono rounded-sm border ';
                 if (isAI) cls += isActive ? 'tab-ai-agent tab-active' : 'tab-ai-agent';
                 else cls += isActive ? 'tab-active theme-border' : 'tab-inactive';
                 btn.className = cls;
-                btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : (etf === 'AI_AGENT' ? '[ AI_AGENT ]' : etf);
+                btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : (etf === AI_TAB ? '[ AI_AGENT ]' : etf);
                 btn.onclick = () => selectETF(etf);
                 container.appendChild(btn);
             });
@@ -669,7 +714,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const aiView = document.getElementById('ai-agent-view');
             const sfContainer = document.getElementById('sector-flow-container');
             
-            if (currentETF === 'AI_AGENT') {
+            if (currentETF === AI_TAB) {
                 normalView.classList.add('hidden');
                 searchView.classList.add('hidden');
                 aiView.classList.remove('hidden');
@@ -731,27 +776,61 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
         }
 
-        const AI_PROMPT_TEMPLATE = `【系統強制指令：請務必啟動聯網搜尋 (Web Search) 功能，獲取 [股票代號] 的「今日最新股價」、「最新一季財報」與「近一週重大新聞」，並嚴格以這份最新數據為基礎進行以下分析。】
+        // 💎 執行 OpenAI 分析邏輯
+        async function runAIAnalysis() {
+            const ticker = document.getElementById('ai-ticker-input').value.trim();
+            const output = document.getElementById('ai-report-output');
+            const btn = document.getElementById('btn-run-ai');
+            const apiKey = localStorage.getItem('openai_api_key');
 
-1. 財務報表分析：
-分析 [股票代號] 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？
+            if (!apiKey) {
+                output.innerHTML = "<span class='text-sell font-bold'>[ ERROR ] 請先於上方設定 OpenAI API Key，並點擊 [ SAVE_KEY ]。</span>";
+                return;
+            }
+            if (!ticker) {
+                output.innerHTML = "<span class='text-sell font-bold'>[ ERROR ] 請輸入股票代號或名稱 (例如：2330)。</span>";
+                return;
+            }
 
-2. 估值分析：
-結合您剛剛查詢到的今日最新股價，對 [股票代號] 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股目前是被低估還是高估的結論。
+            const promptText = `【系統強制指令：請務必啟動聯網搜尋 (Web Search) 功能，獲取 ${ticker} 的「今日最新股價」、「最新一季財報」與「近一週重大新聞」，並嚴格以這份最新數據為基礎進行以下分析。】\n\n1. 財務報表分析：\n分析 ${ticker} 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？\n\n2. 估值分析：\n結合您剛剛查詢到的今日最新股價，對 ${ticker} 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股目前是被低估還是高估的結論。\n\n3. 成長潛力分析：\n分析 ${ticker} 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。\n\n4. 多空對峙辯論：\n請結合您查到的最新重大新聞，模擬兩位分析師針對 ${ticker} 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。\n\n5. 投資建議評估：\n綜合以上最新即時數據，評估今天是否該以目前市價買入 ${ticker}。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
 
-3. 成長潛力分析：
-分析 [股票代號] 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。
+            // UI 狀態更新為 Processing
+            output.innerHTML = `<span class='theme-text-dim'>[ SYSTEM ] 正在連線至 OpenAI API (gpt-4o)...<br>[ SYSTEM ] 執行強制聯網搜尋指令...<br>[ SYSTEM ] 正在生成 ${ticker} 外資級深度分析報告，請稍候 (約需 30-60 秒)...</span>`;
+            btn.disabled = true;
+            btn.textContent = "[ PROCESSING... ]";
+            btn.classList.add("opacity-50", "cursor-not-allowed");
 
-4. 多空對峙辯論：
-請結合您查到的最新重大新聞，模擬兩位分析師針對 [股票代號] 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o",
+                        messages: [
+                            { role: "system", content: "你是一位外資券商首席分析師，精通基本面與量化估值。請以繁體中文輸出高專業度報告，善用 Markdown 格式進行排版。" },
+                            { role: "user", content: promptText }
+                        ],
+                        temperature: 0.5
+                    })
+                });
 
-5. 投資建議評估：
-綜合以上最新即時數據，評估今天是否該以目前市價買入 [股票代號]。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
+                const data = await response.json();
 
-        function generateAIPrompt() {
-            const ticker = document.getElementById('ai-ticker-input').value.trim() || '2330';
-            const output = document.getElementById('ai-prompt-output');
-            output.value = AI_PROMPT_TEMPLATE.replace(/\[股票代號\]/g, ticker);
+                if (!response.ok) {
+                    throw new Error(data.error?.message || "未知的 API 錯誤");
+                }
+
+                output.textContent = data.choices[0].message.content;
+            } catch (error) {
+                output.innerHTML = `<span class='text-sell font-bold'>[ API ERROR ]<br>${error.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "[ EXECUTE_ANALYSIS ]";
+                btn.classList.remove("opacity-50", "cursor-not-allowed");
+            }
         }
 
         window.onload = init;
@@ -760,7 +839,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v6.3 終極定案版)...")
+    print("[INFO] 開始產出 Web Dashboard (v6.4 API 引擎直連版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
