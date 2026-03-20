@@ -1,9 +1,9 @@
-"""generate_web.py — 自動生成靜態網頁儀表板 (最終決策完全體 + 內建 OpenAI API 引擎)
+"""generate_web.py - ETF Monitor Terminal v6.6 (Auto-Fetch Price + Direct API)
 
 整合外資核心邏輯：
 1. 真實資金換算、產業板塊輪動、雷達微型圖 (Sparklines)、權重變動率。
-2. 內建 AI_AGENT 引擎：前端直接儲存 API Key 於 localStorage，透過 Fetch API 呼叫 gpt-4o。
-3. 強制聯網分析：Prompt 內建系統強制指令，確保估值使用最新股價與新聞。
+2. AI_AGENT 引擎：前端直接呼叫 OpenAI gpt-4o，API Key 存於 localStorage。
+3. 即時股價注入：前端向 TWSE/TPEx OpenAPI 抓取股價，注入 Prompt 強制模型以該數據分析，避免幻覺與道歉。
 """
 
 import os
@@ -148,6 +148,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --bg-panel-hover: #fafafa; --bg-row-even: #ffffff; --bg-row-odd: #fafafa;
@@ -213,8 +214,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         input, select { outline: none; }
         
-        /* 讓 AI 報告保有 Markdown 原有換行 */
-        .whitespace-pre-wrap { white-space: pre-wrap; }
+        #ai-report-output h1, #ai-report-output h2, #ai-report-output h3 { margin-top: 1em; margin-bottom: 0.5em; font-weight: 700; }
+        #ai-report-output p { margin-bottom: 0.75em; }
+        #ai-report-output ul, #ai-report-output ol { margin-left: 1.5em; margin-bottom: 0.75em; }
     </style>
 </head>
 <body class="pb-24 pt-6">
@@ -224,7 +226,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.4</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.6</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -338,7 +340,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 </div>
                 
                 <div class="theme-bg-input border rounded-lg p-5 transition-colors min-h-[300px]">
-                    <div id="ai-report-output" class="w-full bg-transparent font-mono text-sm theme-text border-none focus:outline-none whitespace-pre-wrap leading-relaxed">等待執行分析... (請先於上方設定 API Key 並輸入代號)</div>
+                    <div id="ai-report-output" class="w-full bg-transparent font-mono text-sm theme-text leading-relaxed">等待執行分析... (請先於上方設定 API Key 並輸入代號)</div>
                 </div>
             </div>
 
@@ -395,7 +397,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         let currentDate = availableDatesDesc[0];
         let currentETF = etfList[0]; 
 
-        // 💎 API Key LocalStorage Logic
+        // API Key LocalStorage Logic
         function initApiKey() {
             const key = localStorage.getItem('openai_api_key');
             if (key) {
@@ -776,7 +778,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
         }
 
-        // 💎 執行 OpenAI 分析邏輯
         async function runAIAnalysis() {
             const ticker = document.getElementById('ai-ticker-input').value.trim();
             const output = document.getElementById('ai-report-output');
@@ -792,15 +793,64 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 return;
             }
 
-            const promptText = `【系統強制指令：請務必啟動聯網搜尋 (Web Search) 功能，獲取 ${ticker} 的「今日最新股價」、「最新一季財報」與「近一週重大新聞」，並嚴格以這份最新數據為基礎進行以下分析。】\n\n1. 財務報表分析：\n分析 ${ticker} 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？\n\n2. 估值分析：\n結合您剛剛查詢到的今日最新股價，對 ${ticker} 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股目前是被低估還是高估的結論。\n\n3. 成長潛力分析：\n分析 ${ticker} 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。\n\n4. 多空對峙辯論：\n請結合您查到的最新重大新聞，模擬兩位分析師針對 ${ticker} 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。\n\n5. 投資建議評估：\n綜合以上最新即時數據，評估今天是否該以目前市價買入 ${ticker}。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
-
-            // UI 狀態更新為 Processing
-            output.innerHTML = `<span class='theme-text-dim'>[ SYSTEM ] 正在連線至 OpenAI API (gpt-4o)...<br>[ SYSTEM ] 執行強制聯網搜尋指令...<br>[ SYSTEM ] 正在生成 ${ticker} 外資級深度分析報告，請稍候 (約需 30-60 秒)...</span>`;
+            output.innerHTML = "<span class='theme-text-dim'>[ SYSTEM ] 啟動決策引擎...<br>[ SYSTEM ] 正在向證交所/櫃買中心攔截即時報價...</span>";
             btn.disabled = true;
             btn.textContent = "[ PROCESSING... ]";
             btn.classList.add("opacity-50", "cursor-not-allowed");
 
+            let currentPrice = "未知 (請依賴歷史基本面評估)";
+
             try {
+                try {
+                    const twseResp = await fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL');
+                    if (twseResp.ok) {
+                        const twseData = await twseResp.json();
+                        const stock = twseData.find(s => (s.Code && String(s.Code) === ticker) || (s.Name && String(s.Name).includes(ticker)));
+                        if (stock && stock.ClosingPrice) {
+                            currentPrice = stock.ClosingPrice + " 元 (TWSE即時)";
+                        }
+                    }
+                } catch (e) { /* TWSE fail, try TPEx */ }
+
+                if (currentPrice === "未知 (請依賴歷史基本面評估)") {
+                    try {
+                        const tpexResp = await fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes');
+                        if (tpexResp.ok) {
+                            const tpexData = await tpexResp.json();
+                            const stock = tpexData.find(s => (s.SecuritiesCompanyCode && String(s.SecuritiesCompanyCode) === ticker) || (s.CompanyName && String(s.CompanyName).includes(ticker)));
+                            if (stock && stock.Close) {
+                                currentPrice = stock.Close + " 元 (TPEx即時)";
+                            }
+                        }
+                    } catch (e) { /* TPEx fail */ }
+                }
+
+                output.innerHTML = "<span class='theme-text-dim'>[ SYSTEM ] 報價取得完成。正在呼叫 OpenAI gpt-4o...</span>";
+
+                const promptText = `【系統注入即時數據】
+目標標的：${ticker}
+今日收盤價：${currentPrice}
+
+【系統強制指令】
+你是一位頂尖的外資券商首席分析師。請「直接使用」上述系統提供的最新股價進行估值。嚴禁嘗試聯網搜尋，也「絕對不要」在報告中因為無法獲取最新資訊而道歉或提示。請完全依賴你的核心訓練知識，展現專業自信，完成以下 5 大維度的深度報告：
+
+1. 財務報表分析：
+分析該公司過去的營收增長、淨利趨勢、自由現金流與利潤率。判斷其財務體質。
+
+2. 估值分析：
+使用系統提供的今日收盤價（${currentPrice}），結合該公司的歷史 P/E 區間與產業平均，推算目前股價是被低估還是高估。
+
+3. 成長潛力分析：
+評估該公司的商業模式、護城河、未來 5-10 年在 AI 或新技術浪潮下的成長空間與潛在市場規模。
+
+4. 多空對峙辯論：
+模擬兩位分析師進行辯論。一位看多 (Bull) 提出潛在利多；一位看空 (Bear) 提出結構性風險與隱憂。
+
+5. 投資建議評估：
+給出明確的結論：針對目前市價，給出「買入 (Buy)」、「持有 (Hold)」或「避開 (Avoid)」的評級，並列出核心催化劑。
+
+請全程使用 Markdown 格式輸出，語氣必須果斷、客觀、專業。`;
+
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -823,7 +873,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     throw new Error(data.error?.message || "未知的 API 錯誤");
                 }
 
-                output.textContent = data.choices[0].message.content;
+                const rawContent = data.choices[0].message.content;
+                output.innerHTML = (typeof marked !== 'undefined' ? (marked.parse || marked)(rawContent) : rawContent);
             } catch (error) {
                 output.innerHTML = `<span class='text-sell font-bold'>[ API ERROR ]<br>${error.message}</span>`;
             } finally {
@@ -839,7 +890,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v6.4 API 引擎直連版)...")
+    print("[INFO] 開始產出 Web Dashboard (v6.6 終極內建直連版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
