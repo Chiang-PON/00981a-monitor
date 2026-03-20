@@ -18,7 +18,7 @@ from datetime import datetime
 HISTORY_DIR = "history"
 OUTPUT_FILE = "index.html"
 
-# 💎 內建台股產業地圖 (Sector Map)
+# 內建台股產業地圖 (Sector Map)
 SECTOR_MAP = {
     "台積電": "半導體", "聯發科": "半導體", "京元電": "半導體", "日月光投控": "半導體", "瑞昱": "半導體", "聯電": "半導體", "世芯-KY": "半導體", "力旺": "半導體", "聯詠": "半導體", "南亞科": "半導體", "欣銓": "半導體", "精測": "半導體", "穎崴": "半導體", "旺矽": "半導體", "群聯": "半導體",
     "鴻海": "電腦週邊", "廣達": "電腦週邊", "緯創": "電腦週邊", "緯穎": "電腦週邊", "技嘉": "電腦週邊", "華碩": "電腦週邊", "英業達": "電腦週邊", "仁寶": "電腦週邊", "奇鋐": "電腦週邊", "雙鴻": "電腦週邊", "勤誠": "電腦週邊", "富世達": "電腦週邊",
@@ -203,6 +203,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .tab-inactive { background-color: var(--bg-base); color: var(--text-dim); border: 1px solid var(--border-dim); }
         .tab-inactive:hover { border-color: var(--text-main); color: var(--text-main); }
 
+        .tab-ai-agent { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #00f0ff 100%); color: #fff; border: 1px solid rgba(0, 240, 255, 0.5); font-weight: 700; box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); }
+        [data-theme="dark"] .tab-ai-agent { background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #06b6d4 100%); border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        .tab-ai-agent:hover { filter: brightness(1.15); }
+        .tab-ai-agent.tab-active { background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); border-color: var(--color-accent); box-shadow: 0 0 20px rgba(0, 240, 255, 0.5); color: var(--color-accent); }
+
         @keyframes pulse-dot { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
         [data-theme="dark"] @keyframes pulse-dot { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 42, 95, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 42, 95, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 42, 95, 0); } }
         .live-dot { height: 8px; width: 8px; background-color: var(--color-buy); border-radius: 50%; display: inline-block; animation: pulse-dot 2s infinite; }
@@ -218,7 +223,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.1</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.2</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -235,7 +240,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         <div class="theme-panel border rounded-xl p-5 md:p-8 transition-colors">
             
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
+            <div id="header-main" class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
                     <span class="font-mono text-xs theme-text-dim tracking-widest uppercase">TARGET_ASSET</span>
                     <div class="flex items-baseline gap-3">
@@ -243,8 +248,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         <span id="current-date-display" class="font-mono text-lg text-accent"></span>
                     </div>
                 </div>
-                
-                <div class="flex flex-wrap items-center gap-3">
+                <div id="header-controls" class="flex flex-wrap items-center gap-3">
                     <div class="theme-bg-input border rounded-md flex items-center px-3 py-1.5 transition-colors">
                         <span class="theme-text-dim font-mono mr-2">></span>
                         <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-gray-400 theme-text border-none">
@@ -395,15 +399,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const searchView = document.getElementById('search-view');
             const aiView = document.getElementById('ai-agent-view');
             const sfContainer = document.getElementById('sector-flow-container');
+            const headerControls = document.getElementById('header-controls');
+            const titleEl = document.getElementById('current-etf-title');
+            const dateEl = document.getElementById('current-date-display');
             if (etf === 'AI_AGENT') {
                 normalView.classList.add('hidden');
                 searchView.classList.add('hidden');
                 aiView.classList.remove('hidden');
                 sfContainer.classList.add('hidden');
+                headerControls.classList.add('hidden');
+                titleEl.textContent = 'AI_AGENT';
+                dateEl.textContent = '';
             } else {
                 aiView.classList.add('hidden');
                 normalView.classList.remove('hidden');
                 sfContainer.classList.remove('hidden');
+                headerControls.classList.remove('hidden');
                 handleSearch();
             }
         }
@@ -414,7 +425,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             etfList.forEach(etf => {
                 const btn = document.createElement('button');
                 const isActive = etf === currentETF;
-                btn.className = `tab-btn px-4 py-1.5 font-mono rounded-sm border ${isActive ? 'tab-active theme-border' : 'tab-inactive'}`;
+                const isAI = etf === 'AI_AGENT';
+                let cls = 'tab-btn px-4 py-1.5 font-mono rounded-sm border ';
+                if (isAI) cls += isActive ? 'tab-ai-agent tab-active' : 'tab-ai-agent';
+                else cls += isActive ? 'tab-active theme-border' : 'tab-inactive';
+                btn.className = cls;
                 btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : (etf === 'AI_AGENT' ? '[ AI_AGENT ]' : etf);
                 btn.onclick = () => selectETF(etf);
                 container.appendChild(btn);
@@ -717,24 +732,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         const AI_PROMPT_TEMPLATE = `1. 財務報表分析：
-分析 [TICKER] 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？
+分析 [股票代號] 過去 5 年的財務報表。重點拆解：營收增長、淨利趨勢、自由現金流、利潤率與債務水平。請說明該公司的財務狀況是在增強還是轉弱？
 
 2. 估值分析：
-對 [TICKER] 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股是被低估還是高估的結論。
+對 [股票代號] 進行估值分析。包含：本益比 (P/E) 比較、現金流折現 (DCF) 估算、行業平均估值對比，最後給出該股是被低估還是高估的結論。
 
 3. 成長潛力分析：
-分析 [TICKER] 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。
+分析 [股票代號] 的成長潛力。考慮市場規模、產業增長率、新產品線、以及其在 AI 或新技術上的優勢，預測未來 5-10 年的成長空間。
 
 4. 多空對峙辯論：
-請模擬兩位分析師針對 [TICKER] 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。
+請模擬兩位分析師針對 [股票代號] 進行辯論。一位看多 (Bull)，一位看空 (Bear)。兩人必須提出有數據支持的論點，最後給出一個平衡的總結。
 
 5. 投資建議評估：
-評估今天是否該買入 [TICKER]。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
+評估今天是否該買入 [股票代號]。給出短期 (1 年) 與長期 (5 年以上) 展望、主要催化劑與風險，最後給出明確建議：買入、持有或避開。`;
 
         function generateAIPrompt() {
             const ticker = document.getElementById('ai-ticker-input').value.trim() || '2330';
             const output = document.getElementById('ai-prompt-output');
-            output.value = AI_PROMPT_TEMPLATE.replace(/\[TICKER\]/g, ticker);
+            output.value = AI_PROMPT_TEMPLATE.replace(/\[股票代號\]/g, ticker);
         }
 
         window.onload = init;
@@ -743,7 +758,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v6.1 雙軌決策完全體)...")
+    print("[INFO] 開始產出 Web Dashboard (v6.2 終極定案版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
