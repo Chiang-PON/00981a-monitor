@@ -1,9 +1,8 @@
-"""main.py - ETF Monitor Terminal v7.2 (Backend Crawler Engine)
+"""main.py - ETF Monitor Terminal v7.3 (Backend Crawler Engine)
 
 主動式 ETF 家族監控系統 + 凱基大聯盟 18 主力分點監控
-- 資料庫全收錄：0050 + 00980A~00995A (16檔) + 009816
+- 雲端/本機雙軌：GitHub Actions 自動略過券商爬蟲，本機解除 Headless 突破 Cloudflare
 - 凱基大聯盟：18 間凱基證券核心主力分點 (wantgoo 券商買賣超)
-- 共用 WebDriver：18 分點爬取時使用單一 Selenium Session，縮短 GitHub Actions 執行時間
 - LINE 專屬推播：僅 7 檔 ETF
 """
 
@@ -34,6 +33,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger("ETF-Monitor")
+
+# 判斷是否在 GitHub 雲端環境
+IS_GITHUB_ACTION: bool = os.environ.get("GITHUB_ACTIONS") == "true"
 
 LINE_TOKEN: str = os.environ.get("LINE_TOKEN", "")
 
@@ -360,12 +362,31 @@ def fetch_broker_data(broker_code: str, driver: webdriver.Chrome) -> list[dict]:
 
 
 def crawl_all_brokers() -> None:
-    """使用單一 WebDriver 實例依序爬取 18 間凱基分點，大幅縮短執行時間。"""
+    """使用單一 WebDriver 實例依序爬取 18 間凱基分點。具備雲端/本機環境感知能力。"""
     if not BROKER_LIST:
         return
+
+    if IS_GITHUB_ACTION:
+        logger.warning("檢測到雲端環境 (美國 IP)，為避免 Cloudflare 封鎖，略過券商分點爬取。")
+        logger.warning("請在 Mac 本機端執行 python main.py 來更新凱基大聯盟！")
+        return
+
+    logger.info("偵測到本機環境！啟動突破防護機制，開始抓取 18 間凱基分點...")
     driver = None
     try:
-        driver = _create_chrome_driver(headless=True, anti_detect=True)
+        chrome_options = Options()
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+            "source": "Object.defineProperty(navigator, 'webdriver', { get: () => undefined })"
+        })
+
         today_str = datetime.now().strftime("%Y-%m-%d")
         for broker_code, broker_name in BROKER_LIST.items():
             data = fetch_broker_data(broker_code, driver)
