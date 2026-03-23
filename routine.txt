@@ -1,0 +1,11 @@
+git pull --rebase origin main
+
+python main.py --force
+
+python generate_web.py
+
+git add .
+
+git commit -m "更新凱基主力籌碼"
+
+git push

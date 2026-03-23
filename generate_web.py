@@ -1,10 +1,9 @@
-"""generate_web.py - ETF Monitor Terminal v7.2 (Broker-Grade UI + 凱基大聯盟 18 分點)
+"""generate_web.py - ETF Monitor Terminal v8.0 (決策雷達與視覺升級)
 
 整合外資核心邏輯：
-1. 券商級 UI：下拉選單、天數聚合 (1/5/10/20/30日)、金額/張數切換、買超/賣超排行表。
-2. 凱基大聯盟：18 間主力分點辨識、券商流量資料無需相減邏輯。
-3. 多日籌碼動態加總：前端 aggregateData() 引擎累加 N 日 diff 與 amount。
-4. AI_AGENT 引擎、即時股價注入、台股紅綠色彩、Light/Dark 雙軌主題。
+1. 自選股高亮、主力共識警報 (凱基分點 >= 3 買進)、iPad 友善介面。
+2. 券商級 UI、多日籌碼動態加總、凱基大聯盟 18 分點。
+3. AI_AGENT 引擎、即時股價注入、台股紅綠色彩、Light/Dark 雙軌主題。
 """
 
 import os
@@ -190,7 +189,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ETF 籌碼決策戰情室 v7.2 - 凱基大聯盟</title>
+    <title>ETF 籌碼決策戰情室 v8.0 - 決策雷達</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -271,6 +270,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .unit-btn-shares.unit-active { background-color: var(--color-accent); color: #fff; }
         [data-theme="dark"] .unit-btn-amount.unit-active { background-color: var(--color-buy); color: #fff; }
         [data-theme="dark"] .unit-btn-shares.unit-active { background-color: var(--color-accent); color: #fff; }
+
+        .watchlist-highlight { background-color: rgba(234, 179, 8, 0.15) !important; border-left: 4px solid #eab308 !important; }
+        [data-theme="dark"] .watchlist-highlight { background-color: rgba(234, 179, 8, 0.2) !important; border-left: 4px solid #facc15 !important; }
+
+        .consensus-panel { border-color: #ef4444; background-color: #fef2f2; }
+        [data-theme="dark"] .consensus-panel { border-color: #f97316; background-color: rgba(124, 45, 18, 0.4); }
+        .consensus-title { color: #dc2626; }
+        [data-theme="dark"] .consensus-title { color: #fb923c; }
+        .consensus-tag { background-color: #fecaca; color: #b91c1c; }
+        [data-theme="dark"] .consensus-tag { background-color: rgba(194, 65, 12, 0.5); color: #fdba74; }
     </style>
 </head>
 <body class="pb-24 pt-6">
@@ -280,7 +289,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">戰情室 <span class="theme-text-dim font-mono text-xs">v7.2</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">戰情室 <span class="theme-text-dim font-mono text-xs">v8.0</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -301,6 +310,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">目標標的</label>
                         <select id="etf-selector" onchange="onETFChange()" class="theme-bg-input border theme-border rounded-lg w-full px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
                         </select>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-4 mb-4">
+                    <div>
+                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">我的自選股</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="watchlist-input" placeholder="2330, 2317, 3034 (逗號分隔)" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text flex-1 min-w-0">
+                            <button type="button" onclick="saveWatchlist()" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors whitespace-nowrap">
+                                儲存
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="timeframe-unit-row" class="flex flex-wrap items-center gap-4">
@@ -353,6 +373,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
                     > NO_DATA_DETECTED_
                 </div>
+                <div id="consensus-alert-container" class="consensus-panel hidden mb-6 rounded-xl border-2 border-red-500 bg-red-50 p-4">
+                    <h4 class="font-mono text-red-600 font-bold text-sm mb-3 flex items-center gap-2 consensus-title">
+                        <span>🔥</span> 主力共識警報 (3+ 分點買進)
+                    </h4>
+                    <div id="consensus-alert-list" class="flex flex-wrap gap-2"></div>
+                </div>
                 <div id="data-table-container" class="hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
@@ -361,9 +387,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                                 <table class="w-full text-sm">
                                     <thead>
                                         <tr class="theme-bg-input border-b theme-border">
-                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
-                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim">股票</th>
-                                            <th class="text-right py-3 px-4 font-mono font-bold theme-text-dim">淨買超</th>
+                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
+                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim">股票</th>
+                                            <th class="text-right py-3.5 px-4 font-mono font-bold theme-text-dim">淨買超</th>
                                         </tr>
                                     </thead>
                                     <tbody id="buy-rank-tbody"></tbody>
@@ -376,9 +402,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                                 <table class="w-full text-sm">
                                     <thead>
                                         <tr class="theme-bg-input border-b theme-border">
-                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
-                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim">股票</th>
-                                            <th class="text-right py-3 px-4 font-mono font-bold theme-text-dim">淨賣超</th>
+                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
+                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim">股票</th>
+                                            <th class="text-right py-3.5 px-4 font-mono font-bold theme-text-dim">淨賣超</th>
                                         </tr>
                                     </thead>
                                     <tbody id="sell-rank-tbody"></tbody>
@@ -624,6 +650,32 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             document.getElementById('current-date-display').textContent = dateRangeLabel();
             onETFChange();
             initApiKey();
+            initWatchlist();
+        }
+
+        function getWatchlistSet() {
+            const raw = localStorage.getItem('watchlist') || '';
+            return new Set(raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean));
+        }
+
+        function initWatchlist() {
+            const raw = localStorage.getItem('watchlist') || '';
+            const inp = document.getElementById('watchlist-input');
+            if (inp) inp.value = raw;
+        }
+
+        function saveWatchlist() {
+            const inp = document.getElementById('watchlist-input');
+            if (inp) {
+                const val = inp.value.trim();
+                localStorage.setItem('watchlist', val);
+                refreshTable();
+            }
+        }
+
+        function isInWatchlist(code) {
+            if (!code) return false;
+            return getWatchlistSet().has(String(code).toUpperCase());
         }
 
         function refreshTable() {
@@ -638,10 +690,51 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if (buy.length === 0 && sell.length === 0) {
                 emptyState.classList.remove('hidden');
                 dataContainer.classList.add('hidden');
+                document.getElementById('consensus-alert-container').classList.add('hidden');
                 return;
             }
             emptyState.classList.add('hidden');
             dataContainer.classList.remove('hidden');
+
+            const watchSet = getWatchlistSet();
+            const consensusContainer = document.getElementById('consensus-alert-container');
+            const consensusList = document.getElementById('consensus-alert-list');
+            if (currentETF === KAIJI_TAB) {
+                let dateIndex = availableDatesDesc.indexOf(currentDate);
+                if (dateIndex === -1) dateIndex = 0;
+                const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(currentDays, availableDatesDesc.length - dateIndex));
+                const brokerList = brokerCodes.filter(b => allKeys.has(b));
+                const stockBrokerCount = {};
+                dateSlice.forEach(d => {
+                    const dataOfDay = db[d] || {};
+                    brokerList.forEach(b => {
+                        const dayData = dataOfDay[b];
+                        if (!dayData) return;
+                        [...(dayData.increased || []), ...(dayData.new_buy || [])].forEach(i => {
+                            if ((i.diff || 0) > 0) {
+                                const key = i.name;
+                                if (!stockBrokerCount[key]) stockBrokerCount[key] = new Set();
+                                stockBrokerCount[key].add(b);
+                            }
+                        });
+                    });
+                });
+                const highConsensusNames = Object.entries(stockBrokerCount).filter(([, brokers]) => brokers.size >= 3).map(([n]) => n);
+                const buyMap = {};
+                buy.forEach(i => { buyMap[i.name] = i; });
+                const consensusItems = highConsensusNames.filter(n => buyMap[n]).map(n => buyMap[n]);
+                if (consensusItems.length > 0) {
+                    consensusContainer.classList.remove('hidden');
+                    consensusList.innerHTML = consensusItems.map(i => {
+                        const valStr = currentUnit === 'amount' ? formatAmount(i.amount) : '+' + (i.diff || 0).toLocaleString() + ' 張';
+                        return `<span class="consensus-tag inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-mono text-sm font-bold">${i.name} ${i.code ? '(' + i.code + ')' : ''} ${valStr}</span>`;
+                    }).join('');
+                } else {
+                    consensusContainer.classList.add('hidden');
+                }
+            } else {
+                consensusContainer.classList.add('hidden');
+            }
 
             const sfContainer = document.getElementById('sector-flow-container');
             const sectorTotals = {};
@@ -676,13 +769,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const buyTbody = document.getElementById('buy-rank-tbody');
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-2.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-2.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-2.5 px-4 text-right font-mono font-bold text-buy">${formatVal(item, true)}</td></tr>`;
+                const hlClass = isInWatchlist(item.code) ? ' watchlist-highlight' : '';
+                return `<tr class="row-hover border-b theme-border last:border-0${hlClass}"><td class="py-3.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-4 text-right font-mono font-bold text-buy">${formatVal(item, true)}</td></tr>`;
             }).join('');
 
             const sellTbody = document.getElementById('sell-rank-tbody');
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-2.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-2.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-2.5 px-4 text-right font-mono font-bold text-sell">${formatVal(item, false)}</td></tr>`;
+                const hlClass = isInWatchlist(item.code) ? ' watchlist-highlight' : '';
+                return `<tr class="row-hover border-b theme-border last:border-0${hlClass}"><td class="py-3.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-4 text-right font-mono font-bold text-sell">${formatVal(item, false)}</td></tr>`;
             }).join('');
         }
 
@@ -730,7 +825,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 const colorClass = a.isBuy ? 'text-buy' : 'text-sell';
                 const valStr = currentUnit === 'amount' ? (a.sign + ' ' + formatAmount(a.amount)) : (a.sign + (a.diff || 0).toLocaleString());
                 const codeHtml = a.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${a.code}</span>` : '';
-                resultsContainer.innerHTML += `<div class="flex justify-between items-center py-3 border-b theme-border row-hover px-4 transition-colors"><div class="flex items-center gap-2"><span class="theme-text text-[14px] font-bold">${a.name}</span>${codeHtml}</div><span class="${colorClass} font-mono font-bold text-[14px]">${valStr}</span></div>`;
+                const hlClass = isInWatchlist(a.code) ? ' watchlist-highlight' : '';
+                resultsContainer.innerHTML += `<div class="flex justify-between items-center py-3.5 px-4 border-b theme-border row-hover transition-colors${hlClass}"><div class="flex items-center gap-2"><span class="theme-text text-[14px] font-bold">${a.name}</span>${codeHtml}</div><span class="${colorClass} font-mono font-bold text-[14px]">${valStr}</span></div>`;
             });
         }
 
@@ -846,7 +942,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v7.2 凱基大聯盟 18 分點)...")
+    print("[INFO] 開始產出 Web Dashboard (v8.0 決策雷達與視覺升級)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
