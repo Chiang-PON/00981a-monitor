@@ -276,7 +276,7 @@ def _create_chrome_driver(headless: bool = True, anti_detect: bool = False) -> w
     """建立 Chrome WebDriver 實例。anti_detect 用於 wantgoo 等需繞過偵測的網站。"""
     chrome_options = Options()
     if headless:
-        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--no-sandbox")
@@ -298,8 +298,47 @@ def _create_chrome_driver(headless: bool = True, anti_detect: bool = False) -> w
     return driver
 
 
+def _parse_broker_table(soup: BeautifulSoup, table_id: str, negate: bool) -> list[dict]:
+    """解析 wantgoo 買超或賣超表格。negate=True 時將張數與金額轉為負數。"""
+    table = soup.find("tbody", id=table_id)
+    if not table:
+        return []
+    result: list[dict] = []
+    for row in table.find_all("tr"):
+        cols = row.find_all("td")
+        if len(cols) < 6:
+            continue
+        stock_name_tag = cols[1].find("a")
+        stock_name = stock_name_tag.text.strip() if stock_name_tag else cols[1].text.strip()
+        stock_href = stock_name_tag.get("href", "") if stock_name_tag else ""
+        code = ""
+        if stock_href:
+            parts = stock_href.rstrip("/").split("/")
+            if parts:
+                code = parts[-1].split("-")[0] or ""
+        try:
+            net_shares_str = cols[4].text.strip().replace(",", "")
+            net_amount_str = cols[5].text.strip().replace(",", "").replace("萬", "")
+            net_shares = int(float(net_shares_str)) if net_shares_str else 0
+            net_amount = float(net_amount_str) if net_amount_str else 0.0
+        except (ValueError, TypeError):
+            continue
+        if not stock_name or stock_name.upper() in ("CASH", "C_NTD", "C_USD"):
+            continue
+        if negate:
+            net_shares = -abs(net_shares)
+            net_amount = -abs(net_amount)
+        result.append({
+            "code": code if code and code.isdigit() else "",
+            "name": stock_name,
+            "net_shares": net_shares,
+            "net_amount": net_amount,
+        })
+    return result
+
+
 def fetch_broker_data(broker_code: str, driver: webdriver.Chrome) -> list[dict]:
-    """從 wantgoo 抓取單一分點買賣超資料，共用傳入的 WebDriver 實例。"""
+    """從 wantgoo 抓取單一分點買超(#buyTable)與賣超(#sellTable)資料，共用傳入的 WebDriver。"""
     url = WANTGOO_URL_TEMPLATE.format(WANTGOO_MAJOR_ID, broker_code)
     try:
         logger.info("[%s %s] 抓取中...", broker_code, BROKER_LIST.get(broker_code, ""))
@@ -309,40 +348,11 @@ def fetch_broker_data(broker_code: str, driver: webdriver.Chrome) -> list[dict]:
         time.sleep(1)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        buy_table = soup.find("tbody", id="buyTable")
-        if not buy_table:
-            return []
-
-        data: list[dict] = []
-        for row in buy_table.find_all("tr"):
-            cols = row.find_all("td")
-            if len(cols) < 6:
-                continue
-            stock_name_tag = cols[1].find("a")
-            stock_name = stock_name_tag.text.strip() if stock_name_tag else cols[1].text.strip()
-            stock_href = stock_name_tag.get("href", "") if stock_name_tag else ""
-            code = ""
-            if stock_href:
-                parts = stock_href.rstrip("/").split("/")
-                if parts:
-                    code = parts[-1].split("-")[0] or ""
-            try:
-                net_shares_str = cols[4].text.strip().replace(",", "")
-                net_amount_str = cols[5].text.strip().replace(",", "").replace("萬", "")
-                net_shares = int(float(net_shares_str)) if net_shares_str else 0
-                net_amount = float(net_amount_str) if net_amount_str else 0.0
-            except (ValueError, TypeError):
-                continue
-            if not stock_name or stock_name.upper() in ("CASH", "C_NTD", "C_USD"):
-                continue
-            data.append({
-                "code": code if code and code.isdigit() else "",
-                "name": stock_name,
-                "net_shares": net_shares,
-                "net_amount": net_amount,
-            })
+        data = _parse_broker_table(soup, "buyTable", negate=False)
+        sell_data = _parse_broker_table(soup, "sellTable", negate=True)
+        data.extend(sell_data)
         if data:
-            logger.info("[%s] 成功抓取 %d 筆", broker_code, len(data))
+            logger.info("[%s] 成功抓取 %d 筆 (買超+賣超)", broker_code, len(data))
         return data
     except Exception as e:
         logger.error("[%s] wantgoo 抓取失敗: %s", broker_code, e)
