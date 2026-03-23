@@ -1,10 +1,10 @@
-"""main.py - ETF Monitor Terminal v6.3 (Backend Crawler Engine)
+"""main.py - ETF Monitor Terminal v7.2 (Backend Crawler Engine)
 
-主動式 ETF 家族監控系統 - 外資法人級決策輔助
+主動式 ETF 家族監控系統 + 凱基大聯盟 18 主力分點監控
 - 資料庫全收錄：0050 + 00980A~00995A (16檔) + 009816
-- LINE 專屬推播：僅 7 檔 (0050, 00980A, 00981A, 00982A, 00984A, 00985A, 009816)
-- 真實資金流向：TWSE/TPEx 當日收盤價，寫入 price 欄位
-- 向下相容：舊版 CSV 無 price/weight 時以 0.0 處理
+- 凱基大聯盟：18 間凱基證券核心主力分點 (wantgoo 券商買賣超)
+- 共用 WebDriver：18 分點爬取時使用單一 Selenium Session，縮短 GitHub Actions 執行時間
+- LINE 專屬推播：僅 7 檔 ETF
 """
 
 import argparse
@@ -23,6 +23,9 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 logging.basicConfig(
@@ -48,6 +51,34 @@ CRAWL_LIST: list[str] = [
 LINE_NOTIFY_LIST: list[str] = [
     "0050", "00980A", "00981A", "00982A", "00984A", "00985A", "009816"
 ]
+
+# 3. 凱基大聯盟 18 大主力分點 (wantgoo 券商買賣超監控)
+BROKER_LIST: dict[str, str] = {
+    "9207": "凱基永和",
+    "920A": "凱基板橋",
+    "920D": "凱基市府",
+    "920F": "凱基站前",
+    "9216": "凱基信義",
+    "9217": "凱基松山",
+    "9218": "凱基大直",
+    "921F": "凱基天母",
+    "921J": "凱基土城",
+    "921S": "凱基新莊",
+    "9229": "凱基中山",
+    "9234": "凱基竹北",
+    "9238": "凱基士林",
+    "9239": "凱基市政",
+    "9257": "凱基林口",
+    "9272": "凱基竹科",
+    "9285": "凱基中壢",
+    "9287": "凱基內湖",
+}
+
+WANTGOO_MAJOR_ID: str = "9200"
+WANTGOO_URL_TEMPLATE: str = (
+    "https://www.wantgoo.com/stock/major-investors/broker-buy-sell-rank"
+    "?during=1&majorId={}&branchId={}&orderBy=count"
+)
 
 ETF_THEMES: dict[str, str] = {
     "0050": "大盤指標 (元大台灣50)", "00980A": "成長配息 (野村智慧優選)",
@@ -239,6 +270,106 @@ def fetch_data(etf_code: str, prices_dict: dict) -> list[dict]:
         if attempt < CRAWL_MAX_RETRIES:
             time.sleep(5 * (attempt + 1))
     return []
+
+
+def _create_chrome_driver(headless: bool = True, anti_detect: bool = False) -> webdriver.Chrome:
+    """建立 Chrome WebDriver 實例。anti_detect 用於 wantgoo 等需繞過偵測的網站。"""
+    chrome_options = Options()
+    if headless:
+        chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument(
+        "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        " (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    )
+    if anti_detect:
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    if anti_detect:
+        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+            "source": "Object.defineProperty(navigator, 'webdriver', { get: () => undefined })"
+        })
+    return driver
+
+
+def fetch_broker_data(broker_code: str, driver: webdriver.Chrome) -> list[dict]:
+    """從 wantgoo 抓取單一分點買賣超資料，共用傳入的 WebDriver 實例。"""
+    url = WANTGOO_URL_TEMPLATE.format(WANTGOO_MAJOR_ID, broker_code)
+    try:
+        logger.info("[%s %s] 抓取中...", broker_code, BROKER_LIST.get(broker_code, ""))
+        driver.get(url)
+        wait = WebDriverWait(driver, 15)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#buyTable tr")))
+        time.sleep(1)
+
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        buy_table = soup.find("tbody", id="buyTable")
+        if not buy_table:
+            return []
+
+        data: list[dict] = []
+        for row in buy_table.find_all("tr"):
+            cols = row.find_all("td")
+            if len(cols) < 6:
+                continue
+            stock_name_tag = cols[1].find("a")
+            stock_name = stock_name_tag.text.strip() if stock_name_tag else cols[1].text.strip()
+            stock_href = stock_name_tag.get("href", "") if stock_name_tag else ""
+            code = ""
+            if stock_href:
+                parts = stock_href.rstrip("/").split("/")
+                if parts:
+                    code = parts[-1].split("-")[0] or ""
+            try:
+                net_shares_str = cols[4].text.strip().replace(",", "")
+                net_amount_str = cols[5].text.strip().replace(",", "").replace("萬", "")
+                net_shares = int(float(net_shares_str)) if net_shares_str else 0
+                net_amount = float(net_amount_str) if net_amount_str else 0.0
+            except (ValueError, TypeError):
+                continue
+            if not stock_name or stock_name.upper() in ("CASH", "C_NTD", "C_USD"):
+                continue
+            data.append({
+                "code": code if code and code.isdigit() else "",
+                "name": stock_name,
+                "net_shares": net_shares,
+                "net_amount": net_amount,
+            })
+        if data:
+            logger.info("[%s] 成功抓取 %d 筆", broker_code, len(data))
+        return data
+    except Exception as e:
+        logger.error("[%s] wantgoo 抓取失敗: %s", broker_code, e)
+        return []
+
+
+def crawl_all_brokers() -> None:
+    """使用單一 WebDriver 實例依序爬取 18 間凱基分點，大幅縮短執行時間。"""
+    if not BROKER_LIST:
+        return
+    driver = None
+    try:
+        driver = _create_chrome_driver(headless=True, anti_detect=True)
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        for broker_code, broker_name in BROKER_LIST.items():
+            data = fetch_broker_data(broker_code, driver)
+            if data:
+                out_path = os.path.join(HISTORY_DIR, f"{broker_code}_{today_str}.csv")
+                df = pd.DataFrame(data)
+                df.to_csv(out_path, index=False, encoding="utf-8-sig")
+            time.sleep(2)
+    finally:
+        if driver:
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
 
 def process_etf(etf_code: str, prices_dict: dict) -> dict:
@@ -481,6 +612,8 @@ def main() -> None:
                 results_for_line.append(res)
         except Exception as e:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
+
+    crawl_all_brokers()
 
     if results_for_line:
         payloads = build_flex_payloads(results_for_line, today_str)

@@ -1,10 +1,10 @@
-"""generate_web.py - ETF Monitor Terminal v7.0 (Broker-Grade UI + Multi-Day Aggregation)
+"""generate_web.py - ETF Monitor Terminal v7.2 (Broker-Grade UI + 凱基大聯盟 18 分點)
 
 整合外資核心邏輯：
 1. 券商級 UI：下拉選單、天數聚合 (1/5/10/20/30日)、金額/張數切換、買超/賣超排行表。
-2. 多日籌碼動態加總：前端 aggregateData() 引擎累加 N 日 diff 與 amount。
-3. AI_AGENT 引擎：前端直接呼叫 OpenAI gpt-4o，API Key 存於 localStorage。
-4. 即時股價注入、台股紅綠色彩、Light/Dark 雙軌主題保留。
+2. 凱基大聯盟：18 間主力分點辨識、券商流量資料無需相減邏輯。
+3. 多日籌碼動態加總：前端 aggregateData() 引擎累加 N 日 diff 與 amount。
+4. AI_AGENT 引擎、即時股價注入、台股紅綠色彩、Light/Dark 雙軌主題。
 """
 
 import os
@@ -16,6 +16,27 @@ from datetime import datetime
 
 HISTORY_DIR = "history"
 OUTPUT_FILE = "index.html"
+
+BROKER_LIST = {
+    "9207": "凱基永和",
+    "920A": "凱基板橋",
+    "920D": "凱基市府",
+    "920F": "凱基站前",
+    "9216": "凱基信義",
+    "9217": "凱基松山",
+    "9218": "凱基大直",
+    "921F": "凱基天母",
+    "921J": "凱基土城",
+    "921S": "凱基新莊",
+    "9229": "凱基中山",
+    "9234": "凱基竹北",
+    "9238": "凱基士林",
+    "9239": "凱基市政",
+    "9257": "凱基林口",
+    "9272": "凱基竹科",
+    "9285": "凱基中壢",
+    "9287": "凱基內湖",
+}
 
 SECTOR_MAP = {
     "台積電": "半導體", "聯發科": "半導體", "京元電": "半導體", "日月光投控": "半導體", "瑞昱": "半導體", "聯電": "半導體", "世芯-KY": "半導體", "力旺": "半導體", "聯詠": "半導體", "南亞科": "半導體", "欣銓": "半導體", "精測": "半導體", "穎崴": "半導體", "旺矽": "半導體", "群聯": "半導體",
@@ -50,16 +71,41 @@ def process_all_data():
         basename = os.path.basename(f).replace(".csv", "")
         parts = basename.split("_")
         if len(parts) >= 2:
-            etf_code = parts[0]
+            code = parts[0]
             date_str = parts[1]
-            if etf_code not in file_map: file_map[etf_code] = []
-            file_map[etf_code].append((date_str, f))
+            if code not in file_map: file_map[code] = []
+            file_map[code].append((date_str, f))
 
     database = {}
-    
+
     for etf_code, files in file_map.items():
         files.sort(key=lambda x: x[0])
-        
+
+        if etf_code in BROKER_LIST:
+            for date_str, f in files:
+                try:
+                    df = pd.read_csv(f, dtype={"code": str})
+                    if "net_shares" not in df.columns or "net_amount" not in df.columns:
+                        continue
+                    if date_str not in database: database[date_str] = {}
+                    increased, decreased = [], []
+                    for _, row in df.iterrows():
+                        net_shares = int(row.get("net_shares", 0) or 0)
+                        net_amount = float(row.get("net_amount", 0) or 0)
+                        c_name = clean_stock_name(str(row.get("name", "")))
+                        code_val = str(row.get("code", ""))
+                        sector = SECTOR_MAP.get(c_name, "其他")
+                        if net_shares > 0:
+                            increased.append({"name": c_name, "code": code_val, "diff": net_shares, "amount": net_amount, "sector": sector, "weight": 0, "w_diff": 0})
+                        elif net_shares < 0:
+                            decreased.append({"name": c_name, "code": code_val, "diff": abs(net_shares), "amount": abs(net_amount), "sector": sector, "weight": 0, "w_diff": 0})
+                    increased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
+                    decreased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
+                    database[date_str][etf_code] = {"new_buy": [], "sold_out": [], "increased": increased, "decreased": decreased}
+                except Exception as e:
+                    print(f"處理經紀 {etf_code} {f} 失敗: {e}")
+            continue
+
         for i in range(1, len(files)):
             prev_date, prev_file = files[i-1]
             curr_date, curr_file = files[i]
@@ -144,7 +190,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ETF 籌碼決策戰情室 v7.0</title>
+    <title>ETF 籌碼決策戰情室 v7.2 - 凱基大聯盟</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -234,7 +280,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">戰情室 <span class="theme-text-dim font-mono text-xs">v7.0</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">戰情室 <span class="theme-text-dim font-mono text-xs">v7.2</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -422,15 +468,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         updateClock();
 
         const db = __DB_JSON__;
+        const brokerLabels = __BROKER_JSON__ || {};
         const availableDatesDesc = Object.keys(db).sort().reverse();
         const availableDatesAsc = [...availableDatesDesc].reverse();
         const FAMILY_TAB = "GLOBAL_CONSENSUS";
+        const KAIJI_TAB = "KAIJI_CONSENSUS";
         const AI_TAB = "AI_AGENT";
 
-        let allETFs = new Set();
-        Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(etf => allETFs.add(etf)); });
-        let etfList = Array.from(allETFs).filter(e => e !== AI_TAB).sort();
-        etfList.unshift(FAMILY_TAB);
+        let allKeys = new Set();
+        Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(k => allKeys.add(k)); });
+        const brokerCodes = Object.keys(brokerLabels);
+        const etfCodes = Array.from(allKeys).filter(k => !brokerCodes.includes(k) && k !== AI_TAB).sort();
+        let etfList = [FAMILY_TAB];
+        etfList = etfList.concat(etfCodes);
+        if (brokerCodes.some(b => allKeys.has(b))) {
+            etfList.push(KAIJI_TAB);
+            etfList = etfList.concat(brokerCodes.filter(b => allKeys.has(b)).sort((a, b) => brokerCodes.indexOf(a) - brokerCodes.indexOf(b)));
+        }
         etfList.push(AI_TAB);
 
         let currentETF = etfList[0];
@@ -444,7 +498,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if (dateIndex === -1) dateIndex = 0;
             const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(days, availableDatesDesc.length - dateIndex));
             const agg = {};
-            const etfListToUse = (etf === FAMILY_TAB) ? etfList.filter(e => e !== FAMILY_TAB && e !== AI_TAB) : [etf];
+            const etfListToUse = (etf === FAMILY_TAB)
+                ? etfList.filter(e => e !== FAMILY_TAB && e !== KAIJI_TAB && e !== AI_TAB && !brokerCodes.includes(e))
+                : (etf === KAIJI_TAB)
+                    ? brokerCodes.filter(b => allKeys.has(b))
+                    : [etf];
 
             dateSlice.forEach(d => {
                 const dataOfDay = db[d] || {};
@@ -481,7 +539,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             document.getElementById('normal-view').classList.toggle('hidden', isAI);
             document.getElementById('search-view').classList.add('hidden');
             document.getElementById('ai-agent-view').classList.toggle('hidden', !isAI);
-            document.getElementById('current-etf-title').textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : currentETF);
+            document.getElementById('current-etf-title').textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
             document.getElementById('current-date-display').textContent = isAI ? 'PROTOCOL_ACTIVE' : dateRangeLabel();
             if (!isAI) refreshTable();
         }
@@ -544,7 +602,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             etfList.forEach(etf => {
                 const opt = document.createElement('option');
                 opt.value = etf;
-                opt.textContent = etf === FAMILY_TAB ? 'GLOBAL_CONSENSUS (全家族共識)' : (etf === AI_TAB ? 'AI_AGENT' : etf);
+                let label = etf;
+                if (etf === FAMILY_TAB) label = 'GLOBAL_CONSENSUS (全家族共識)';
+                else if (etf === KAIJI_TAB) label = 'KAIJI_CONSENSUS (凱基大聯盟)';
+                else if (etf === AI_TAB) label = 'AI_AGENT';
+                else if (brokerLabels[etf]) label = etf + ' ' + brokerLabels[etf];
+                opt.textContent = label;
                 etfSel.appendChild(opt);
             });
             const dateSel = document.getElementById('date-selector');
@@ -783,11 +846,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v7.0 券商級 UI 多日聚合版)...")
+    print("[INFO] 開始產出 Web Dashboard (v7.2 凱基大聯盟 18 分點)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
-    final_html = HTML_TEMPLATE.replace("__DB_JSON__", json_str)
+    broker_str = json.dumps(BROKER_LIST, ensure_ascii=False)
+    final_html = HTML_TEMPLATE.replace("__DB_JSON__", json_str).replace("__BROKER_JSON__", broker_str)
     
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(final_html)
