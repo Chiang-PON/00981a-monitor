@@ -1,9 +1,10 @@
-"""generate_web.py - ETF Monitor Terminal v6.6 (Auto-Fetch Price + Direct API)
+"""generate_web.py - ETF Monitor Terminal v7.0 (Broker-Grade UI + Multi-Day Aggregation)
 
 整合外資核心邏輯：
-1. 真實資金換算、產業板塊輪動、雷達微型圖 (Sparklines)、權重變動率。
-2. AI_AGENT 引擎：前端直接呼叫 OpenAI gpt-4o，API Key 存於 localStorage。
-3. 即時股價注入：前端向 TWSE/TPEx OpenAPI 抓取股價，注入 Prompt 強制模型以該數據分析，避免幻覺與道歉。
+1. 券商級 UI：下拉選單、天數聚合 (1/5/10/20/30日)、金額/張數切換、買超/賣超排行表。
+2. 多日籌碼動態加總：前端 aggregateData() 引擎累加 N 日 diff 與 amount。
+3. AI_AGENT 引擎：前端直接呼叫 OpenAI gpt-4o，API Key 存於 localStorage。
+4. 即時股價注入、台股紅綠色彩、Light/Dark 雙軌主題保留。
 """
 
 import os
@@ -95,14 +96,14 @@ def process_all_data():
                     shares, weight, price = extract_info(row, df_curr)
                     c_name = clean_stock_name(row["name"])
                     amount_10k = (shares * price) / 10 if price > 0 else 0
-                    new_buy.append({"name": c_name, "diff": shares, "weight": weight, "w_diff": weight, "amount": amount_10k, "sector": SECTOR_MAP.get(c_name, "其他")})
+                    new_buy.append({"name": c_name, "code": str(c), "diff": shares, "weight": weight, "w_diff": weight, "amount": amount_10k, "sector": SECTOR_MAP.get(c_name, "其他")})
                     
                 for c in (prev_codes - curr_codes):
                     row = df_prev[df_prev["code"].astype(str) == c].iloc[0]
                     shares, weight, price = extract_info(row, df_prev)
                     c_name = clean_stock_name(row["name"])
                     amount_10k = (shares * price) / 10 if price > 0 else 0
-                    sold_out.append({"name": c_name, "diff": shares, "weight": 0.0, "w_diff": -weight, "amount": amount_10k, "sector": SECTOR_MAP.get(c_name, "其他")})
+                    sold_out.append({"name": c_name, "code": str(c), "diff": shares, "weight": 0.0, "w_diff": -weight, "amount": amount_10k, "sector": SECTOR_MAP.get(c_name, "其他")})
                     
                 for c in common_codes:
                     row_curr = df_curr[df_curr["code"].astype(str) == c].iloc[0]
@@ -118,9 +119,9 @@ def process_all_data():
                     sector = SECTOR_MAP.get(c_name, "其他")
                     
                     if diff > 0:
-                        increased.append({"name": c_name, "diff": diff, "weight": weight_curr, "w_diff": w_diff, "amount": amount_10k, "sector": sector})
+                        increased.append({"name": c_name, "code": str(c), "diff": diff, "weight": weight_curr, "w_diff": w_diff, "amount": amount_10k, "sector": sector})
                     elif diff < 0:
-                        decreased.append({"name": c_name, "diff": abs(diff), "weight": weight_curr, "w_diff": w_diff, "amount": amount_10k, "sector": sector})
+                        decreased.append({"name": c_name, "code": str(c), "diff": abs(diff), "weight": weight_curr, "w_diff": w_diff, "amount": amount_10k, "sector": sector})
                         
                 def sort_key(x):
                     return (-x["diff"], -x.get("amount", 0))
@@ -143,7 +144,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONITOR TERMINAL</title>
+    <title>ETF 籌碼決策戰情室 v7.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -217,6 +218,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         #ai-report-output h1, #ai-report-output h2, #ai-report-output h3 { margin-top: 1em; margin-bottom: 0.5em; font-weight: 700; }
         #ai-report-output p { margin-bottom: 0.75em; }
         #ai-report-output ul, #ai-report-output ol { margin-left: 1.5em; margin-bottom: 0.75em; }
+
+        .unit-btn { background-color: var(--bg-base); color: var(--text-dim); }
+        .unit-btn:hover { color: var(--text-main); }
+        .unit-btn-amount.unit-active { background-color: var(--color-buy); color: #fff; }
+        .unit-btn-shares.unit-active { background-color: var(--color-accent); color: #fff; }
+        [data-theme="dark"] .unit-btn-amount.unit-active { background-color: var(--color-buy); color: #fff; }
+        [data-theme="dark"] .unit-btn-shares.unit-active { background-color: var(--color-accent); color: #fff; }
     </style>
 </head>
 <body class="pb-24 pt-6">
@@ -226,7 +234,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">MONITOR <span class="theme-text-dim font-mono text-xs">v6.6</span></h1>
+            <h1 class="text-lg font-black tracking-[0.2em] theme-text">戰情室 <span class="theme-text-dim font-mono text-xs">v7.0</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
@@ -238,11 +246,42 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     </nav>
 
     <div class="max-w-6xl mx-auto px-4 md:px-6 mt-20">
-        
-        <div id="etf-tabs" class="flex flex-wrap gap-2.5 mb-8"></div>
 
         <div class="theme-panel border rounded-xl p-5 md:p-8 transition-colors">
-            
+
+            <div id="control-panel" class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">目標標的</label>
+                        <select id="etf-selector" onchange="onETFChange()" class="theme-bg-input border theme-border rounded-lg w-full px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
+                        </select>
+                    </div>
+                </div>
+                <div id="timeframe-unit-row" class="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">天數</label>
+                        <select id="timeframe-selector" onchange="onTimeframeChange()" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
+                            <option value="1">近1日</option>
+                            <option value="5">近5日</option>
+                            <option value="10">近10日</option>
+                            <option value="20">近20日</option>
+                            <option value="30">近30日</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">單位</label>
+                        <div class="flex rounded-lg overflow-hidden border theme-border" role="group">
+                            <button type="button" id="unit-btn-amount" onclick="setUnit('amount')" class="unit-btn unit-btn-amount px-4 py-2.5 text-sm font-mono font-bold border-r theme-border transition-colors">
+                                金額
+                            </button>
+                            <button type="button" id="unit-btn-shares" onclick="setUnit('shares')" class="unit-btn unit-btn-shares px-4 py-2.5 text-sm font-mono font-bold transition-colors">
+                                張數
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="header-main" class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
                     <span class="font-mono text-xs theme-text-dim tracking-widest uppercase">TARGET_ASSET</span>
@@ -257,7 +296,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                         <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-gray-400 theme-text border-none">
                     </div>
                     <div class="theme-bg-input border rounded-md flex items-center px-2 py-1.5 transition-colors">
-                        <select id="date-selector" onchange="changeDate()" class="bg-transparent text-sm font-mono theme-text cursor-pointer pr-2 border-none appearance-none"></select>
+                        <select id="date-selector" onchange="onDateChange()" class="bg-transparent text-sm font-mono theme-text cursor-pointer pr-2 border-none appearance-none"></select>
                     </div>
                 </div>
             </div>
@@ -265,39 +304,39 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div id="sector-flow-container" class="mb-8 flex gap-3 overflow-x-auto hide-scrollbar pb-2"></div>
 
             <div id="normal-view">
-                <div class="mb-12">
-                    <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center">
-                        <span class="theme-text-dim opacity-50 mr-2">///</span> VOLUME_FLOW
-                    </h3>
-                    <div id="chart-container" class="w-full theme-bg-base border theme-border rounded-lg overflow-hidden"></div>
+                <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
+                    > NO_DATA_DETECTED_
                 </div>
-
-                <div>
-                    <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center border-b theme-border pb-2">
-                        <span class="theme-text-dim opacity-50 mr-2">///</span> TICKER_BREAKDOWN
-                    </h3>
-                    <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
-                        > NO_DATA_DETECTED_
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
-                        <div class="flex flex-col gap-8">
-                            <div id="list-new" class="hidden">
-                                <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-2 border-buy pl-2">INITIATE_POSITION</h4>
-                                <div id="items-new" class="flex flex-col border-t theme-border mt-1"></div>
-                            </div>
-                            <div id="list-inc" class="hidden">
-                                <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-2 border-buy pl-2">ACCUMULATE</h4>
-                                <div id="items-inc" class="flex flex-col border-t theme-border mt-1"></div>
+                <div id="data-table-container" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-4 border-buy pl-3 py-1">買超排行</h4>
+                            <div class="theme-bg-base border theme-border rounded-lg overflow-hidden">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="theme-bg-input border-b theme-border">
+                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
+                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim">股票</th>
+                                            <th class="text-right py-3 px-4 font-mono font-bold theme-text-dim">淨買超</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="buy-rank-tbody"></tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="flex flex-col gap-8">
-                            <div id="list-dec" class="hidden">
-                                <h4 class="font-mono text-sell text-sm font-bold tracking-widest mb-3 border-l-2 border-sell pl-2">REDUCE_EXPOSURE</h4>
-                                <div id="items-dec" class="flex flex-col border-t theme-border mt-1"></div>
-                            </div>
-                            <div id="list-out" class="hidden">
-                                <h4 class="font-mono theme-text-dim text-sm font-bold tracking-widest mb-3 border-l-2 theme-border pl-2">LIQUIDATE</h4>
-                                <div id="items-out" class="flex flex-col border-t theme-border mt-1"></div>
+                        <div>
+                            <h4 class="font-mono text-sell text-sm font-bold tracking-widest mb-3 border-l-4 border-sell pl-3 py-1">賣超排行</h4>
+                            <div class="theme-bg-base border theme-border rounded-lg overflow-hidden">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="theme-bg-input border-b theme-border">
+                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
+                                            <th class="text-left py-3 px-4 font-mono font-bold theme-text-dim">股票</th>
+                                            <th class="text-right py-3 px-4 font-mono font-bold theme-text-dim">淨賣超</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sell-rank-tbody"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -385,17 +424,93 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         const db = __DB_JSON__;
         const availableDatesDesc = Object.keys(db).sort().reverse();
         const availableDatesAsc = [...availableDatesDesc].reverse();
-        const FAMILY_TAB = "GLOBAL_CONSENSUS"; 
+        const FAMILY_TAB = "GLOBAL_CONSENSUS";
         const AI_TAB = "AI_AGENT";
-        
+
         let allETFs = new Set();
         Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(etf => allETFs.add(etf)); });
-        let etfList = Array.from(allETFs).sort();
+        let etfList = Array.from(allETFs).filter(e => e !== AI_TAB).sort();
         etfList.unshift(FAMILY_TAB);
         etfList.push(AI_TAB);
-        
+
+        let currentETF = etfList[0];
         let currentDate = availableDatesDesc[0];
-        let currentETF = etfList[0]; 
+        let currentUnit = 'amount';
+        let currentDays = 5;
+
+        function aggregateData(etf, days) {
+            if (availableDatesDesc.length === 0) return { buy: [], sell: [] };
+            let dateIndex = availableDatesDesc.indexOf(currentDate);
+            if (dateIndex === -1) dateIndex = 0;
+            const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(days, availableDatesDesc.length - dateIndex));
+            const agg = {};
+            const etfListToUse = (etf === FAMILY_TAB) ? etfList.filter(e => e !== FAMILY_TAB && e !== AI_TAB) : [etf];
+
+            dateSlice.forEach(d => {
+                const dataOfDay = db[d] || {};
+                etfListToUse.forEach(e => {
+                    const dayData = dataOfDay[e];
+                    if (!dayData) return;
+                    [...(dayData.new_buy || []), ...(dayData.increased || [])].forEach(i => {
+                        const key = i.name;
+                        if (!agg[key]) agg[key] = { name: key, code: i.code || '', sector: i.sector || '其他', diff: 0, amount: 0 };
+                        agg[key].diff += i.diff;
+                        agg[key].amount += (i.amount || 0);
+                    });
+                    [...(dayData.decreased || []), ...(dayData.sold_out || [])].forEach(i => {
+                        const key = i.name;
+                        if (!agg[key]) agg[key] = { name: key, code: i.code || '', sector: i.sector || '其他', diff: 0, amount: 0 };
+                        agg[key].diff -= i.diff;
+                        agg[key].amount -= (i.amount || 0);
+                    });
+                });
+            });
+
+            const buy = Object.values(agg).filter(x => x.diff > 0);
+            const sell = Object.values(agg).filter(x => x.diff < 0).map(x => ({ ...x, diff: Math.abs(x.diff), amount: Math.abs(x.amount) }));
+            return { buy, sell };
+        }
+
+        function onETFChange() {
+            currentETF = document.getElementById('etf-selector').value;
+            document.getElementById('search-input').value = '';
+            const isAI = currentETF === AI_TAB;
+            document.getElementById('timeframe-unit-row').classList.toggle('hidden', isAI);
+            document.getElementById('header-controls').classList.toggle('hidden', isAI);
+            document.getElementById('sector-flow-container').classList.toggle('hidden', isAI);
+            document.getElementById('normal-view').classList.toggle('hidden', isAI);
+            document.getElementById('search-view').classList.add('hidden');
+            document.getElementById('ai-agent-view').classList.toggle('hidden', !isAI);
+            document.getElementById('current-etf-title').textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : currentETF);
+            document.getElementById('current-date-display').textContent = isAI ? 'PROTOCOL_ACTIVE' : dateRangeLabel();
+            if (!isAI) refreshTable();
+        }
+
+        function onTimeframeChange() {
+            currentDays = parseInt(document.getElementById('timeframe-selector').value, 10);
+            document.getElementById('current-date-display').textContent = dateRangeLabel();
+            refreshTable();
+        }
+
+        function onDateChange() {
+            currentDate = document.getElementById('date-selector').value;
+            document.getElementById('current-date-display').textContent = dateRangeLabel();
+            refreshTable();
+        }
+
+        function dateRangeLabel() {
+            const idx = availableDatesDesc.indexOf(currentDate);
+            const slice = availableDatesDesc.slice(idx, idx + Math.min(currentDays, availableDatesDesc.length - idx));
+            if (slice.length === 0) return currentDate;
+            return slice.length === 1 ? slice[0] : slice[slice.length - 1] + ' ~ ' + slice[0];
+        }
+
+        function setUnit(u) {
+            currentUnit = u;
+            document.getElementById('unit-btn-amount').classList.toggle('unit-active', u === 'amount');
+            document.getElementById('unit-btn-shares').classList.toggle('unit-active', u === 'shares');
+            refreshTable();
+        }
 
         // API Key LocalStorage Logic
         function initApiKey() {
@@ -424,63 +539,88 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         function init() {
-            if(availableDatesDesc.length === 0) return;
-            const sel = document.getElementById('date-selector');
+            if (availableDatesDesc.length === 0) return;
+            const etfSel = document.getElementById('etf-selector');
+            etfList.forEach(etf => {
+                const opt = document.createElement('option');
+                opt.value = etf;
+                opt.textContent = etf === FAMILY_TAB ? 'GLOBAL_CONSENSUS (全家族共識)' : (etf === AI_TAB ? 'AI_AGENT' : etf);
+                etfSel.appendChild(opt);
+            });
+            const dateSel = document.getElementById('date-selector');
             availableDatesDesc.forEach(date => {
                 const opt = document.createElement('option');
-                opt.value = date; opt.textContent = date;
-                sel.appendChild(opt);
+                opt.value = date;
+                opt.textContent = date;
+                dateSel.appendChild(opt);
             });
-            renderTabs();
-            updateDashboard();
-            initApiKey(); // 載入時初始化 API Key 狀態
+            document.getElementById('etf-selector').value = currentETF;
+            document.getElementById('timeframe-selector').value = currentDays;
+            setUnit(currentUnit);
+            document.getElementById('current-etf-title').textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
+            document.getElementById('current-date-display').textContent = dateRangeLabel();
+            onETFChange();
+            initApiKey();
         }
 
-        function changeDate() { currentDate = document.getElementById('date-selector').value; handleSearch(); }
-        
-        function selectETF(etf) {
-            currentETF = etf;
-            document.getElementById('search-input').value = '';
-            renderTabs();
-            const normalView = document.getElementById('normal-view');
-            const searchView = document.getElementById('search-view');
-            const aiView = document.getElementById('ai-agent-view');
-            const sfContainer = document.getElementById('sector-flow-container');
-            const headerControls = document.getElementById('header-controls');
-            const titleEl = document.getElementById('current-etf-title');
-            const dateEl = document.getElementById('current-date-display');
-            if (etf === AI_TAB) {
-                normalView.classList.add('hidden');
-                searchView.classList.add('hidden');
-                aiView.classList.remove('hidden');
-                sfContainer.classList.add('hidden');
-                headerControls.classList.add('hidden');
-                titleEl.textContent = 'AI_AGENT';
-                dateEl.textContent = 'PROTOCOL_ACTIVE';
-            } else {
-                aiView.classList.add('hidden');
-                normalView.classList.remove('hidden');
-                sfContainer.classList.remove('hidden');
-                headerControls.classList.remove('hidden');
-                handleSearch();
+        function refreshTable() {
+            if (currentETF === AI_TAB) return;
+            const { buy, sell } = aggregateData(currentETF, currentDays);
+            const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
+            buy.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+            sell.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+
+            const emptyState = document.getElementById('empty-state');
+            const dataContainer = document.getElementById('data-table-container');
+            if (buy.length === 0 && sell.length === 0) {
+                emptyState.classList.remove('hidden');
+                dataContainer.classList.add('hidden');
+                return;
             }
-        }
+            emptyState.classList.add('hidden');
+            dataContainer.classList.remove('hidden');
 
-        function renderTabs() {
-            const container = document.getElementById('etf-tabs');
-            container.innerHTML = '';
-            etfList.forEach(etf => {
-                const btn = document.createElement('button');
-                const isActive = etf === currentETF;
-                const isAI = etf === AI_TAB;
-                let cls = 'tab-btn px-4 py-1.5 font-mono rounded-sm border ';
-                if (isAI) cls += isActive ? 'tab-ai-agent tab-active' : 'tab-ai-agent';
-                else cls += isActive ? 'tab-active theme-border' : 'tab-inactive';
-                btn.className = cls;
-                btn.textContent = etf === FAMILY_TAB ? '[ CONSENSUS ]' : (etf === AI_TAB ? '[ AI_AGENT ]' : etf);
-                btn.onclick = () => selectETF(etf);
-                container.appendChild(btn);
+            const sfContainer = document.getElementById('sector-flow-container');
+            const sectorTotals = {};
+            buy.forEach(i => {
+                const s = i.sector || '其他';
+                if (!sectorTotals[s]) sectorTotals[s] = 0;
+                sectorTotals[s] += currentUnit === 'amount' ? i.amount : i.diff;
             });
+            sell.forEach(i => {
+                const s = i.sector || '其他';
+                if (!sectorTotals[s]) sectorTotals[s] = 0;
+                sectorTotals[s] -= currentUnit === 'amount' ? i.amount : i.diff;
+            });
+            let topSectors = Object.entries(sectorTotals).filter(x => x[1] !== 0).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 3);
+            sfContainer.innerHTML = '';
+            topSectors.forEach(s => {
+                const isFlowIn = s[1] > 0;
+                const cColor = isFlowIn ? 'text-buy' : 'text-sell';
+                const cBorder = isFlowIn ? 'border-buy' : 'border-sell';
+                const sign = isFlowIn ? '+' : '-';
+                const valStr = currentUnit === 'amount' ? formatAmount(Math.abs(s[1])).replace(/[()]/g, '') : Math.abs(s[1]).toLocaleString();
+                sfContainer.innerHTML += `<div class="flex flex-col border-l-[3px] ${cBorder} pl-3 py-1.5 theme-bg-input rounded-r pr-4 min-w-[120px]"><span class="text-[11px] font-bold theme-text-dim mb-0.5">${s[0]}</span><span class="font-mono text-sm font-bold ${cColor}">${sign}${valStr}</span></div>`;
+            });
+            if (topSectors.length === 0) sfContainer.classList.add('hidden');
+            else sfContainer.classList.remove('hidden');
+
+            const formatVal = (item, isBuy) => {
+                if (currentUnit === 'amount') return (isBuy ? '+' : '-') + ' ' + formatAmount(item.amount);
+                return (isBuy ? '+' : '-') + (item.diff || 0).toLocaleString();
+            };
+
+            const buyTbody = document.getElementById('buy-rank-tbody');
+            buyTbody.innerHTML = buy.map((item, i) => {
+                const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-2.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-2.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-2.5 px-4 text-right font-mono font-bold text-buy">${formatVal(item, true)}</td></tr>`;
+            }).join('');
+
+            const sellTbody = document.getElementById('sell-rank-tbody');
+            sellTbody.innerHTML = sell.map((item, i) => {
+                const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-2.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-2.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-2.5 px-4 text-right font-mono font-bold text-sell">${formatVal(item, false)}</td></tr>`;
+            }).join('');
         }
 
         function formatAmount(amount_10k) {
@@ -490,292 +630,45 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             return `(約 ${Math.round(val).toLocaleString()} 萬)`;
         }
 
-        function getSparklineHTML(etf, stockName) {
-            let data = [];
-            for(let i = 4; i >= 0; i--) {
-                let index = availableDatesDesc.indexOf(currentDate) + i;
-                if (index >= availableDatesDesc.length || index < 0) continue;
-                const d = availableDatesDesc[index];
-                const etfData = db[d] && db[d][etf];
-                let diff = 0;
-                if(etfData) {
-                    let item = [...(etfData.new_buy||[]), ...(etfData.increased||[])].find(x => x.name === stockName);
-                    if(item) diff = item.diff;
-                    else {
-                        item = [...(etfData.decreased||[]), ...(etfData.sold_out||[])].find(x => x.name === stockName);
-                        if(item) diff = -item.diff;
-                    }
-                }
-                data.push(diff);
-            }
-            let max = Math.max(...data.map(Math.abs)) || 1;
-            let html = '<div class="flex items-end gap-[2px] h-5 w-12 ml-2">';
-            data.forEach(val => {
-                let h = Math.max((Math.abs(val)/max)*100, 15);
-                if (val === 0) h = 15;
-                let bg = val > 0 ? 'bg-buy opacity-80' : (val < 0 ? 'bg-sell opacity-80' : 'bg-neutral opacity-50');
-                html += `<div class="w-2 ${bg} rounded-[1px]" style="height: ${h}%"></div>`;
-            });
-            html += '</div>';
-            return html;
-        }
-
-        function getStreak(etf, stockName, startDate, type) {
-            if (etf === FAMILY_TAB) return 0;
-            let streak = 0;
-            let startIndex = availableDatesDesc.indexOf(startDate);
-            if (startIndex === -1) return 0;
-            for (let i = startIndex; i < availableDatesDesc.length; i++) {
-                const d = availableDatesDesc[i];
-                const data = db[d] && db[d][etf];
-                if (!data) break;
-                let found = false;
-                if (type === 'buy') found = [...(data.new_buy||[]), ...(data.increased||[])].some(x => x.name === stockName);
-                else found = [...(data.decreased||[]), ...(data.sold_out||[])].some(x => x.name === stockName);
-                if (found) streak++;
-                else break;
-            }
-            return streak;
-        }
-
-        function updateDashboard() {
-            const displayTitle = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : currentETF;
-            document.getElementById('current-etf-title').textContent = displayTitle;
-            document.getElementById('current-date-display').textContent = currentDate;
-            
-            const dataToday = db[currentDate] || {};
-            let etfData = { new_buy: [], increased: [], decreased: [], sold_out: [] };
-            let sectorAgg = {}; 
-            
-            if (currentETF === FAMILY_TAB) {
-                let agg = {};
-                Object.keys(dataToday).forEach(etf => {
-                    const d = dataToday[etf];
-                    [...(d.new_buy||[]), ...(d.increased||[])].forEach(i => {
-                        if(!agg[i.name]) agg[i.name] = { diff: 0, amount: 0, sector: i.sector };
-                        agg[i.name].diff += i.diff; agg[i.name].amount += i.amount;
-                        if(!sectorAgg[i.sector]) sectorAgg[i.sector] = 0;
-                        sectorAgg[i.sector] += i.amount;
-                    });
-                    [...(d.decreased||[]), ...(d.sold_out||[])].forEach(i => {
-                        if(!agg[i.name]) agg[i.name] = { diff: 0, amount: 0, sector: i.sector };
-                        agg[i.name].diff -= i.diff; agg[i.name].amount -= i.amount;
-                        if(!sectorAgg[i.sector]) sectorAgg[i.sector] = 0;
-                        sectorAgg[i.sector] -= i.amount;
-                    });
-                });
-                
-                Object.keys(agg).forEach(name => {
-                    if (agg[name].diff > 0) etfData.increased.push({ name: name, diff: agg[name].diff, amount: agg[name].amount, sector: agg[name].sector, weight:0, w_diff:0 });
-                    else if (agg[name].diff < 0) etfData.decreased.push({ name: name, diff: Math.abs(agg[name].diff), amount: Math.abs(agg[name].amount), sector: agg[name].sector, weight:0, w_diff:0 });
-                });
-            } else {
-                etfData = dataToday[currentETF] || { new_buy: [], increased: [], decreased: [], sold_out: [] };
-                [...(etfData.new_buy||[]), ...(etfData.increased||[])].forEach(i => {
-                    if(!sectorAgg[i.sector]) sectorAgg[i.sector] = 0; sectorAgg[i.sector] += i.amount;
-                });
-                [...(etfData.decreased||[]), ...(etfData.sold_out||[])].forEach(i => {
-                    if(!sectorAgg[i.sector]) sectorAgg[i.sector] = 0; sectorAgg[i.sector] -= i.amount;
-                });
-            }
-
-            const sfContainer = document.getElementById('sector-flow-container');
-            sfContainer.innerHTML = '';
-            let topSectors = Object.entries(sectorAgg).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).filter(x => x[1] !== 0).slice(0, 3);
-            if(topSectors.length > 0) {
-                let sfHTML = '';
-                topSectors.forEach(s => {
-                    let isFlowIn = s[1] > 0;
-                    let cColor = isFlowIn ? 'text-buy' : 'text-sell';
-                    let cBorder = isFlowIn ? 'border-buy' : 'border-sell';
-                    let sign = isFlowIn ? '+' : '-';
-                    sfHTML += `
-                    <div class="flex flex-col border-l-[3px] ${cBorder} pl-3 py-1.5 theme-bg-input rounded-r pr-4 min-w-[120px]">
-                        <span class="text-[11px] font-bold theme-text-dim mb-0.5">${s[0]}</span>
-                        <span class="font-mono text-sm font-bold ${cColor}">${sign}${formatAmount(s[1]).replace('(','').replace(')','')}</span>
-                    </div>`;
-                });
-                sfContainer.innerHTML = sfHTML;
-                sfContainer.classList.remove('hidden');
-            } else {
-                sfContainer.classList.add('hidden');
-            }
-
-            etfData.increased.sort((a,b) => b.diff - a.diff);
-            etfData.decreased.sort((a,b) => b.diff - a.diff);
-
-            const emptyState = document.getElementById('empty-state');
-            const sections = ['new', 'inc', 'dec', 'out'];
-            const chartContainer = document.getElementById('chart-container');
-            
-            if(!etfData.new_buy.length && !etfData.increased.length && !etfData.decreased.length && !etfData.sold_out.length) {
-                emptyState.classList.remove('hidden');
-                sections.forEach(s => document.getElementById(`list-${s}`).classList.add('hidden'));
-                chartContainer.innerHTML = '<div class="font-mono theme-text-dim py-8 text-center text-xs">> SIGNAL_LOST</div>';
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-
-            let formattedItems = [];
-            [...(etfData.new_buy || []), ...(etfData.increased || [])].forEach(i => { formattedItems.push({ name: i.name, trueVal: i.diff, amount: i.amount }); });
-            [...(etfData.decreased || []), ...(etfData.sold_out || [])].forEach(i => { formattedItems.push({ name: i.name, trueVal: -i.diff, amount: i.amount }); });
-            
-            formattedItems.sort((a, b) => {
-                if (a.amount && b.amount) return b.amount - a.amount;
-                return b.trueVal - a.trueVal;
-            });
-            
-            const maxVal = Math.max(...formattedItems.map(i => Math.abs(i.trueVal)));
-
-            let chartHTML = '<div class="flex flex-col">';
-            formattedItems.forEach((item, index) => {
-                const isBuy = item.trueVal > 0;
-                const valStr = isBuy ? `+${item.trueVal.toLocaleString()}` : item.trueVal.toLocaleString();
-                const textColor = isBuy ? 'text-buy' : 'text-sell';
-                const barClass = isBuy ? 'bg-buy' : 'bg-sell';
-                const bgClass = index % 2 === 0 ? 'row-even' : 'row-odd'; 
-                const widthPct = Math.max((Math.abs(item.trueVal) / maxVal) * 100, 1);
-
-                chartHTML += `
-                <div class="row-hover flex items-center py-2.5 px-4 ${bgClass} border-b theme-border last:border-0 transition-colors">
-                    <div class="w-48 md:w-60 flex-shrink-0 flex justify-between items-center pr-4 border-r theme-border">
-                        <span class="font-bold theme-text text-[14px] truncate text-left w-16">${item.name}</span>
-                        <div class="flex flex-col items-end">
-                            <span class="font-mono font-bold ${textColor} text-[13px] text-right">${valStr}</span>
-                            <span class="font-mono theme-text-dim text-[10px] opacity-80">${formatAmount(item.amount)}</span>
-                        </div>
-                    </div>
-                    <div class="flex-grow flex items-center pl-4">
-                        <div class="w-full bar-track h-[6px] rounded-sm overflow-hidden">
-                            <div class="${barClass} h-full" style="width: ${widthPct}%"></div>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            chartHTML += '</div>';
-            chartContainer.innerHTML = chartHTML;
-
-            const fillSection = (sectionId, items, colorClass, sign, type) => {
-                const wrap = document.getElementById(`list-${sectionId}`);
-                const list = document.getElementById(`items-${sectionId}`);
-                list.innerHTML = '';
-                
-                if(items && items.length > 0) {
-                    wrap.classList.remove('hidden');
-                    items.forEach(i => {
-                        let valStr = sectionId === 'out' ? `LIQ ${i.diff.toLocaleString()}` : `${sign}${i.diff.toLocaleString()}`;
-                        
-                        let tagsHTML = '';
-                        if (currentETF !== FAMILY_TAB) {
-                            if (i.weight && i.weight > 0) {
-                                let wDiffStr = '';
-                                if (i.w_diff !== undefined && i.w_diff !== 0) {
-                                    let wSign = i.w_diff > 0 ? '+' : '';
-                                    wDiffStr = `<span class="${i.w_diff > 0 ? 'text-buy':'text-sell'} ml-1">(${wSign}${i.w_diff.toFixed(2)}%)</span>`;
-                                }
-                                tagsHTML += `<span class="ml-2 font-mono theme-text-dim text-[10px] opacity-80">W:${i.weight.toFixed(2)}%${wDiffStr}</span>`;
-                            }
-                            
-                            const streak = getStreak(currentETF, i.name, currentDate, type);
-                            if (streak >= 3) {
-                                const sc = type === 'buy' ? 'text-buy border-buy' : 'text-sell border-sell';
-                                tagsHTML += `<span class="ml-2 px-1 border font-mono text-[9px] uppercase ${sc}">STRK:${streak}</span>`;
-                            }
-                        }
-
-                        let amountStr = i.amount > 0 ? `<span class="mr-3 font-mono theme-text-dim text-[11px] opacity-70">${formatAmount(i.amount)}</span>` : '';
-
-                        list.innerHTML += `
-                        <div class="flex justify-between items-center py-2.5 border-b theme-border last:border-0 row-hover px-2 -mx-2 transition-colors">
-                            <div class="flex items-center">
-                                <span class="text-[14px] font-bold theme-text">${i.name}</span>
-                                ${tagsHTML}
-                            </div>
-                            <div class="flex items-center">
-                                ${amountStr}
-                                <span class="${colorClass} text-[14px] font-mono font-bold">${valStr}</span>
-                            </div>
-                        </div>`;
-                    });
-                } else {
-                    wrap.classList.add('hidden');
-                }
-            };
-
-            fillSection('new', etfData.new_buy, 'text-buy', '+', 'buy');
-            fillSection('inc', etfData.increased, 'text-buy', '+', 'buy');
-            fillSection('dec', etfData.decreased, 'text-sell', '-', 'sell');
-            fillSection('out', etfData.sold_out, 'theme-text-dim', '', 'sell');
-        }
-
         function handleSearch() {
             const val = document.getElementById('search-input').value.trim().toLowerCase();
             const normalView = document.getElementById('normal-view');
             const searchView = document.getElementById('search-view');
             const aiView = document.getElementById('ai-agent-view');
             const sfContainer = document.getElementById('sector-flow-container');
-            
-            if (currentETF === AI_TAB) {
-                normalView.classList.add('hidden');
-                searchView.classList.add('hidden');
-                aiView.classList.remove('hidden');
-                sfContainer.classList.add('hidden');
-                return;
-            }
+
+            if (currentETF === AI_TAB) return;
             if (!val) {
                 normalView.classList.remove('hidden');
                 searchView.classList.add('hidden');
-                aiView.classList.add('hidden');
                 sfContainer.classList.remove('hidden');
-                updateDashboard(); 
+                refreshTable();
                 return;
             }
 
             normalView.classList.add('hidden');
-            aiView.classList.add('hidden');
             sfContainer.classList.add('hidden');
             searchView.classList.remove('hidden');
 
             const resultsContainer = document.getElementById('search-results-list');
             resultsContainer.innerHTML = '';
 
-            const dataToday = db[currentDate] || {};
-            let found = false;
+            const { buy, sell } = aggregateData(currentETF, currentDays);
+            const allMatches = [...buy.filter(i => (i.name + (i.code || '')).toLowerCase().includes(val)).map(i => ({ ...i, sign: '+', isBuy: true })),
+                ...sell.filter(i => (i.name + (i.code || '')).toLowerCase().includes(val)).map(i => ({ ...i, sign: '-', isBuy: false }))];
+            allMatches.sort((a, b) => (b.diff || 0) - (a.diff || 0));
 
-            Object.keys(dataToday).forEach(etf => {
-                if (etf === FAMILY_TAB) return; 
-                const d = dataToday[etf];
-                let actions = [];
-                [...(d.new_buy||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({name: i.name, act: 'INIT', diff: i.diff, sign: '+'}); });
-                [...(d.increased||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({name: i.name, act: 'ACC', diff: i.diff, sign: '+'}); });
-                [...(d.decreased||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({name: i.name, act: 'RED', diff: i.diff, sign: '-'}); });
-                [...(d.sold_out||[])].forEach(i => { if(i.name.toLowerCase().includes(val)) actions.push({name: i.name, act: 'LIQ', diff: i.diff, sign: '-'}); });
-
-                actions.forEach(a => {
-                    found = true;
-                    const isBuy = a.sign === '+';
-                    const colorClass = isBuy ? 'text-buy' : 'text-sell';
-                    const actStyle = a.act === 'LIQ' ? 'theme-text-dim theme-border' : `border border-current ${colorClass}`;
-                    
-                    const sparkline = getSparklineHTML(etf, a.name);
-
-                    resultsContainer.innerHTML += `
-                    <div class="flex justify-between items-center py-3 border-b theme-border row-hover px-2 -mx-2 transition-colors">
-                        <div class="flex items-center gap-3 flex-1 min-w-0">
-                            <span class="font-bold theme-text text-[14px] w-14 font-mono flex-shrink-0">${etf}</span>
-                            <span class="theme-text text-[14px] truncate">${a.name}</span>
-                            <span class="px-1.5 py-[1px] rounded-sm text-[10px] font-mono flex-shrink-0 ${actStyle}">${a.act}</span>
-                            ${sparkline}
-                        </div>
-                        <span class="${colorClass} font-mono font-bold text-[14px] flex-shrink-0 ml-2">${a.sign}${a.diff.toLocaleString()}</span>
-                    </div>`;
-                });
-            });
-
-            if (!found) {
+            if (allMatches.length === 0) {
                 resultsContainer.innerHTML = '<div class="py-12 text-center theme-text-dim font-mono text-sm">> RADAR_EMPTY</div>';
+                return;
             }
+
+            allMatches.forEach(a => {
+                const colorClass = a.isBuy ? 'text-buy' : 'text-sell';
+                const valStr = currentUnit === 'amount' ? (a.sign + ' ' + formatAmount(a.amount)) : (a.sign + (a.diff || 0).toLocaleString());
+                const codeHtml = a.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${a.code}</span>` : '';
+                resultsContainer.innerHTML += `<div class="flex justify-between items-center py-3 border-b theme-border row-hover px-4 transition-colors"><div class="flex items-center gap-2"><span class="theme-text text-[14px] font-bold">${a.name}</span>${codeHtml}</div><span class="${colorClass} font-mono font-bold text-[14px]">${valStr}</span></div>`;
+            });
         }
 
         async function runAIAnalysis() {
@@ -890,7 +783,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 def main():
-    print("[INFO] 開始產出 Web Dashboard (v6.6 終極內建直連版)...")
+    print("[INFO] 開始產出 Web Dashboard (v7.0 券商級 UI 多日聚合版)...")
     db = process_all_data()
     
     json_str = json.dumps(db, ensure_ascii=False)
