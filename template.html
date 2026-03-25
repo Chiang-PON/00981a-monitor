@@ -10,6 +10,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         :root {
             --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --bg-panel-hover: #fafafa; --bg-row-even: #ffffff; --bg-row-odd: #fafafa;
@@ -98,6 +100,19 @@
         [data-theme="dark"] .consensus-title { color: #fb923c; }
         .consensus-tag { background-color: #fecaca; color: #b91c1c; }
         [data-theme="dark"] .consensus-tag { background-color: rgba(194, 65, 12, 0.5); color: #fdba74; }
+
+        #broker-map { position: relative; z-index: 10; background: var(--bg-panel); }
+        #broker-map .leaflet-container { font-family: "Noto Sans TC", sans-serif; border-radius: 0.75rem; }
+        [data-theme="dark"] #broker-map.broker-map-dark .leaflet-tile-pane {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+        [data-theme="dark"] #broker-map.broker-map-dark .leaflet-control-attribution {
+            background: rgba(13, 13, 13, 0.85);
+            color: var(--text-dim);
+        }
+        [data-theme="dark"] #broker-map.broker-map-dark .leaflet-control-attribution a {
+            color: var(--color-accent);
+        }
     </style>
 </head>
 <body class="pb-24 pt-6">
@@ -184,6 +199,8 @@
                     </div>
                 </div>
             </div>
+
+            <div id="broker-map" class="hidden h-64 md:h-80 w-full rounded-xl border theme-border z-10 mb-6 overflow-hidden" aria-hidden="true"></div>
 
             <div id="chart-container" class="hidden mb-6 theme-bg-base border theme-border rounded-lg p-4">
                 <canvas id="stock-chart" height="180"></canvas>
@@ -305,6 +322,7 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcons(savedTheme);
+            updateBrokerMapThemeClass();
         }
         function toggleTheme() {
             const html = document.documentElement;
@@ -313,6 +331,7 @@
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcons(newTheme);
+            updateBrokerMapThemeClass();
         }
         function updateThemeIcons(theme) {
             if (theme === 'dark') {
@@ -344,6 +363,28 @@
         let allKeys = new Set();
         Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(k => allKeys.add(k)); });
         const brokerCodes = Object.keys(brokerLabels);
+        const brokerCoords = {
+            "9207": { name: "凱基永和", lat: 25.0080, lng: 121.5150 },
+            "920A": { name: "凱基板橋", lat: 25.0118, lng: 121.4653 },
+            "920D": { name: "凱基市府", lat: 25.0392, lng: 121.5644 },
+            "920F": { name: "凱基站前", lat: 25.0460, lng: 121.5160 },
+            "9216": { name: "凱基信義", lat: 25.0320, lng: 121.5670 },
+            "9217": { name: "凱基松山", lat: 25.0500, lng: 121.5770 },
+            "9218": { name: "凱基大直", lat: 25.0800, lng: 121.5450 },
+            "921F": { name: "凱基天母", lat: 25.1140, lng: 121.5320 },
+            "921J": { name: "凱基土城", lat: 24.9820, lng: 121.4420 },
+            "921S": { name: "凱基新莊", lat: 25.0360, lng: 121.4320 },
+            "9229": { name: "凱基中山", lat: 25.0560, lng: 121.5240 },
+            "9234": { name: "凱基竹北", lat: 24.8252, lng: 121.0125 },
+            "9238": { name: "凱基士林", lat: 25.0898, lng: 121.5230 },
+            "9239": { name: "凱基市政", lat: 24.1620, lng: 120.6470 },
+            "9257": { name: "凱基林口", lat: 25.0760, lng: 121.3780 },
+            "9272": { name: "凱基竹科", lat: 24.7814, lng: 120.9876 },
+            "9285": { name: "凱基中壢", lat: 24.9576, lng: 121.2250 },
+            "9287": { name: "凱基內湖", lat: 25.0796, lng: 121.5796 }
+        };
+        let brokerMap = null;
+        let brokerMapMarkers = {};
         const etfCodes = Array.from(allKeys).filter(k => !brokerCodes.includes(k) && k !== AI_TAB).sort();
         let etfList = [FAMILY_TAB];
         etfList = etfList.concat(etfCodes);
@@ -488,6 +529,82 @@
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
         }
 
+        function updateBrokerMapThemeClass() {
+            const el = document.getElementById('broker-map');
+            if (!el) return;
+            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+            el.classList.toggle('broker-map-dark', dark);
+        }
+
+        function initBrokerMap() {
+            if (brokerMap || typeof L === 'undefined') return;
+            const el = document.getElementById('broker-map');
+            if (!el) return;
+            brokerMap = L.map('broker-map', { scrollWheelZoom: true }).setView([25.03, 121.5], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(brokerMap);
+            brokerMapMarkers = {};
+            brokerCodes.forEach(code => {
+                const c = brokerCoords[code];
+                if (!c) return;
+                const marker = L.marker([c.lat, c.lng]).addTo(brokerMap);
+                marker.bindTooltip(c.name, { permanent: false, direction: 'top', offset: [0, -8] });
+                marker.on('click', () => {
+                    brokerMap.flyTo([c.lat, c.lng], 14, { duration: 0.85 });
+                    marker.openTooltip();
+                    currentETF = code;
+                    document.getElementById('etf-dropdown-label').textContent = getETFLabel(code);
+                    onETFChange();
+                });
+                brokerMapMarkers[code] = marker;
+            });
+            updateBrokerMapThemeClass();
+            setTimeout(function() {
+                if (brokerMap) {
+                    brokerMap.invalidateSize();
+                    syncBrokerMapToSelection(currentETF);
+                }
+            }, 200);
+        }
+
+        function syncBrokerMapToSelection(etf) {
+            if (!brokerMap) return;
+            if (etf === KAIJI_TAB) {
+                brokerMap.flyTo([25.03, 121.5], 11, { duration: 0.85 });
+                return;
+            }
+            const c = brokerCoords[etf];
+            if (!c) return;
+            brokerMap.flyTo([c.lat, c.lng], 14, { duration: 0.85 });
+            const m = brokerMapMarkers[etf];
+            if (m) {
+                setTimeout(function() { m.openTooltip(); }, 400);
+            }
+        }
+
+        function ensureBrokerMapVisibleAndSync() {
+            const mapEl = document.getElementById('broker-map');
+            if (!mapEl) return;
+            if (currentMode !== 'BROKER') {
+                mapEl.classList.add('hidden');
+                mapEl.setAttribute('aria-hidden', 'true');
+                return;
+            }
+            mapEl.classList.remove('hidden');
+            mapEl.setAttribute('aria-hidden', 'false');
+            if (!brokerMap) {
+                initBrokerMap();
+            } else {
+                setTimeout(function() {
+                    if (brokerMap) {
+                        brokerMap.invalidateSize();
+                        syncBrokerMapToSelection(currentETF);
+                    }
+                }, 50);
+            }
+        }
+
         function setMode(mode) {
             if (mode !== 'ETF' && mode !== 'BROKER') return;
             if (mode === currentMode) return;
@@ -583,6 +700,7 @@
                 document.getElementById('chart-container').classList.toggle('hidden', !chartVisible);
                 refreshTable();
             }
+            ensureBrokerMapVisibleAndSync();
         }
 
         function onTimeframeChange() {
