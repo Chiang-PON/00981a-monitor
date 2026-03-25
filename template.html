@@ -73,6 +73,9 @@
         .live-dot { height: 8px; width: 8px; background-color: var(--color-buy); border-radius: 50%; display: inline-block; animation: pulse-dot 2s infinite; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .etf-search-placeholder::placeholder { color: var(--text-dim); opacity: 0.85; }
+        #etf-dropdown-btn:focus { border-color: var(--border-focus); outline: none; }
+        .etf-group-header { background-color: var(--bg-panel); border-bottom: 1px solid var(--border-dim); }
         input, select { outline: none; }
 
         #ai-report-output h1, #ai-report-output h2, #ai-report-output h3 { margin-top: 1em; margin-bottom: 0.5em; font-weight: 700; }
@@ -121,10 +124,19 @@
 
             <div id="control-panel" class="mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div>
+                    <div class="relative" id="etf-dropdown-wrapper">
                         <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">目標標的</label>
-                        <select id="etf-selector" onchange="onETFChange()" class="theme-bg-input border theme-border rounded-lg w-full px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
-                        </select>
+                        <button type="button" id="etf-dropdown-btn" onclick="toggleETFDropdown()" class="theme-bg-input border theme-border rounded-lg w-full px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors text-left flex justify-between items-center gap-2">
+                            <span id="etf-dropdown-label" class="truncate">---</span>
+                            <svg id="etf-dropdown-chevron" class="w-4 h-4 theme-text-dim flex-shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="etf-dropdown-panel" class="hidden absolute z-50 top-full left-0 right-0 mt-1 theme-panel border theme-border rounded-lg shadow-lg overflow-hidden min-w-[280px]">
+                            <div class="p-2 border-b theme-border bg-inherit">
+                                <input type="text" id="etf-search-input" placeholder="搜尋標的或分點..." class="theme-bg-input border theme-border rounded-md w-full px-3 py-2 text-sm font-mono theme-text etf-search-placeholder" oninput="filterETFOptions()">
+                            </div>
+                            <ul id="etf-dropdown-list" class="max-h-60 overflow-y-auto hide-scrollbar py-1">
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mb-4">
@@ -431,8 +443,87 @@
             return { buy, sell };
         }
 
+        function getETFLabel(etf) {
+            if (etf === FAMILY_TAB) return 'GLOBAL_CONSENSUS (全家族共識)';
+            if (etf === KAIJI_TAB) return 'KAIJI_CONSENSUS (凱基大聯盟)';
+            if (etf === AI_TAB) return 'AI_AGENT';
+            if (brokerLabels[etf]) return etf + ' ' + brokerLabels[etf];
+            return etf;
+        }
+
+        function getETFGroup(etf) {
+            if (etf === FAMILY_TAB || etf === KAIJI_TAB || etf === AI_TAB) return 'core';
+            if (brokerCodes.includes(etf)) return 'broker';
+            return 'etf';
+        }
+
+        const ETF_GROUP_DEFS = [
+            { id: 'core', title: '【 🎯 核心決策 】' },
+            { id: 'etf', title: '【 📈 ETF 標的 】' },
+            { id: 'broker', title: '【 🏦 主力分點 】' }
+        ];
+
+        function toggleETFDropdown() {
+            const panel = document.getElementById('etf-dropdown-panel');
+            const chevron = document.getElementById('etf-dropdown-chevron');
+            const isOpen = !panel.classList.contains('hidden');
+            if (isOpen) {
+                panel.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+                document.getElementById('etf-search-input').value = '';
+                filterETFOptions();
+            } else {
+                panel.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+                document.getElementById('etf-search-input').focus();
+            }
+        }
+
+        function closeETFDropdown() {
+            const panel = document.getElementById('etf-dropdown-panel');
+            if (!panel.classList.contains('hidden')) {
+                panel.classList.add('hidden');
+                document.getElementById('etf-dropdown-chevron').classList.remove('rotate-180');
+                document.getElementById('etf-search-input').value = '';
+                filterETFOptions();
+            }
+        }
+
+        function filterETFOptions() {
+            const query = (document.getElementById('etf-search-input').value || '').trim().toLowerCase();
+            const listEl = document.getElementById('etf-dropdown-list');
+            if (!listEl) return;
+            const items = listEl.querySelectorAll('[data-etf-value]');
+            const headers = listEl.querySelectorAll('[data-group-header]');
+            items.forEach(el => {
+                const text = (el.getAttribute('data-etf-label') || '').toLowerCase();
+                const match = !query || text.includes(query);
+                el.classList.toggle('hidden', !match);
+            });
+            headers.forEach(header => {
+                const groupId = header.getAttribute('data-group-header');
+                const groupItems = listEl.querySelectorAll(`[data-group-id="${groupId}"]`);
+                const hasVisible = Array.from(groupItems).some(el => !el.classList.contains('hidden'));
+                header.classList.toggle('hidden', !hasVisible);
+            });
+        }
+
+        function selectETFOption(etf) {
+            currentETF = etf;
+            document.getElementById('etf-dropdown-label').textContent = getETFLabel(etf);
+            closeETFDropdown();
+            onETFChange();
+        }
+
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('etf-dropdown-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) closeETFDropdown();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeETFDropdown();
+        });
+
         function onETFChange() {
-            currentETF = document.getElementById('etf-selector').value;
             document.getElementById('search-input').value = '';
             const isAI = currentETF === AI_TAB;
             document.getElementById('timeframe-unit-row').classList.toggle('hidden', isAI);
@@ -504,20 +595,36 @@
             }
         }
 
+        function renderETFDropdownList() {
+            const listEl = document.getElementById('etf-dropdown-list');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            let lastGroup = null;
+            etfList.forEach(etf => {
+                const group = getETFGroup(etf);
+                if (group !== lastGroup) {
+                    const header = document.createElement('li');
+                    header.setAttribute('data-group-header', group);
+                    header.className = 'etf-group-header sticky top-0 px-3 py-2 text-xs font-bold tracking-wider theme-text-dim font-mono cursor-default select-none z-10';
+                    header.textContent = ETF_GROUP_DEFS.find(g => g.id === group).title;
+                    listEl.appendChild(header);
+                    lastGroup = group;
+                }
+                const label = getETFLabel(etf);
+                const li = document.createElement('li');
+                li.setAttribute('data-etf-value', etf);
+                li.setAttribute('data-etf-label', label);
+                li.setAttribute('data-group-id', group);
+                li.className = 'px-3 py-2.5 text-sm font-mono theme-text cursor-pointer row-hover transition-colors';
+                li.textContent = label;
+                li.onclick = () => selectETFOption(etf);
+                listEl.appendChild(li);
+            });
+        }
+
         function init() {
             if (availableDatesDesc.length === 0) return;
-            const etfSel = document.getElementById('etf-selector');
-            etfList.forEach(etf => {
-                const opt = document.createElement('option');
-                opt.value = etf;
-                let label = etf;
-                if (etf === FAMILY_TAB) label = 'GLOBAL_CONSENSUS (全家族共識)';
-                else if (etf === KAIJI_TAB) label = 'KAIJI_CONSENSUS (凱基大聯盟)';
-                else if (etf === AI_TAB) label = 'AI_AGENT';
-                else if (brokerLabels[etf]) label = etf + ' ' + brokerLabels[etf];
-                opt.textContent = label;
-                etfSel.appendChild(opt);
-            });
+            renderETFDropdownList();
             const dateSel = document.getElementById('date-selector');
             availableDatesDesc.forEach(date => {
                 const opt = document.createElement('option');
@@ -525,7 +632,7 @@
                 opt.textContent = date;
                 dateSel.appendChild(opt);
             });
-            document.getElementById('etf-selector').value = currentETF;
+            document.getElementById('etf-dropdown-label').textContent = getETFLabel(currentETF);
             document.getElementById('timeframe-selector').value = currentDays;
             setUnit(currentUnit);
             document.getElementById('current-etf-title').textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
