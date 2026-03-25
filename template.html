@@ -123,6 +123,10 @@
         <div class="theme-panel border rounded-xl p-5 md:p-8 transition-colors">
 
             <div id="control-panel" class="mb-6">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
+                    <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div class="relative" id="etf-dropdown-wrapper">
                         <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">目標標的</label>
@@ -349,7 +353,8 @@
         }
         etfList.push(AI_TAB);
 
-        let currentETF = etfList[0];
+        let currentMode = 'ETF';
+        let currentETF = FAMILY_TAB;
         let currentDate = availableDatesDesc[0];
         let currentUnit = 'amount';
         let currentDays = 5;
@@ -451,10 +456,21 @@
             return etf;
         }
 
-        function getETFGroup(etf) {
-            if (etf === FAMILY_TAB || etf === KAIJI_TAB || etf === AI_TAB) return 'core';
-            if (brokerCodes.includes(etf)) return 'broker';
-            return 'etf';
+        function getDropdownEtfList() {
+            if (currentMode === 'ETF') {
+                return [FAMILY_TAB, AI_TAB, ...etfCodes];
+            }
+            const brokers = brokerCodes.filter(b => allKeys.has(b)).sort((a, b) => brokerCodes.indexOf(a) - brokerCodes.indexOf(b));
+            return [KAIJI_TAB, ...brokers];
+        }
+
+        function getETFGroupForRender(etf) {
+            if (currentMode === 'ETF') {
+                if (etf === FAMILY_TAB || etf === AI_TAB) return 'core';
+                return 'etf';
+            }
+            if (etf === KAIJI_TAB) return 'core';
+            return 'broker';
         }
 
         const ETF_GROUP_DEFS = [
@@ -462,6 +478,31 @@
             { id: 'etf', title: '【 📈 ETF 標的 】' },
             { id: 'broker', title: '【 🏦 主力分點 】' }
         ];
+
+        function updateModeTabStyles() {
+            const etfBtn = document.getElementById('mode-tab-etf');
+            const brokerBtn = document.getElementById('mode-tab-broker');
+            if (!etfBtn || !brokerBtn) return;
+            const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors';
+            etfBtn.className = base + ' ' + (currentMode === 'ETF' ? 'tab-active' : 'tab-inactive');
+            brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
+        }
+
+        function setMode(mode) {
+            if (mode !== 'ETF' && mode !== 'BROKER') return;
+            if (mode === currentMode) return;
+            currentMode = mode;
+            updateModeTabStyles();
+            closeETFDropdown();
+            if (mode === 'ETF') {
+                currentETF = FAMILY_TAB;
+            } else {
+                currentETF = KAIJI_TAB;
+            }
+            renderETFDropdownList();
+            document.getElementById('etf-dropdown-label').textContent = getETFLabel(currentETF);
+            onETFChange();
+        }
 
         function toggleETFDropdown() {
             const panel = document.getElementById('etf-dropdown-panel');
@@ -599,9 +640,10 @@
             const listEl = document.getElementById('etf-dropdown-list');
             if (!listEl) return;
             listEl.innerHTML = '';
+            const rows = getDropdownEtfList();
             let lastGroup = null;
-            etfList.forEach(etf => {
-                const group = getETFGroup(etf);
+            rows.forEach(etf => {
+                const group = getETFGroupForRender(etf);
                 if (group !== lastGroup) {
                     const header = document.createElement('li');
                     header.setAttribute('data-group-header', group);
@@ -624,6 +666,9 @@
 
         function init() {
             if (availableDatesDesc.length === 0) return;
+            currentMode = 'ETF';
+            currentETF = FAMILY_TAB;
+            updateModeTabStyles();
             renderETFDropdownList();
             const dateSel = document.getElementById('date-selector');
             availableDatesDesc.forEach(date => {
