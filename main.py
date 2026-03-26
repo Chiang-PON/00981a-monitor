@@ -127,6 +127,17 @@ STRIP_PATTERN = re.compile(r"（股）公司|\(股\)公司|股份有限公司|�
 
 
 def clean_stock_name(name: str) -> str:
+    if name is None:
+        return ""
+    try:
+        if pd.isna(name):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    if not isinstance(name, str):
+        name = str(name)
+    if name.lower() == "nan":
+        return ""
     name = name.replace("*", "").strip()
     for old, new in NAME_REPLACEMENTS.items():
         if old in name:
@@ -191,6 +202,31 @@ def _ensure_csv_columns(df: pd.DataFrame) -> pd.DataFrame:
     if "weight" not in df.columns:
         df["weight"] = 0.0
     return df
+
+
+def _shares_thousands_int(val) -> int:
+    """將持股股數轉為「千張」整數；None/NaN/空字串視為 0。僅對 str 做千分位逗號清理。"""
+    if val is None:
+        return 0
+    try:
+        if pd.isna(val):
+            return 0
+    except (TypeError, ValueError):
+        pass
+    if isinstance(val, str):
+        val = val.replace(",", "").strip()
+        if not val or val.lower() == "nan":
+            return 0
+    try:
+        v = float(pd.to_numeric(val, errors="coerce"))
+    except (TypeError, ValueError):
+        return 0
+    if pd.isna(v):
+        return 0
+    try:
+        return int(v / 1000)
+    except (TypeError, ValueError, OverflowError):
+        return 0
 
 
 def fetch_data(etf_code: str, prices_dict: dict) -> list[dict]:
@@ -432,24 +468,36 @@ def process_etf(etf_code: str, prices_dict: dict) -> dict:
         try:
             last_df = pd.read_csv(all_files[-2], dtype={"code": str})
             last_df = _ensure_csv_columns(last_df)
+            today_df = _ensure_csv_columns(today_df)
+            for _df in (today_df, last_df):
+                if "shares" in _df.columns:
+                    _df["shares"] = pd.to_numeric(_df["shares"], errors="coerce").fillna(0)
+                if "weight" in _df.columns:
+                    _df["weight"] = pd.to_numeric(_df["weight"], errors="coerce").fillna(0.0)
+                if "price" in _df.columns:
+                    _df["price"] = pd.to_numeric(_df["price"], errors="coerce").fillna(0.0)
+                if "name" in _df.columns:
+                    _df["name"] = _df["name"].apply(
+                        lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
+                    )
             today_codes = set(today_df["code"].astype(str))
             last_codes = set(last_df["code"].astype(str))
             common_codes = today_codes & last_codes
 
             for c in (today_codes - last_codes):
                 row = today_df[today_df["code"].astype(str) == c].iloc[0]
-                shares = int(row["shares"] / 1000)
+                shares = _shares_thousands_int(row["shares"])
                 new_buy_list.append((f"+ {clean_stock_name(row['name'])}", f"{shares:,} 張"))
 
             for c in (last_codes - today_codes):
                 row = last_df[last_df["code"].astype(str) == c].iloc[0]
-                shares = int(row["shares"] / 1000)
+                shares = _shares_thousands_int(row["shares"])
                 sold_out_list.append((f"- {clean_stock_name(row['name'])}", f"出清 {shares:,} 張"))
 
             for c in common_codes:
                 row_now = today_df[today_df["code"].astype(str) == c].iloc[0]
                 row_last = last_df[last_df["code"].astype(str) == c].iloc[0]
-                shares_diff = int(row_now["shares"] / 1000) - int(row_last["shares"] / 1000)
+                shares_diff = _shares_thousands_int(row_now["shares"]) - _shares_thousands_int(row_last["shares"])
                 if shares_diff != 0:
                     name = clean_stock_name(row_now["name"])
                     if shares_diff > 0:
@@ -459,8 +507,25 @@ def process_etf(etf_code: str, prices_dict: dict) -> dict:
         except Exception as e:
             logger.warning("[%s] 比較歷史資料失敗: %s", etf_code, e)
 
-    def _parse_shares(s: str) -> int:
-        return int(s.replace(" 張", "").replace(",", "").replace("出清 ", "").replace("+", "").strip() or "0")
+    def _parse_shares(s) -> int:
+        if s is None:
+            return 0
+        try:
+            if pd.isna(s):
+                return 0
+        except (TypeError, ValueError):
+            pass
+        if not isinstance(s, str):
+            try:
+                v = float(pd.to_numeric(s, errors="coerce"))
+                return int(v) if not pd.isna(v) else 0
+            except (TypeError, ValueError):
+                return 0
+        t = s.replace(" 張", "").replace(",", "").replace("出清 ", "").replace("+", "").strip() or "0"
+        try:
+            return int(float(t))
+        except (TypeError, ValueError):
+            return 0
 
     new_buy_list.sort(key=lambda x: _parse_shares(x[1]), reverse=True)
     sold_out_list.sort(key=lambda x: _parse_shares(x[1]), reverse=True)
