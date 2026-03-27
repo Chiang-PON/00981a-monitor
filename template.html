@@ -77,8 +77,8 @@
         input, select { outline: none; }
 
         .pill-btn {
-            min-height: 2.75rem;
-            padding: 0.5rem 1rem;
+            min-height: 2.5rem;
+            padding: 0.375rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.8125rem;
             line-height: 1.35;
@@ -101,6 +101,12 @@
         [data-theme="dark"] .pill-btn-active {
             color: #0a0a0a;
             box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+        }
+        @media (min-width: 640px) {
+            .pill-btn {
+                min-height: 2.75rem;
+                padding: 0.5rem 1rem;
+            }
         }
         .table-num-cell { white-space: nowrap; font-size: 0.8125rem; }
         @media (min-width: 640px) {
@@ -493,6 +499,13 @@
             return etf;
         }
 
+        /** 按鈕顯示用：分點模式下略去「凱基」以節省版面（標的代碼與邏輯仍用 etf / data-etf） */
+        function getPillButtonLabel(etf) {
+            const full = getETFLabel(etf);
+            if (currentMode !== 'BROKER') return full;
+            return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
+        }
+
         function getDropdownEtfList() {
             if (currentMode === 'ETF') {
                 return [FAMILY_TAB, AI_TAB, ...etfCodes];
@@ -653,7 +666,7 @@
                 btn.type = 'button';
                 btn.dataset.etf = etf;
                 btn.className = 'pill-btn pill-btn-idle';
-                btn.textContent = getETFLabel(etf);
+                btn.textContent = getPillButtonLabel(etf);
                 btn.onclick = () => selectTarget(etf);
                 rowEl.appendChild(btn);
             });
