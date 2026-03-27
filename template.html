@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
@@ -75,10 +74,38 @@
         .live-dot { height: 8px; width: 8px; background-color: var(--color-buy); border-radius: 50%; display: inline-block; animation: pulse-dot 2s infinite; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .etf-search-placeholder::placeholder { color: var(--text-dim); opacity: 0.85; }
-        #etf-dropdown-btn:focus { border-color: var(--border-focus); outline: none; }
-        .etf-group-header { background-color: var(--bg-panel); border-bottom: 1px solid var(--border-dim); }
         input, select { outline: none; }
+
+        .pill-btn {
+            min-height: 2.75rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            line-height: 1.35;
+            font-family: "JetBrains Mono", ui-monospace, monospace;
+            border: 1px solid var(--border-dim);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            text-align: center;
+            max-width: 100%;
+        }
+        .pill-btn-idle:hover { border-color: var(--border-focus); color: var(--text-main); }
+        .pill-btn-active {
+            background-color: var(--color-accent);
+            color: #fff;
+            border-color: var(--color-accent);
+            font-weight: 700;
+            box-shadow: var(--shadow-accent);
+        }
+        [data-theme="dark"] .pill-btn-active {
+            color: #0a0a0a;
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+        }
+        .table-num-cell { white-space: nowrap; font-size: 0.8125rem; }
+        @media (min-width: 640px) {
+            .table-num-cell { font-size: 0.875rem; }
+        }
 
         #ai-report-output h1, #ai-report-output h2, #ai-report-output h3 { margin-top: 1em; margin-bottom: 0.5em; font-weight: 700; }
         #ai-report-output p { margin-bottom: 0.75em; }
@@ -103,8 +130,21 @@
 
         #broker-map { position: relative; z-index: 10; background: var(--bg-panel); }
         #broker-map .leaflet-container { font-family: "Noto Sans TC", sans-serif; border-radius: 0.75rem; }
-        [data-theme="dark"] #broker-map.broker-map-dark .leaflet-tile-pane {
-            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        .leaflet-tooltip.broker-pin-tooltip {
+            font-family: "Noto Sans TC", sans-serif !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            padding: 8px 12px !important;
+            border-radius: 8px !important;
+            border: 1px solid var(--border-dim) !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+            background: rgba(255, 255, 255, 0.96) !important;
+            color: var(--text-main) !important;
+        }
+        [data-theme="dark"] .leaflet-tooltip.broker-pin-tooltip {
+            background: rgba(23, 23, 23, 0.96) !important;
+            color: #fafafa !important;
+            border-color: #3f3f46 !important;
         }
         [data-theme="dark"] #broker-map.broker-map-dark .leaflet-control-attribution {
             background: rgba(13, 13, 13, 0.85);
@@ -142,21 +182,9 @@
                     <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
                     <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div class="relative" id="etf-dropdown-wrapper">
-                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">目標標的</label>
-                        <button type="button" id="etf-dropdown-btn" onclick="toggleETFDropdown()" class="theme-bg-input border theme-border rounded-lg w-full px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors text-left flex justify-between items-center gap-2">
-                            <span id="etf-dropdown-label" class="truncate">---</span>
-                            <svg id="etf-dropdown-chevron" class="w-4 h-4 theme-text-dim flex-shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div id="etf-dropdown-panel" class="hidden absolute z-50 top-full left-0 right-0 mt-1 theme-panel border theme-border rounded-lg shadow-lg overflow-hidden min-w-[280px]">
-                            <div class="p-2 border-b theme-border bg-inherit">
-                                <input type="text" id="etf-search-input" placeholder="搜尋標的或分點..." class="theme-bg-input border theme-border rounded-md w-full px-3 py-2 text-sm font-mono theme-text etf-search-placeholder" oninput="filterETFOptions()">
-                            </div>
-                            <ul id="etf-dropdown-list" class="max-h-60 overflow-y-auto hide-scrollbar py-1">
-                            </ul>
-                        </div>
-                    </div>
+                <div class="mb-4">
+                    <label class="block font-mono text-xs theme-text-dim mb-2 uppercase tracking-wider">目標標的（點選切換）</label>
+                    <div id="target-pills-container" class="space-y-3"></div>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mb-4">
                     <div>
@@ -191,20 +219,10 @@
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">個股圖表</label>
-                        <button type="button" id="chart-toggle-btn" onclick="toggleChart()" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">
-                            顯示圖表
-                        </button>
-                    </div>
                 </div>
             </div>
 
             <div id="broker-map" class="hidden h-64 md:h-80 w-full rounded-xl border theme-border z-10 mb-6 overflow-hidden" aria-hidden="true"></div>
-
-            <div id="chart-container" class="hidden mb-6 theme-bg-base border theme-border rounded-lg p-4">
-                <canvas id="stock-chart" height="180"></canvas>
-            </div>
 
             <div id="header-main" class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
@@ -239,30 +257,30 @@
                 </div>
                 <div id="data-table-container" class="hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
+                        <div class="min-w-0">
                             <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-4 border-buy pl-3 py-1">買超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-lg overflow-hidden">
-                                <table class="w-full text-sm">
+                            <div class="theme-bg-base border theme-border rounded-lg overflow-x-auto overflow-y-hidden">
+                                <table class="w-full text-sm min-w-[280px]">
                                     <thead>
                                         <tr class="theme-bg-input border-b theme-border">
-                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
-                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim">股票</th>
-                                            <th class="text-right py-3.5 px-4 font-mono font-bold theme-text-dim">淨買超</th>
+                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim w-14 sm:w-16">排名</th>
+                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim">股票</th>
+                                            <th class="text-right py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim whitespace-nowrap">淨買超</th>
                                         </tr>
                                     </thead>
                                     <tbody id="buy-rank-tbody"></tbody>
                                 </table>
                             </div>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <h4 class="font-mono text-sell text-sm font-bold tracking-widest mb-3 border-l-4 border-sell pl-3 py-1">賣超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-lg overflow-hidden">
-                                <table class="w-full text-sm">
+                            <div class="theme-bg-base border theme-border rounded-lg overflow-x-auto overflow-y-hidden">
+                                <table class="w-full text-sm min-w-[280px]">
                                     <thead>
                                         <tr class="theme-bg-input border-b theme-border">
-                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim w-16">排名</th>
-                                            <th class="text-left py-3.5 px-4 font-mono font-bold theme-text-dim">股票</th>
-                                            <th class="text-right py-3.5 px-4 font-mono font-bold theme-text-dim">淨賣超</th>
+                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim w-14 sm:w-16">排名</th>
+                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim">股票</th>
+                                            <th class="text-right py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim whitespace-nowrap">淨賣超</th>
                                         </tr>
                                     </thead>
                                     <tbody id="sell-rank-tbody"></tbody>
@@ -317,41 +335,16 @@
     </div>
 
     <script>
-        // Theme Logic
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcons(savedTheme);
-            updateBrokerMapThemeClass();
-        }
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcons(newTheme);
-            updateBrokerMapThemeClass();
-        }
-        function updateThemeIcons(theme) {
-            if (theme === 'dark') {
-                document.getElementById('icon-sun').classList.remove('hidden');
-                document.getElementById('icon-moon').classList.add('hidden');
-            } else {
-                document.getElementById('icon-sun').classList.add('hidden');
-                document.getElementById('icon-moon').classList.remove('hidden');
-            }
-        }
-        initTheme();
-
-        // Live Clock
-        function updateClock() {
-            const now = new Date();
-            const utc = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-            document.getElementById('live-clock').textContent = utc;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        /* 全域狀態：須在任何 init / 主題回呼之前宣告，避免 let TDZ (Cannot access before initialization) */
+        let brokerMap = null;
+        let brokerMapBasemapLayer = null;
+        let brokerMapMarkers = {};
+        let currentMode = 'ETF';
+        let currentETF = 'GLOBAL_CONSENSUS';
+        let currentDate = '';
+        let currentUnit = 'amount';
+        let currentDays = 5;
+        let etfList = [];
 
         const db = __DB_JSON__;
         const brokerLabels = __BROKER_JSON__ || {};
@@ -383,10 +376,26 @@
             "9285": { name: "凱基中壢", lat: 24.9576, lng: 121.2250 },
             "9287": { name: "凱基內湖", lat: 25.0796, lng: 121.5796 }
         };
-        let brokerMap = null;
-        let brokerMapMarkers = {};
+
+        function getCartoBasemapUrl() {
+            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+            return dark
+                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        }
+
+        function getCartoAttribution() {
+            return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+        }
+
+        function shortBrokerMapLabel(fullName) {
+            if (!fullName || typeof fullName !== 'string') return '';
+            const t = fullName.replace(/凱基/g, '').trim();
+            return t || fullName;
+        }
+
         const etfCodes = Array.from(allKeys).filter(k => !brokerCodes.includes(k) && k !== AI_TAB).sort();
-        let etfList = [FAMILY_TAB];
+        etfList = [FAMILY_TAB];
         etfList = etfList.concat(etfCodes);
         if (brokerCodes.some(b => allKeys.has(b))) {
             etfList.push(KAIJI_TAB);
@@ -394,63 +403,50 @@
         }
         etfList.push(AI_TAB);
 
-        let currentMode = 'ETF';
-        let currentETF = FAMILY_TAB;
-        let currentDate = availableDatesDesc[0];
-        let currentUnit = 'amount';
-        let currentDays = 5;
-        let chartVisible = false;
-        let stockChart = null;
+        currentMode = 'ETF';
+        currentETF = FAMILY_TAB;
+        currentDate = availableDatesDesc.length > 0 ? availableDatesDesc[0] : '';
+        currentUnit = 'amount';
+        currentDays = 5;
 
-        function toggleChart() {
-            chartVisible = !chartVisible;
-            const container = document.getElementById('chart-container');
-            const btn = document.getElementById('chart-toggle-btn');
-            container.classList.toggle('hidden', !chartVisible);
-            btn.textContent = chartVisible ? '隱藏圖表' : '顯示圖表';
-            if (chartVisible && lastBuyData.length > 0) {
-                renderRealChart(lastBuyData);
-            } else if (!chartVisible && stockChart) {
-                stockChart.destroy();
-                stockChart = null;
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcons(savedTheme);
+            updateBrokerMapThemeClass();
+        }
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+            updateBrokerMapThemeClass();
+        }
+        function updateThemeIcons(theme) {
+            const sun = document.getElementById('icon-sun');
+            const moon = document.getElementById('icon-moon');
+            if (!sun || !moon) return;
+            if (theme === 'dark') {
+                sun.classList.remove('hidden');
+                moon.classList.add('hidden');
+            } else {
+                sun.classList.add('hidden');
+                moon.classList.remove('hidden');
             }
         }
+        initTheme();
 
-        let lastBuyData = [];
-
-        function renderRealChart(buyData) {
-            if (stockChart) {
-                stockChart.destroy();
-                stockChart = null;
-            }
-            const top10 = (buyData || []).slice(0, 10);
-            if (top10.length === 0) return;
-            const labels = top10.map(item => item.name);
-            const data = top10.map(item => currentUnit === 'amount' ? (item.amount || 0) : (item.diff || 0));
-            const ctx = document.getElementById('stock-chart');
-            if (!ctx) return;
-            stockChart = new Chart(ctx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: currentUnit === 'amount' ? '淨買超 (萬)' : '淨買超 (張)',
-                        data: data,
-                        backgroundColor: 'rgba(220, 38, 38, 0.7)',
-                        borderColor: 'rgba(220, 38, 38, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
+        function updateClock() {
+            const el = document.getElementById('live-clock');
+            if (!el) return;
+            const now = new Date();
+            const utc = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            el.textContent = utc;
         }
+        setInterval(updateClock, 1000);
+        updateClock();
 
         function aggregateData(etf, days) {
             if (availableDatesDesc.length === 0) return { buy: [], sell: [] };
@@ -534,6 +530,9 @@
             if (!el) return;
             const dark = document.documentElement.getAttribute('data-theme') === 'dark';
             el.classList.toggle('broker-map-dark', dark);
+            if (brokerMapBasemapLayer) {
+                brokerMapBasemapLayer.setUrl(getCartoBasemapUrl());
+            }
         }
 
         function initBrokerMap() {
@@ -541,20 +540,26 @@
             const el = document.getElementById('broker-map');
             if (!el) return;
             brokerMap = L.map('broker-map', { scrollWheelZoom: true }).setView([25.03, 121.5], 11);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            brokerMapBasemapLayer = L.tileLayer(getCartoBasemapUrl(), {
+                attribution: getCartoAttribution(),
+                subdomains: 'abcd',
+                maxZoom: 20
             }).addTo(brokerMap);
             brokerMapMarkers = {};
             brokerCodes.forEach(code => {
                 const c = brokerCoords[code];
                 if (!c) return;
                 const marker = L.marker([c.lat, c.lng]).addTo(brokerMap);
-                marker.bindTooltip(c.name, { permanent: false, direction: 'top', offset: [0, -8] });
+                marker.bindTooltip(shortBrokerMapLabel(c.name), {
+                    permanent: false,
+                    direction: 'top',
+                    offset: [0, -8],
+                    className: 'broker-pin-tooltip'
+                });
                 marker.on('click', () => {
                     brokerMap.flyTo([c.lat, c.lng], 14, { duration: 0.85 });
                     marker.openTooltip();
                     currentETF = code;
-                    document.getElementById('etf-dropdown-label').textContent = getETFLabel(code);
                     onETFChange();
                 });
                 brokerMapMarkers[code] = marker;
@@ -610,122 +615,117 @@
             if (mode === currentMode) return;
             currentMode = mode;
             updateModeTabStyles();
-            closeETFDropdown();
             if (mode === 'ETF') {
                 currentETF = FAMILY_TAB;
             } else {
                 currentETF = KAIJI_TAB;
             }
-            renderETFDropdownList();
-            document.getElementById('etf-dropdown-label').textContent = getETFLabel(currentETF);
+            renderTargetPills();
             onETFChange();
         }
 
-        function toggleETFDropdown() {
-            const panel = document.getElementById('etf-dropdown-panel');
-            const chevron = document.getElementById('etf-dropdown-chevron');
-            const isOpen = !panel.classList.contains('hidden');
-            if (isOpen) {
-                panel.classList.add('hidden');
-                chevron.classList.remove('rotate-180');
-                document.getElementById('etf-search-input').value = '';
-                filterETFOptions();
-            } else {
-                panel.classList.remove('hidden');
-                chevron.classList.add('rotate-180');
-                document.getElementById('etf-search-input').focus();
-            }
-        }
-
-        function closeETFDropdown() {
-            const panel = document.getElementById('etf-dropdown-panel');
-            if (!panel.classList.contains('hidden')) {
-                panel.classList.add('hidden');
-                document.getElementById('etf-dropdown-chevron').classList.remove('rotate-180');
-                document.getElementById('etf-search-input').value = '';
-                filterETFOptions();
-            }
-        }
-
-        function filterETFOptions() {
-            const query = (document.getElementById('etf-search-input').value || '').trim().toLowerCase();
-            const listEl = document.getElementById('etf-dropdown-list');
-            if (!listEl) return;
-            const items = listEl.querySelectorAll('[data-etf-value]');
-            const headers = listEl.querySelectorAll('[data-group-header]');
-            items.forEach(el => {
-                const text = (el.getAttribute('data-etf-label') || '').toLowerCase();
-                const match = !query || text.includes(query);
-                el.classList.toggle('hidden', !match);
-            });
-            headers.forEach(header => {
-                const groupId = header.getAttribute('data-group-header');
-                const groupItems = listEl.querySelectorAll(`[data-group-id="${groupId}"]`);
-                const hasVisible = Array.from(groupItems).some(el => !el.classList.contains('hidden'));
-                header.classList.toggle('hidden', !hasVisible);
-            });
-        }
-
-        function selectETFOption(etf) {
+        function selectTarget(etf) {
             currentETF = etf;
-            document.getElementById('etf-dropdown-label').textContent = getETFLabel(etf);
-            closeETFDropdown();
             onETFChange();
         }
 
-        document.addEventListener('click', function(e) {
-            const wrapper = document.getElementById('etf-dropdown-wrapper');
-            if (wrapper && !wrapper.contains(e.target)) closeETFDropdown();
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeETFDropdown();
-        });
+        function renderTargetPills() {
+            const container = document.getElementById('target-pills-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const rows = getDropdownEtfList();
+            let lastGroup = null;
+            let rowEl = null;
+            rows.forEach(etf => {
+                const group = getETFGroupForRender(etf);
+                if (group !== lastGroup) {
+                    const h = document.createElement('div');
+                    h.className = 'text-xs font-bold tracking-wider theme-text-dim font-mono w-full mt-3 first:mt-0 mb-1';
+                    const gdef = ETF_GROUP_DEFS.find(g => g.id === group);
+                    h.textContent = gdef ? gdef.title : '';
+                    container.appendChild(h);
+                    rowEl = document.createElement('div');
+                    rowEl.className = 'flex flex-wrap gap-2';
+                    container.appendChild(rowEl);
+                    lastGroup = group;
+                }
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.etf = etf;
+                btn.className = 'pill-btn pill-btn-idle';
+                btn.textContent = getETFLabel(etf);
+                btn.onclick = () => selectTarget(etf);
+                rowEl.appendChild(btn);
+            });
+            updatePillActiveState();
+        }
+
+        function updatePillActiveState() {
+            document.querySelectorAll('#target-pills-container [data-etf]').forEach(btn => {
+                const on = btn.dataset.etf === currentETF;
+                btn.classList.toggle('pill-btn-active', on);
+                btn.classList.toggle('pill-btn-idle', !on);
+                btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+        }
 
         function onETFChange() {
-            document.getElementById('search-input').value = '';
+            const searchInp = document.getElementById('search-input');
+            if (searchInp) searchInp.value = '';
             const isAI = currentETF === AI_TAB;
-            document.getElementById('timeframe-unit-row').classList.toggle('hidden', isAI);
-            document.getElementById('header-controls').classList.toggle('hidden', isAI);
-            document.getElementById('sector-flow-container').classList.toggle('hidden', isAI);
-            document.getElementById('normal-view').classList.toggle('hidden', isAI);
-            document.getElementById('search-view').classList.add('hidden');
-            document.getElementById('ai-agent-view').classList.toggle('hidden', !isAI);
-            document.getElementById('current-etf-title').textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
-            document.getElementById('current-date-display').textContent = isAI ? 'PROTOCOL_ACTIVE' : dateRangeLabel();
-            if (isAI) {
-                lastBuyData = [];
-                if (stockChart) { stockChart.destroy(); stockChart = null; }
-                document.getElementById('chart-container').classList.add('hidden');
-            } else {
-                document.getElementById('chart-container').classList.toggle('hidden', !chartVisible);
+            const tfr = document.getElementById('timeframe-unit-row');
+            if (tfr) tfr.classList.toggle('hidden', isAI);
+            const hc = document.getElementById('header-controls');
+            if (hc) hc.classList.toggle('hidden', isAI);
+            const sf = document.getElementById('sector-flow-container');
+            if (sf) sf.classList.toggle('hidden', isAI);
+            const nv = document.getElementById('normal-view');
+            if (nv) nv.classList.toggle('hidden', isAI);
+            const sv = document.getElementById('search-view');
+            if (sv) sv.classList.add('hidden');
+            const aiV = document.getElementById('ai-agent-view');
+            if (aiV) aiV.classList.toggle('hidden', !isAI);
+            const titleEl = document.getElementById('current-etf-title');
+            if (titleEl) titleEl.textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
+            const dateEl = document.getElementById('current-date-display');
+            if (dateEl) dateEl.textContent = isAI ? 'PROTOCOL_ACTIVE' : dateRangeLabel();
+            if (!isAI) {
                 refreshTable();
             }
+            updatePillActiveState();
             ensureBrokerMapVisibleAndSync();
         }
 
         function onTimeframeChange() {
-            currentDays = parseInt(document.getElementById('timeframe-selector').value, 10);
-            document.getElementById('current-date-display').textContent = dateRangeLabel();
+            const sel = document.getElementById('timeframe-selector');
+            if (sel) currentDays = parseInt(sel.value, 10) || 5;
+            const dateEl = document.getElementById('current-date-display');
+            if (dateEl) dateEl.textContent = dateRangeLabel();
             refreshTable();
         }
 
         function onDateChange() {
-            currentDate = document.getElementById('date-selector').value;
-            document.getElementById('current-date-display').textContent = dateRangeLabel();
+            const ds = document.getElementById('date-selector');
+            if (ds) currentDate = ds.value;
+            const dateEl = document.getElementById('current-date-display');
+            if (dateEl) dateEl.textContent = dateRangeLabel();
             refreshTable();
         }
 
         function dateRangeLabel() {
-            const idx = availableDatesDesc.indexOf(currentDate);
+            if (!availableDatesDesc.length) return '—';
+            const idx = Math.max(0, availableDatesDesc.indexOf(currentDate));
             const slice = availableDatesDesc.slice(idx, idx + Math.min(currentDays, availableDatesDesc.length - idx));
-            if (slice.length === 0) return currentDate;
+            if (slice.length === 0) return currentDate || '—';
             return slice.length === 1 ? slice[0] : slice[slice.length - 1] + ' ~ ' + slice[0];
         }
 
         function setUnit(u) {
             currentUnit = u;
-            document.getElementById('unit-btn-amount').classList.toggle('unit-active', u === 'amount');
-            document.getElementById('unit-btn-shares').classList.toggle('unit-active', u === 'shares');
+            const ua = document.getElementById('unit-btn-amount');
+            const us = document.getElementById('unit-btn-shares');
+            if (ua) ua.classList.toggle('unit-active', u === 'amount');
+            if (us) us.classList.toggle('unit-active', u === 'shares');
             refreshTable();
         }
 
@@ -754,52 +754,33 @@
             }
         }
 
-        function renderETFDropdownList() {
-            const listEl = document.getElementById('etf-dropdown-list');
-            if (!listEl) return;
-            listEl.innerHTML = '';
-            const rows = getDropdownEtfList();
-            let lastGroup = null;
-            rows.forEach(etf => {
-                const group = getETFGroupForRender(etf);
-                if (group !== lastGroup) {
-                    const header = document.createElement('li');
-                    header.setAttribute('data-group-header', group);
-                    header.className = 'etf-group-header sticky top-0 px-3 py-2 text-xs font-bold tracking-wider theme-text-dim font-mono cursor-default select-none z-10';
-                    header.textContent = ETF_GROUP_DEFS.find(g => g.id === group).title;
-                    listEl.appendChild(header);
-                    lastGroup = group;
-                }
-                const label = getETFLabel(etf);
-                const li = document.createElement('li');
-                li.setAttribute('data-etf-value', etf);
-                li.setAttribute('data-etf-label', label);
-                li.setAttribute('data-group-id', group);
-                li.className = 'px-3 py-2.5 text-sm font-mono theme-text cursor-pointer row-hover transition-colors';
-                li.textContent = label;
-                li.onclick = () => selectETFOption(etf);
-                listEl.appendChild(li);
-            });
-        }
-
         function init() {
-            if (availableDatesDesc.length === 0) return;
             currentMode = 'ETF';
             currentETF = FAMILY_TAB;
+            if (availableDatesDesc.length > 0) {
+                currentDate = availableDatesDesc[0];
+            } else {
+                currentDate = '';
+            }
             updateModeTabStyles();
-            renderETFDropdownList();
+            renderTargetPills();
             const dateSel = document.getElementById('date-selector');
-            availableDatesDesc.forEach(date => {
-                const opt = document.createElement('option');
-                opt.value = date;
-                opt.textContent = date;
-                dateSel.appendChild(opt);
-            });
-            document.getElementById('etf-dropdown-label').textContent = getETFLabel(currentETF);
-            document.getElementById('timeframe-selector').value = currentDays;
+            if (dateSel) {
+                dateSel.innerHTML = '';
+                availableDatesDesc.forEach(date => {
+                    const opt = document.createElement('option');
+                    opt.value = date;
+                    opt.textContent = date;
+                    dateSel.appendChild(opt);
+                });
+            }
+            const tfSel = document.getElementById('timeframe-selector');
+            if (tfSel) tfSel.value = String(currentDays);
             setUnit(currentUnit);
-            document.getElementById('current-etf-title').textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
-            document.getElementById('current-date-display').textContent = dateRangeLabel();
+            const titleEl = document.getElementById('current-etf-title');
+            if (titleEl) titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
+            const dateDisp = document.getElementById('current-date-display');
+            if (dateDisp) dateDisp.textContent = dateRangeLabel();
             onETFChange();
             initApiKey();
             initWatchlist();
@@ -839,19 +820,16 @@
 
             const emptyState = document.getElementById('empty-state');
             const dataContainer = document.getElementById('data-table-container');
+            if (!emptyState || !dataContainer) return;
             if (buy.length === 0 && sell.length === 0) {
                 emptyState.classList.remove('hidden');
                 dataContainer.classList.add('hidden');
-                document.getElementById('consensus-alert-container').classList.add('hidden');
-                lastBuyData = [];
-                if (stockChart) { stockChart.destroy(); stockChart = null; }
-                document.getElementById('chart-container').classList.add('hidden');
+                const ca = document.getElementById('consensus-alert-container');
+                if (ca) ca.classList.add('hidden');
                 return;
             }
-            lastBuyData = buy;
             emptyState.classList.add('hidden');
             dataContainer.classList.remove('hidden');
-            if (chartVisible) renderRealChart(buy);
 
             const consensusContainer = document.getElementById('consensus-alert-container');
             const consensusList = document.getElementById('consensus-alert-list');
@@ -911,41 +889,43 @@
                 const cColor = isFlowIn ? 'text-buy' : 'text-sell';
                 const cBorder = isFlowIn ? 'border-buy' : 'border-sell';
                 const sign = isFlowIn ? '+' : '-';
-                const valStr = currentUnit === 'amount' ? formatAmount(Math.abs(s[1])).replace(/[()]/g, '') : Math.abs(s[1]).toLocaleString();
+                const valStr = currentUnit === 'amount' ? formatAmount(Math.abs(s[1])) : Math.abs(s[1]).toLocaleString();
                 sfContainer.innerHTML += `<div class="flex flex-col border-l-[3px] ${cBorder} pl-3 py-1.5 theme-bg-input rounded-r pr-4 min-w-[120px]"><span class="text-[11px] font-bold theme-text-dim mb-0.5">${s[0]}</span><span class="font-mono text-sm font-bold ${cColor}">${sign}${valStr}</span></div>`;
             });
             if (topSectors.length === 0) sfContainer.classList.add('hidden');
             else sfContainer.classList.remove('hidden');
 
             const formatVal = (item, isBuy) => {
-                if (currentUnit === 'amount') return (isBuy ? '+' : '-') + ' ' + formatAmount(item.amount);
-                return (isBuy ? '+' : '-') + (item.diff || 0).toLocaleString();
+                if (currentUnit === 'amount') return (isBuy ? '+ ' : '- ') + formatAmount(item.amount);
+                return (isBuy ? '+' : '-') + (item.diff || 0).toLocaleString() + ' 張';
             };
 
             const buyTbody = document.getElementById('buy-rank-tbody');
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const hlClass = isInWatchlist(item.code) ? ' watchlist-highlight' : '';
-                return `<tr class="row-hover border-b theme-border last:border-0${hlClass}"><td class="py-3.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-4 text-right font-mono font-bold text-buy">${formatVal(item, true)}</td></tr>`;
+                return `<tr class="row-hover border-b theme-border last:border-0${hlClass}"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell whitespace-nowrap">${formatVal(item, true)}</td></tr>`;
             }).join('');
 
             const sellTbody = document.getElementById('sell-rank-tbody');
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const hlClass = isInWatchlist(item.code) ? ' watchlist-highlight' : '';
-                return `<tr class="row-hover border-b theme-border last:border-0${hlClass}"><td class="py-3.5 px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-4"><span class="font-bold theme-text">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-4 text-right font-mono font-bold text-sell">${formatVal(item, false)}</td></tr>`;
+                return `<tr class="row-hover border-b theme-border last:border-0${hlClass}"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell whitespace-nowrap">${formatVal(item, false)}</td></tr>`;
             }).join('');
         }
 
         function formatAmount(amount_10k) {
             if (!amount_10k) return "";
             let val = Math.abs(amount_10k);
-            if (val >= 10000) return `(約 ${(val/10000).toFixed(2)} 億)`;
-            return `(約 ${Math.round(val).toLocaleString()} 萬)`;
+            if (val >= 10000) return `約 ${(val/10000).toFixed(2)} 億`;
+            return `約 ${Math.round(val).toLocaleString()} 萬`;
         }
 
         function handleSearch() {
-            const val = document.getElementById('search-input').value.trim().toLowerCase();
+            const inp = document.getElementById('search-input');
+            if (!inp) return;
+            const val = inp.value.trim().toLowerCase();
             const normalView = document.getElementById('normal-view');
             const searchView = document.getElementById('search-view');
             const sfContainer = document.getElementById('sector-flow-container');
@@ -981,7 +961,7 @@
                 const valStr = currentUnit === 'amount' ? (a.sign + ' ' + formatAmount(a.amount)) : (a.sign + (a.diff || 0).toLocaleString());
                 const codeHtml = a.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${a.code}</span>` : '';
                 const hlClass = isInWatchlist(a.code) ? ' watchlist-highlight' : '';
-                resultsContainer.innerHTML += `<div class="flex justify-between items-center py-3.5 px-4 border-b theme-border row-hover transition-colors${hlClass}"><div class="flex items-center gap-2"><span class="theme-text text-[14px] font-bold">${a.name}</span>${codeHtml}</div><span class="${colorClass} font-mono font-bold text-[14px]">${valStr}</span></div>`;
+                resultsContainer.innerHTML += `<div class="flex justify-between items-center gap-2 py-3.5 px-4 border-b theme-border row-hover transition-colors${hlClass}"><div class="flex items-center gap-2 min-w-0"><span class="theme-text text-[14px] font-bold break-words">${a.name}</span>${codeHtml}</div><span class="${colorClass} font-mono font-bold text-[14px] whitespace-nowrap flex-shrink-0">${valStr}</span></div>`;
             });
         }
 
