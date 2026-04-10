@@ -129,6 +129,7 @@ def _row_to_item(row: pd.Series, c_name: str, code: str, diff: int, amount: floa
         "sector": SECTOR_MAP.get(c_name, "其他"),
         "weight": w,
         "w_diff": w_diff,
+        "price": _scalar_numeric(row.get("price", 0), 0.0),
     }
 
 
@@ -160,6 +161,15 @@ def process_all_data() -> dict:
                         continue
                     df["net_shares"] = pd.to_numeric(df["net_shares"], errors="coerce").fillna(0).astype(int)
                     df["net_amount"] = pd.to_numeric(df["net_amount"], errors="coerce").fillna(0.0)
+                    if "buy_shares" not in df.columns:
+                        df["buy_shares"] = 0
+                    if "sell_shares" not in df.columns:
+                        df["sell_shares"] = 0
+                    df["buy_shares"] = pd.to_numeric(df["buy_shares"], errors="coerce").fillna(0).astype(int)
+                    df["sell_shares"] = pd.to_numeric(df["sell_shares"], errors="coerce").fillna(0).astype(int)
+                    if "avg_price" not in df.columns:
+                        df["avg_price"] = 0.0
+                    df["avg_price"] = pd.to_numeric(df["avg_price"], errors="coerce").fillna(0.0)
                     if "name" in df.columns:
                         df["name"] = df["name"].apply(
                             lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
@@ -170,13 +180,27 @@ def process_all_data() -> dict:
                     for _, row in df.iterrows():
                         net_shares = _scalar_int(row.get("net_shares", 0), 0)
                         net_amount = _scalar_numeric(row.get("net_amount", 0), 0.0)
+                        buy_shares = _scalar_int(row.get("buy_shares", 0), 0)
+                        sell_shares = _scalar_int(row.get("sell_shares", 0), 0)
+                        avg_price_val = _scalar_numeric(row.get("avg_price", 0), 0.0)
                         c_name = clean_stock_name(row.get("name", ""))
                         code_val = str(row.get("code", "") or "")
                         sector = SECTOR_MAP.get(c_name, "其他")
+                        base_item = {
+                            "name": c_name,
+                            "code": code_val,
+                            "sector": sector,
+                            "weight": 0,
+                            "w_diff": 0,
+                            "avg_price": avg_price_val,
+                            "price": avg_price_val,
+                            "buy_shares": buy_shares,
+                            "sell_shares": sell_shares,
+                        }
                         if net_shares > 0:
-                            increased.append({"name": c_name, "code": code_val, "diff": net_shares, "amount": net_amount, "sector": sector, "weight": 0, "w_diff": 0})
+                            increased.append({**base_item, "diff": net_shares, "amount": net_amount})
                         elif net_shares < 0:
-                            decreased.append({"name": c_name, "code": code_val, "diff": abs(net_shares), "amount": abs(net_amount), "sector": sector, "weight": 0, "w_diff": 0})
+                            decreased.append({**base_item, "diff": abs(net_shares), "amount": abs(net_amount)})
                     increased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
                     decreased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
                     database[date_str][etf_code] = {"new_buy": [], "sold_out": [], "increased": increased, "decreased": decreased}
@@ -236,7 +260,16 @@ def process_all_data() -> dict:
                     weight = _scalar_numeric(row.get("weight", 0), 0.0)
                     c_name = clean_stock_name(row.get("name", ""))
                     amount_10k = (shares * price) / 10 if price > 0 else 0
-                    sold_out.append({"name": c_name, "code": str(c), "diff": shares, "weight": 0.0, "w_diff": -weight, "amount": amount_10k, "sector": SECTOR_MAP.get(c_name, "其他")})
+                    sold_out.append({
+                        "name": c_name,
+                        "code": str(c),
+                        "diff": shares,
+                        "weight": 0.0,
+                        "w_diff": -weight,
+                        "amount": amount_10k,
+                        "sector": SECTOR_MAP.get(c_name, "其他"),
+                        "price": price,
+                    })
 
                 for c in common_codes:
                     row_curr = _normalize_index_row(curr_idx.loc[c])

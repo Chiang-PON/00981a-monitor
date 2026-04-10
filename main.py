@@ -337,7 +337,7 @@ def _create_chrome_driver(headless: bool = True, anti_detect: bool = False) -> w
 
 
 def _parse_broker_table(soup: BeautifulSoup, table_id: str, negate: bool) -> list[dict]:
-    """解析 wantgoo 買超或賣超表格。negate=True 時將張數與金額轉為負數。"""
+    """解析 wantgoo 買超或賣超表格。cols[5] 為千元，已除以 10 轉為戰情室萬元。negate=True 時將淨張數與淨金額轉為負數。"""
     table = soup.find("tbody", id=table_id)
     if not table:
         return []
@@ -354,11 +354,25 @@ def _parse_broker_table(soup: BeautifulSoup, table_id: str, negate: bool) -> lis
             parts = stock_href.rstrip("/").split("/")
             if parts:
                 code = parts[-1].split("-")[0] or ""
+        avg_price = 0.0
+        if len(cols) > 6:
+            try:
+                avg_price_str = cols[6].text.strip().replace(",", "")
+                avg_price = float(avg_price_str) if avg_price_str else 0.0
+            except (ValueError, TypeError):
+                avg_price = 0.0
         try:
+            buy_shares_str = cols[2].text.strip().replace(",", "")
+            sell_shares_str = cols[3].text.strip().replace(",", "")
             net_shares_str = cols[4].text.strip().replace(",", "")
             net_amount_str = cols[5].text.strip().replace(",", "").replace("萬", "")
+
+            buy_shares = int(float(buy_shares_str)) if buy_shares_str else 0
+            sell_shares = int(float(sell_shares_str)) if sell_shares_str else 0
             net_shares = int(float(net_shares_str)) if net_shares_str else 0
-            net_amount = float(net_amount_str) if net_amount_str else 0.0
+
+            # 玩股網金額欄為「千元」，除以 10 轉為戰情室標準「萬元」
+            net_amount = (float(net_amount_str) / 10.0) if net_amount_str else 0.0
         except (ValueError, TypeError):
             continue
         if not stock_name or stock_name.upper() in ("CASH", "C_NTD", "C_USD"):
@@ -369,8 +383,11 @@ def _parse_broker_table(soup: BeautifulSoup, table_id: str, negate: bool) -> lis
         result.append({
             "code": code if code and code.isdigit() else "",
             "name": stock_name,
+            "buy_shares": buy_shares,
+            "sell_shares": sell_shares,
             "net_shares": net_shares,
             "net_amount": net_amount,
+            "avg_price": avg_price,
         })
     return result
 
