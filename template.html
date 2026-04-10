@@ -184,47 +184,64 @@
                 <div class="flex flex-wrap gap-2 mb-4">
                     <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
                     <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
+                    <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
                 </div>
-                <div class="mb-4">
-                    <label class="block font-mono text-xs theme-text-dim mb-2 uppercase tracking-wider">目標標的（點選切換）</label>
-                    <div id="target-pills-container" class="space-y-3"></div>
+            </div>
+
+            <div id="section-pills" class="mb-4">
+                <label class="block font-mono text-xs theme-text-dim mb-2 uppercase tracking-wider">目標標的（點選切換）</label>
+                <div id="target-pills-container" class="space-y-3"></div>
+            </div>
+
+            <div id="timeframe-unit-row" class="flex flex-wrap items-center gap-4 mb-6">
+                <div>
+                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">天數</label>
+                    <select id="timeframe-selector" onchange="onTimeframeChange()" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
+                        <option value="1">近1日</option>
+                        <option value="5">近5日</option>
+                        <option value="10">近10日</option>
+                        <option value="20">近20日</option>
+                        <option value="30">近30日</option>
+                    </select>
                 </div>
-                <div class="mb-4">
-                    <label class="block font-mono text-xs theme-text-dim mb-2 tracking-wide">🎯 個股主力追蹤 (搜尋誰在買賣)</label>
-                    <div class="flex flex-wrap gap-2 items-stretch">
-                        <input type="text" id="stock-reverse-input" placeholder="輸入股票代號或名稱，例如: 2330 或 台積電" autocomplete="off"
-                            class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text flex-1 min-w-[12rem]">
-                        <button type="button" id="stock-reverse-btn" onclick="runStockReverseSearch()" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors whitespace-nowrap">
+                <div>
+                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">單位</label>
+                    <div class="flex rounded-lg overflow-hidden border theme-border" role="group">
+                        <button type="button" id="unit-btn-amount" onclick="setUnit('amount')" class="unit-btn unit-btn-amount px-4 py-2.5 text-sm font-mono font-bold border-r theme-border transition-colors">
+                            金額
+                        </button>
+                        <button type="button" id="unit-btn-shares" onclick="setUnit('shares')" class="unit-btn unit-btn-shares px-4 py-2.5 text-sm font-mono font-bold transition-colors">
+                            張數
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">結束日期</label>
+                    <select id="date-selector" onchange="onDateChange()" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors min-w-[9rem]"></select>
+                </div>
+            </div>
+
+            <div id="search-mode-panel" class="hidden mb-6">
+                <div class="max-w-3xl mx-auto rounded-xl border theme-border bg-[var(--bg-panel)] p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]">
+                    <div class="text-center mb-6">
+                        <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">個股主力追蹤</h2>
+                        <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依上方「天數」「結束日期」累計區間，掃描 ETF／分點持倉異動；排序依目前「單位」。</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:items-end justify-center">
+                        <div class="w-full sm:flex-1 sm:min-w-[14rem]">
+                            <label for="stock-reverse-input" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">股票代號／名稱</label>
+                            <input type="text" id="stock-reverse-input" placeholder="輸入股票代號或名稱，例如: 2330 或 台積電" autocomplete="off"
+                                class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full">
+                        </div>
+                        <button type="button" id="stock-reverse-btn" onclick="runStockReverseSearch()" class="tab-btn px-6 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors whitespace-nowrap w-full sm:w-auto">
                             搜尋
                         </button>
                     </div>
-                    <p class="mt-1.5 text-[11px] theme-text-dim font-mono">掃描右上角日期選擇器所選「當日」之所有 ETF／分點持倉異動。</p>
-                    <div id="stock-reverse-results" class="hidden mt-4 rounded-xl border theme-border theme-bg-input overflow-hidden"></div>
-                </div>
-                <div id="timeframe-unit-row" class="flex flex-wrap items-center gap-4">
-                    <div>
-                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">天數</label>
-                        <select id="timeframe-selector" onchange="onTimeframeChange()" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
-                            <option value="1">近1日</option>
-                            <option value="5">近5日</option>
-                            <option value="10">近10日</option>
-                            <option value="20">近20日</option>
-                            <option value="30">近30日</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">單位</label>
-                        <div class="flex rounded-lg overflow-hidden border theme-border" role="group">
-                            <button type="button" id="unit-btn-amount" onclick="setUnit('amount')" class="unit-btn unit-btn-amount px-4 py-2.5 text-sm font-mono font-bold border-r theme-border transition-colors">
-                                金額
-                            </button>
-                            <button type="button" id="unit-btn-shares" onclick="setUnit('shares')" class="unit-btn unit-btn-shares px-4 py-2.5 text-sm font-mono font-bold transition-colors">
-                                張數
-                            </button>
-                        </div>
-                    </div>
+                    <div id="stock-reverse-results" class="mt-6 rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[8rem]"></div>
                 </div>
             </div>
+
+            <div id="dashboard-mode-panel">
 
             <div id="broker-map" class="hidden h-64 md:h-80 w-full rounded-xl border theme-border z-10 mb-6 overflow-hidden" aria-hidden="true"></div>
 
@@ -241,9 +258,6 @@
                         <span class="theme-text-dim font-mono mr-2">></span>
                         <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-gray-400 theme-text border-none">
                     </div>
-                    <div class="theme-bg-input border rounded-md flex items-center px-2 py-1.5 transition-colors">
-                        <select id="date-selector" onchange="onDateChange()" class="bg-transparent text-sm font-mono theme-text cursor-pointer pr-2 border-none appearance-none"></select>
-                    </div>
                 </div>
             </div>
 
@@ -255,7 +269,7 @@
                 </div>
                 <div id="consensus-alert-container" class="consensus-panel hidden mb-6 rounded-xl border-2 p-4">
                     <h4 class="font-mono font-bold text-sm mb-3 flex items-center gap-2 consensus-title">
-                        <span>🔥</span> 主力共識警報 (3+ 分點買進)
+                        主力共識警報 (3+ 分點買進)
                     </h4>
                     <div id="consensus-alert-list" class="flex flex-wrap gap-2"></div>
                 </div>
@@ -333,6 +347,8 @@
                 <div class="theme-bg-input border rounded-lg p-5 transition-colors min-h-[300px]">
                     <div id="ai-report-output" class="w-full bg-transparent font-mono text-sm theme-text leading-relaxed">等待執行分析... (請先於上方設定 API Key 並輸入代號)</div>
                 </div>
+            </div>
+
             </div>
 
         </div>
@@ -522,18 +538,20 @@
         }
 
         const ETF_GROUP_DEFS = [
-            { id: 'core', title: '【 🎯 核心決策 】' },
-            { id: 'etf', title: '【 📈 ETF 標的 】' },
-            { id: 'broker', title: '【 🏦 主力分點 】' }
+            { id: 'core', title: '【 核心決策 】' },
+            { id: 'etf', title: '【 ETF 標的 】' },
+            { id: 'broker', title: '【 主力分點 】' }
         ];
 
         function updateModeTabStyles() {
             const etfBtn = document.getElementById('mode-tab-etf');
             const brokerBtn = document.getElementById('mode-tab-broker');
-            if (!etfBtn || !brokerBtn) return;
+            const searchBtn = document.getElementById('mode-tab-search');
+            if (!etfBtn || !brokerBtn || !searchBtn) return;
             const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors';
             etfBtn.className = base + ' ' + (currentMode === 'ETF' ? 'tab-active' : 'tab-inactive');
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
+            searchBtn.className = base + ' ' + (currentMode === 'SEARCH' ? 'tab-active' : 'tab-inactive');
         }
 
         function updateBrokerMapThemeClass() {
@@ -622,10 +640,23 @@
         }
 
         function setMode(mode) {
-            if (mode !== 'ETF' && mode !== 'BROKER') return;
+            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH') return;
             if (mode === currentMode) return;
             currentMode = mode;
             updateModeTabStyles();
+            const dashPanel = document.getElementById('dashboard-mode-panel');
+            const searchPanel = document.getElementById('search-mode-panel');
+            const pillsSection = document.getElementById('section-pills');
+            if (mode === 'SEARCH') {
+                if (pillsSection) pillsSection.classList.add('hidden');
+                if (dashPanel) dashPanel.classList.add('hidden');
+                if (searchPanel) searchPanel.classList.remove('hidden');
+                runStockReverseSearch();
+                return;
+            }
+            if (pillsSection) pillsSection.classList.remove('hidden');
+            if (dashPanel) dashPanel.classList.remove('hidden');
+            if (searchPanel) searchPanel.classList.add('hidden');
             if (mode === 'ETF') {
                 currentETF = FAMILY_TAB;
             } else {
@@ -651,7 +682,7 @@
                 const group = getETFGroupForRender(etf);
                 if (group !== lastGroup) {
                     const h = document.createElement('div');
-                    h.className = 'text-xs font-bold tracking-wider theme-text-dim font-mono w-full mt-3 first:mt-0 mb-1';
+                    h.className = 'text-lg sm:text-xl font-bold tracking-wide theme-text font-mono w-full mt-4 first:mt-0 mb-2 border-b theme-border pb-2';
                     const gdef = ETF_GROUP_DEFS.find(g => g.id === group);
                     h.textContent = gdef ? gdef.title : '';
                     container.appendChild(h);
@@ -681,6 +712,7 @@
         }
 
         function onETFChange() {
+            if (currentMode === 'SEARCH') return;
             const searchInp = document.getElementById('search-input');
             if (searchInp) searchInp.value = '';
             const isAI = currentETF === AI_TAB;
@@ -713,6 +745,7 @@
             const dateEl = document.getElementById('current-date-display');
             if (dateEl) dateEl.textContent = dateRangeLabel();
             refreshTable();
+            maybeRefreshStockReverseSearch();
         }
 
         function onDateChange() {
@@ -720,8 +753,14 @@
             if (ds) currentDate = ds.value;
             const dateEl = document.getElementById('current-date-display');
             if (dateEl) dateEl.textContent = dateRangeLabel();
-            clearStockReverseSearchUI();
             refreshTable();
+            maybeRefreshStockReverseSearch();
+        }
+
+        function maybeRefreshStockReverseSearch() {
+            if (currentMode !== 'SEARCH') return;
+            const inp = document.getElementById('stock-reverse-input');
+            if (inp && inp.value.trim()) runStockReverseSearch();
         }
 
         function dateRangeLabel() {
@@ -739,6 +778,7 @@
             if (ua) ua.classList.toggle('unit-active', u === 'amount');
             if (us) us.classList.toggle('unit-active', u === 'shares');
             refreshTable();
+            maybeRefreshStockReverseSearch();
         }
 
         function initApiKey() {
@@ -785,6 +825,7 @@
                     opt.textContent = date;
                     dateSel.appendChild(opt);
                 });
+                if (currentDate) dateSel.value = currentDate;
             }
             const tfSel = document.getElementById('timeframe-selector');
             if (tfSel) tfSel.value = String(currentDays);
@@ -800,6 +841,11 @@
                 sri.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter') runStockReverseSearch();
                 });
+                sri.addEventListener('input', function() {
+                    if (currentMode === 'SEARCH' && !sri.value.trim()) {
+                        showStockReverseIdlePlaceholder();
+                    }
+                });
             }
         }
 
@@ -808,12 +854,27 @@
             return getETFLabel(actorKey);
         }
 
-        function clearStockReverseSearchUI() {
-            const el = document.getElementById('stock-reverse-results');
-            if (el) {
-                el.classList.add('hidden');
-                el.innerHTML = '';
-            }
+        function showStockReverseIdlePlaceholder() {
+            const out = document.getElementById('stock-reverse-results');
+            if (!out) return;
+            out.innerHTML = '<div class="px-4 py-12 text-center font-mono text-sm theme-text-dim">請輸入股票代號開始追蹤主力</div>';
+        }
+
+        function getDateSliceForStockSearch() {
+            if (availableDatesDesc.length === 0) return [];
+            let dateIndex = availableDatesDesc.indexOf(currentDate);
+            if (dateIndex === -1) dateIndex = 0;
+            return availableDatesDesc.slice(dateIndex, dateIndex + Math.min(currentDays, availableDatesDesc.length - dateIndex));
+        }
+
+        function formatAmountNetDisplay(amount_10k) {
+            if (amount_10k == null || amount_10k === 0) return '—';
+            const neg = amount_10k < 0;
+            const abs = Math.abs(amount_10k);
+            let inner;
+            if (abs >= 10000) inner = '約 ' + (abs / 10000).toFixed(2) + ' 億';
+            else inner = '約 ' + Math.round(abs).toLocaleString() + ' 萬';
+            return (neg ? '−' : '+') + inner;
         }
 
         function runStockReverseSearch() {
@@ -822,86 +883,136 @@
             if (!inp || !out) return;
             const raw = inp.value.trim();
             if (!raw) {
-                clearStockReverseSearchUI();
+                showStockReverseIdlePlaceholder();
                 return;
             }
             const q = raw.toLowerCase();
-            const dayData = db[currentDate];
-            const buyMap = new Map();
-            const sellMap = new Map();
+            const dateSlice = getDateSliceForStockSearch();
+            const netMap = new Map();
 
             function mergeKey(actorKey, item) {
                 return actorKey + '|' + String(item.code || '') + '|' + String(item.name || '');
             }
 
-            function addTo(map, actorKey, item) {
-                const k = mergeKey(actorKey, item);
-                const prev = map.get(k) || { actorKey: actorKey, item: item, diff: 0, amount: 0 };
-                prev.diff += item.diff || 0;
-                prev.amount += item.amount || 0;
-                map.set(k, prev);
+            function matches(item) {
+                const code = (item.code != null ? String(item.code) : '').toLowerCase();
+                const name = (item.name != null ? String(item.name) : '').toLowerCase();
+                return code.includes(q) || name.includes(q);
             }
 
-            if (dayData && typeof dayData === 'object') {
+            function addSigned(actorKey, item, sign) {
+                const k = mergeKey(actorKey, item);
+                const prev = netMap.get(k) || { actorKey: actorKey, item: item, netDiff: 0, netAmount: 0 };
+                prev.netDiff += (item.diff || 0) * sign;
+                prev.netAmount += (item.amount || 0) * sign;
+                prev.item = item;
+                netMap.set(k, prev);
+            }
+
+            dateSlice.forEach(function(d) {
+                const dayData = db[d];
+                if (!dayData || typeof dayData !== 'object') return;
                 Object.keys(dayData).forEach(function(actorKey) {
                     if (actorKey === AI_TAB) return;
                     const bucket = dayData[actorKey];
                     if (!bucket || typeof bucket !== 'object') return;
-
-                    function matches(item) {
-                        const code = (item.code != null ? String(item.code) : '').toLowerCase();
-                        const name = (item.name != null ? String(item.name) : '').toLowerCase();
-                        return code.includes(q) || name.includes(q);
-                    }
-
                     (bucket.new_buy || []).forEach(function(item) {
-                        if (matches(item)) addTo(buyMap, actorKey, item);
+                        if (matches(item)) addSigned(actorKey, item, 1);
                     });
                     (bucket.increased || []).forEach(function(item) {
-                        if (matches(item)) addTo(buyMap, actorKey, item);
+                        if (matches(item)) addSigned(actorKey, item, 1);
                     });
                     (bucket.decreased || []).forEach(function(item) {
-                        if (matches(item)) addTo(sellMap, actorKey, item);
+                        if (matches(item)) addSigned(actorKey, item, -1);
                     });
                     (bucket.sold_out || []).forEach(function(item) {
-                        if (matches(item)) addTo(sellMap, actorKey, item);
+                        if (matches(item)) addSigned(actorKey, item, -1);
                     });
                 });
-            }
+            });
 
-            const buys = Array.from(buyMap.values()).sort(function(a, b) { return (b.diff || 0) - (a.diff || 0); });
-            const sells = Array.from(sellMap.values()).sort(function(a, b) { return (b.diff || 0) - (a.diff || 0); });
+            const buys = [];
+            const sells = [];
+            netMap.forEach(function(entry) {
+                if (entry.netDiff > 0) buys.push(entry);
+                else if (entry.netDiff < 0) sells.push(entry);
+            });
 
-            out.classList.remove('hidden');
+            const sortVal = function(e) {
+                return currentUnit === 'amount' ? Math.abs(e.netAmount) : Math.abs(e.netDiff);
+            };
+            const sortDesc = function(a, b) { return sortVal(b) - sortVal(a); };
+
+            const etfBuy = [];
+            const etfSell = [];
+            const brokerBuy = [];
+            const brokerSell = [];
+            buys.forEach(function(e) {
+                if (brokerLabels[e.actorKey]) brokerBuy.push(e);
+                else etfBuy.push(e);
+            });
+            sells.forEach(function(e) {
+                if (brokerLabels[e.actorKey]) brokerSell.push(e);
+                else etfSell.push(e);
+            });
+            etfBuy.sort(sortDesc);
+            etfSell.sort(sortDesc);
+            brokerBuy.sort(sortDesc);
+            brokerSell.sort(sortDesc);
+
             if (buys.length === 0 && sells.length === 0) {
-                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">本日無主力異動紀錄</div>';
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">區間內無主力異動紀錄</div>';
                 return;
             }
 
-            function rowHtml(entry, isBuy) {
+            function rowHtml(entry, isBuySide) {
                 const it = entry.item;
                 const name = it.name || '—';
                 const code = it.code ? '<span class="font-mono text-[10px] opacity-80 ml-1">' + it.code + '</span>' : '';
-                const diffStr = (entry.diff || 0).toLocaleString() + ' 張';
-                const amtStr = formatAmount(entry.amount) ? ' · ' + formatAmount(entry.amount) : '';
-                const color = isBuy ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
-                return '<div class="flex flex-wrap justify-between gap-2 py-2.5 px-3 border-b theme-border last:border-0 row-hover">' +
-                    '<div class="min-w-0"><span class="font-mono text-xs theme-text-dim block mb-0.5">' + getActorLabelForReverseSearch(entry.actorKey) + '</span>' +
-                    '<span class="font-bold theme-text text-sm">' + name + '</span>' + code + '</div>' +
-                    '<div class="text-right font-mono text-sm font-bold ' + color + ' whitespace-nowrap">' + diffStr + amtStr + '</div></div>';
+                const nd = entry.netDiff;
+                const na = entry.netAmount;
+                const diffStr = (nd >= 0 ? '+' : '') + nd.toLocaleString() + ' 張';
+                const amtStr = formatAmountNetDisplay(na);
+                const color = isBuySide ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
+                const nums = '<div class="flex flex-wrap items-center justify-end sm:justify-end gap-x-0 font-mono text-xs sm:text-sm font-bold ' + color + ' w-full sm:w-auto shrink-0 mt-1 sm:mt-0">' +
+                    '<span class="tabular-nums">' + diffStr + '</span>' +
+                    '<span class="inline-flex items-center mx-1.5 sm:mx-2 text-zinc-300 dark:text-zinc-600 select-none" aria-hidden="true"><span class="hidden sm:inline w-px h-3.5 bg-zinc-300 dark:bg-zinc-600"></span><span class="sm:hidden text-[10px] px-0.5">|</span></span>' +
+                    '<span class="tabular-nums">' + amtStr + '</span></div>';
+                return '<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
+                    '<div class="min-w-0 flex-1 pr-0 sm:pr-1"><span class="font-mono text-[10px] sm:text-xs theme-text-dim block mb-0.5 leading-snug">' + getActorLabelForReverseSearch(entry.actorKey) + '</span>' +
+                    '<span class="font-bold theme-text text-sm leading-snug break-words">' + name + '</span>' + code + '</div>' +
+                    nums + '</div>';
             }
 
-            const buyBlock = '<div class="border-b theme-border md:border-b-0 md:border-r theme-border md:pr-1">' +
-                '<div class="px-3 py-2 font-mono text-xs font-bold tracking-wider bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-b theme-border">買進主力（新進／加碼）</div>' +
-                '<div class="max-h-[min(60vh,28rem)] overflow-y-auto">' + (buys.length ? buys.map(function(e) { return rowHtml(e, true); }).join('') : '<div class="px-3 py-6 text-center text-sm theme-text-dim font-mono">無</div>') + '</div></div>';
-            const sellBlock = '<div>' +
-                '<div class="px-3 py-2 font-mono text-xs font-bold tracking-wider bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-b theme-border">賣出主力（減碼／出清）</div>' +
-                '<div class="max-h-[min(60vh,28rem)] overflow-y-auto">' + (sells.length ? sells.map(function(e) { return rowHtml(e, false); }).join('') : '<div class="px-3 py-6 text-center text-sm theme-text-dim font-mono">無</div>') + '</div></div>';
+            function renderBuySellGrid(buyArr, sellArr, buyHead, sellHead) {
+                return '<div class="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-zinc-200 dark:md:divide-zinc-700">' +
+                    '<div class="flex flex-col min-w-0 border-b theme-border md:border-b-0">' +
+                    '<div class="px-2 sm:px-3 py-2 font-mono text-[10px] sm:text-xs font-bold tracking-wider bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-b theme-border">' + buyHead + '</div>' +
+                    '<div class="max-h-[min(50vh,22rem)] md:max-h-[min(60vh,28rem)] overflow-y-auto overflow-x-hidden">' +
+                    (buyArr.length ? buyArr.map(function(e) { return rowHtml(e, true); }).join('') : '<div class="px-2 sm:px-3 py-5 sm:py-6 text-center text-xs sm:text-sm theme-text-dim font-mono">無</div>') +
+                    '</div></div>' +
+                    '<div class="flex flex-col min-w-0">' +
+                    '<div class="px-2 sm:px-3 py-2 font-mono text-[10px] sm:text-xs font-bold tracking-wider bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-b theme-border">' + sellHead + '</div>' +
+                    '<div class="max-h-[min(50vh,22rem)] md:max-h-[min(60vh,28rem)] overflow-y-auto overflow-x-hidden">' +
+                    (sellArr.length ? sellArr.map(function(e) { return rowHtml(e, false); }).join('') : '<div class="px-2 sm:px-3 py-5 sm:py-6 text-center text-xs sm:text-sm theme-text-dim font-mono">無</div>') +
+                    '</div></div></div>';
+            }
 
-            out.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-0">' + buyBlock + sellBlock + '</div>';
+            const etfSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
+                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)]">【 ETF 持倉異動 】</h3>' +
+                renderBuySellGrid(etfBuy, etfSell, '買進（淨買為正 · 區間累計）', '賣出（淨賣為負 · 區間累計）') +
+                '</section>';
+
+            const brokerSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
+                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)]">【 主力分點異動 】</h3>' +
+                renderBuySellGrid(brokerBuy, brokerSell, '買進（淨買為正 · 區間累計）', '賣出（淨賣為負 · 區間累計）') +
+                '</section>';
+
+            out.innerHTML = '<div class="flex flex-col gap-6 sm:gap-8">' + etfSection + brokerSection + '</div>';
         }
 
         function refreshTable() {
+            if (currentMode === 'SEARCH') return;
             if (currentETF === AI_TAB) return;
             const { buy, sell } = aggregateData(currentETF, currentDays);
             const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
@@ -1011,6 +1122,7 @@
         }
 
         function handleSearch() {
+            if (currentMode === 'SEARCH') return;
             const inp = document.getElementById('search-input');
             if (!inp) return;
             const val = inp.value.trim().toLowerCase();
