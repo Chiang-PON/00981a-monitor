@@ -8,6 +8,96 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Flatpickr 標題列：Tailwind Preflight 置中、年份欄寬度與箭頭 */
+        .flatpickr-months .flatpickr-month {
+            height: auto;
+            min-height: 32px;
+        }
+        .flatpickr-current-month {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 8px !important;
+            width: 100% !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            flex-wrap: nowrap;
+            position: relative;
+            left: auto;
+            transform: none;
+            max-width: none;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            display: inline-block;
+            margin: 0 !important;
+            padding: 0.125rem 0.35rem !important;
+            border: none !important;
+            border-radius: 0.25rem;
+            background: transparent !important;
+            box-shadow: none !important;
+            font-size: inherit;
+            font-weight: 600;
+            line-height: 1.35;
+            vertical-align: middle;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .flatpickr-current-month .numInputWrapper {
+            display: inline-flex !important;
+            flex-direction: row;
+            align-items: stretch;
+            width: 80px !important;
+            min-width: 80px !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            vertical-align: middle;
+        }
+        .flatpickr-current-month input.cur-year {
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            font-weight: bold !important;
+            box-sizing: border-box !important;
+            border: none !important;
+            border-radius: 0.25rem;
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            font-size: inherit !important;
+            line-height: 1.35;
+            min-width: 0;
+            text-align: center;
+            vertical-align: middle;
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+        .flatpickr-current-month .numInputWrapper span.arrowUp,
+        .flatpickr-current-month .numInputWrapper span.arrowDown {
+            position: relative !important;
+            display: block !important;
+            flex-shrink: 0;
+            width: 12px;
+            min-width: 12px;
+            height: 50%;
+            min-height: 8px;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            opacity: 1;
+        }
+        .flatpickr-current-month .numInputWrapper span.arrowUp:after,
+        .flatpickr-current-month .numInputWrapper span.arrowDown:after {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -156,6 +246,37 @@
         [data-theme="dark"] #broker-map.broker-map-dark .leaflet-control-attribution a {
             color: var(--color-accent);
         }
+
+        .flatpickr-calendar {
+            z-index: 100 !important;
+        }
+        [data-theme="dark"] .flatpickr-calendar {
+            background: var(--bg-panel);
+            border-color: var(--border-dim);
+            box-shadow: var(--shadow-panel);
+        }
+        [data-theme="dark"] .flatpickr-months .flatpickr-month,
+        [data-theme="dark"] .flatpickr-current-month .flatpickr-monthDropdown-months,
+        [data-theme="dark"] .flatpickr-current-month input.cur-year {
+            background: var(--bg-panel);
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .flatpickr-weekdays,
+        [data-theme="dark"] .flatpickr-day {
+            color: var(--text-main);
+        }
+        [data-theme="dark"] .flatpickr-day.flatpickr-disabled,
+        [data-theme="dark"] .flatpickr-day.prevMonthDay,
+        [data-theme="dark"] .flatpickr-day.nextMonthDay {
+            color: var(--text-dim);
+        }
+        [data-theme="dark"] .flatpickr-day.selected,
+        [data-theme="dark"] .flatpickr-day.startRange,
+        [data-theme="dark"] .flatpickr-day.endRange {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: #0a0a0a;
+        }
     </style>
 </head>
 <body class="pb-24 pt-6">
@@ -215,9 +336,11 @@
                         </button>
                     </div>
                 </div>
-                <div>
-                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">結束日期</label>
-                    <select id="date-selector" onchange="onDateChange()" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors min-w-[9rem]"></select>
+                <div class="min-w-[10rem] sm:min-w-[11rem]">
+                    <label for="date-picker" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">結束日期</label>
+                    <input type="text" id="date-picker" readonly placeholder="選擇日期"
+                        class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]"
+                        autocomplete="off">
                 </div>
             </div>
 
@@ -354,11 +477,13 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         /* 全域狀態：須在任何 init / 主題回呼之前宣告，避免 let TDZ (Cannot access before initialization) */
         let brokerMap = null;
         let brokerMapBasemapLayer = null;
         let brokerMapMarkers = {};
+        let datePickerInstance = null;
         let currentMode = 'ETF';
         let currentETF = 'GLOBAL_CONSENSUS';
         let currentDate = '';
@@ -369,6 +494,7 @@
         const db = __DB_JSON__;
         const brokerLabels = __BROKER_JSON__ || {};
         const availableDatesDesc = Object.keys(db).sort().reverse();
+        const availableDates = availableDatesDesc;
         const FAMILY_TAB = "GLOBAL_CONSENSUS";
         const KAIJI_TAB = "KAIJI_CONSENSUS";
         const AI_TAB = "AI_AGENT";
@@ -443,6 +569,9 @@
             localStorage.setItem('theme', newTheme);
             updateThemeIcons(newTheme);
             updateBrokerMapThemeClass();
+            if (datePickerInstance && typeof datePickerInstance.redraw === 'function') {
+                datePickerInstance.redraw();
+            }
         }
         function updateThemeIcons(theme) {
             const sun = document.getElementById('icon-sun');
@@ -748,9 +877,7 @@
             maybeRefreshStockReverseSearch();
         }
 
-        function onDateChange() {
-            const ds = document.getElementById('date-selector');
-            if (ds) currentDate = ds.value;
+        function syncDisplaysAfterDateChange() {
             const dateEl = document.getElementById('current-date-display');
             if (dateEl) dateEl.textContent = dateRangeLabel();
             refreshTable();
@@ -779,6 +906,42 @@
             if (us) us.classList.toggle('unit-active', u === 'shares');
             refreshTable();
             maybeRefreshStockReverseSearch();
+        }
+
+        function initDatePicker() {
+            const inp = document.getElementById('date-picker');
+            if (!inp) return;
+            if (datePickerInstance) {
+                datePickerInstance.destroy();
+                datePickerInstance = null;
+            }
+            if (typeof flatpickr === 'undefined') {
+                inp.disabled = true;
+                inp.placeholder = 'Flatpickr 載入失敗';
+                return;
+            }
+            const enableDates = availableDates.length ? availableDates.slice() : [];
+            if (!enableDates.length) {
+                inp.disabled = true;
+                inp.value = '';
+                inp.placeholder = '無可用日期';
+                return;
+            }
+            inp.disabled = false;
+            if (!currentDate || enableDates.indexOf(currentDate) < 0) {
+                currentDate = enableDates[0];
+            }
+            datePickerInstance = flatpickr(inp, {
+                dateFormat: 'Y-m-d',
+                defaultDate: currentDate,
+                enable: enableDates,
+                onChange: function(selectedDates, dateStr) {
+                    if (!dateStr) return;
+                    if (currentDate === dateStr) return;
+                    currentDate = dateStr;
+                    syncDisplaysAfterDateChange();
+                }
+            });
         }
 
         function initApiKey() {
@@ -816,17 +979,7 @@
             }
             updateModeTabStyles();
             renderTargetPills();
-            const dateSel = document.getElementById('date-selector');
-            if (dateSel) {
-                dateSel.innerHTML = '';
-                availableDatesDesc.forEach(date => {
-                    const opt = document.createElement('option');
-                    opt.value = date;
-                    opt.textContent = date;
-                    dateSel.appendChild(opt);
-                });
-                if (currentDate) dateSel.value = currentDate;
-            }
+            initDatePicker();
             const tfSel = document.getElementById('timeframe-selector');
             if (tfSel) tfSel.value = String(currentDays);
             setUnit(currentUnit);
