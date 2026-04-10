@@ -965,10 +965,18 @@
                 return;
             }
 
+            const firstHit = buys[0] || sells[0];
+            let stockTag = '';
+            if (firstHit && firstHit.item) {
+                const n = (firstHit.item.name || '').trim();
+                const c = firstHit.item.code != null && String(firstHit.item.code).trim() !== '' ? String(firstHit.item.code).trim() : '';
+                stockTag = c ? (n + ' ' + c) : n;
+            }
+
             function rowHtml(entry, isBuySide) {
                 const it = entry.item;
-                const name = it.name || '—';
-                const code = it.code ? '<span class="font-mono text-[10px] opacity-80 ml-1">' + it.code + '</span>' : '';
+                const actorLabel = getActorLabelForReverseSearch(entry.actorKey);
+                const stockLine = ((it.name || '—') + (it.code != null && String(it.code).trim() !== '' ? ' ' + String(it.code).trim() : '')).trim();
                 const nd = entry.netDiff;
                 const na = entry.netAmount;
                 const diffStr = (nd >= 0 ? '+' : '') + nd.toLocaleString() + ' 張';
@@ -979,8 +987,9 @@
                     '<span class="inline-flex items-center mx-1.5 sm:mx-2 text-zinc-300 dark:text-zinc-600 select-none" aria-hidden="true"><span class="hidden sm:inline w-px h-3.5 bg-zinc-300 dark:bg-zinc-600"></span><span class="sm:hidden text-[10px] px-0.5">|</span></span>' +
                     '<span class="tabular-nums">' + amtStr + '</span></div>';
                 return '<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
-                    '<div class="min-w-0 flex-1 pr-0 sm:pr-1"><span class="font-mono text-[10px] sm:text-xs theme-text-dim block mb-0.5 leading-snug">' + getActorLabelForReverseSearch(entry.actorKey) + '</span>' +
-                    '<span class="font-bold theme-text text-sm leading-snug break-words">' + name + '</span>' + code + '</div>' +
+                    '<div class="min-w-0 flex-1 pr-0 sm:pr-1">' +
+                    '<div class="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-snug break-words">' + actorLabel + '</div>' +
+                    '<div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-mono tracking-tight">' + stockLine + '</div></div>' +
                     nums + '</div>';
             }
 
@@ -998,13 +1007,14 @@
                     '</div></div></div>';
             }
 
+            const titleExtra = stockTag ? (' ' + stockTag) : '';
             const etfSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
-                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)]">【 ETF 持倉異動 】</h3>' +
+                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)] leading-snug">【 ETF 持倉異動 】' + titleExtra + '</h3>' +
                 renderBuySellGrid(etfBuy, etfSell, '買進（淨買為正 · 區間累計）', '賣出（淨賣為負 · 區間累計）') +
                 '</section>';
 
             const brokerSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
-                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)]">【 主力分點異動 】</h3>' +
+                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)] leading-snug">【 主力分點異動 】' + titleExtra + '</h3>' +
                 renderBuySellGrid(brokerBuy, brokerSell, '買進（淨買為正 · 區間累計）', '賣出（淨賣為負 · 區間累計）') +
                 '</section>';
 
