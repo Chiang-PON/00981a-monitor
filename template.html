@@ -371,9 +371,9 @@
             <div id="header-main" class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
                     <span class="font-mono text-xs theme-text-dim tracking-widest uppercase">TARGET_ASSET</span>
-                    <div class="flex items-baseline gap-3">
+                    <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                         <h2 id="current-etf-title" class="text-3xl md:text-4xl font-black theme-text tracking-wider">---</h2>
-                        <span id="current-date-display" class="font-mono text-lg text-accent"></span>
+                        <span id="dashboard-title-date-range" class="hidden text-sm font-normal text-gray-500 dark:text-gray-400 ml-0 sm:ml-2 tracking-normal whitespace-nowrap" aria-label="資料日期區間"></span>
                     </div>
                 </div>
                 <div id="header-controls" class="flex flex-wrap items-center gap-3">
@@ -780,6 +780,7 @@
                 if (pillsSection) pillsSection.classList.add('hidden');
                 if (dashPanel) dashPanel.classList.add('hidden');
                 if (searchPanel) searchPanel.classList.remove('hidden');
+                updateDashboardTitleDateRange();
                 runStockReverseSearch();
                 return;
             }
@@ -859,8 +860,7 @@
             if (aiV) aiV.classList.toggle('hidden', !isAI);
             const titleEl = document.getElementById('current-etf-title');
             if (titleEl) titleEl.textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
-            const dateEl = document.getElementById('current-date-display');
-            if (dateEl) dateEl.textContent = isAI ? 'PROTOCOL_ACTIVE' : dateRangeLabel();
+            updateDashboardTitleDateRange();
             if (!isAI) {
                 refreshTable();
             }
@@ -871,15 +871,13 @@
         function onTimeframeChange() {
             const sel = document.getElementById('timeframe-selector');
             if (sel) currentDays = parseInt(sel.value, 10) || 5;
-            const dateEl = document.getElementById('current-date-display');
-            if (dateEl) dateEl.textContent = dateRangeLabel();
+            updateDashboardTitleDateRange();
             refreshTable();
             maybeRefreshStockReverseSearch();
         }
 
         function syncDisplaysAfterDateChange() {
-            const dateEl = document.getElementById('current-date-display');
-            if (dateEl) dateEl.textContent = dateRangeLabel();
+            updateDashboardTitleDateRange();
             refreshTable();
             maybeRefreshStockReverseSearch();
         }
@@ -896,6 +894,28 @@
             const slice = availableDatesDesc.slice(idx, idx + Math.min(currentDays, availableDatesDesc.length - idx));
             if (slice.length === 0) return currentDate || '—';
             return slice.length === 1 ? slice[0] : slice[slice.length - 1] + ' ~ ' + slice[0];
+        }
+
+        function getDateRangeDisplayString() {
+            return dateRangeLabel();
+        }
+
+        function updateDashboardTitleDateRange() {
+            const el = document.getElementById('dashboard-title-date-range');
+            if (!el) return;
+            if (currentMode === 'SEARCH' || currentETF === AI_TAB) {
+                el.textContent = '';
+                el.classList.add('hidden');
+                return;
+            }
+            const s = getDateRangeDisplayString();
+            if (!s || s === '—') {
+                el.textContent = '';
+                el.classList.add('hidden');
+                return;
+            }
+            el.textContent = s;
+            el.classList.remove('hidden');
         }
 
         function setUnit(u) {
@@ -985,8 +1005,6 @@
             setUnit(currentUnit);
             const titleEl = document.getElementById('current-etf-title');
             if (titleEl) titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
-            const dateDisp = document.getElementById('current-date-display');
-            if (dateDisp) dateDisp.textContent = dateRangeLabel();
             onETFChange();
             initApiKey();
             const sri = document.getElementById('stock-reverse-input');
@@ -1161,13 +1179,18 @@
             }
 
             const titleExtra = stockTag ? (' ' + stockTag) : '';
+            const rangeStr = getDateRangeDisplayString();
+            const rangeSpanHtml = (rangeStr && rangeStr !== '—')
+                ? '<span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2 tracking-normal">' + rangeStr + '</span>'
+                : '';
+            const h3Class = 'px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)] leading-snug flex flex-wrap items-baseline gap-x-1';
             const etfSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
-                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)] leading-snug">【 ETF 持倉異動 】' + titleExtra + '</h3>' +
+                '<h3 class="' + h3Class + '">【 ETF 持倉異動 】' + titleExtra + rangeSpanHtml + '</h3>' +
                 renderBuySellGrid(etfBuy, etfSell, '買進（淨買為正 · 區間累計）', '賣出（淨賣為負 · 區間累計）') +
                 '</section>';
 
             const brokerSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
-                '<h3 class="px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)] leading-snug">【 主力分點異動 】' + titleExtra + '</h3>' +
+                '<h3 class="' + h3Class + '">【 主力分點異動 】' + titleExtra + rangeSpanHtml + '</h3>' +
                 renderBuySellGrid(brokerBuy, brokerSell, '買進（淨買為正 · 區間累計）', '賣出（淨賣為負 · 區間累計）') +
                 '</section>';
 
