@@ -360,9 +360,6 @@
                             搜尋
                         </button>
                     </div>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 tracking-wide text-center max-w-3xl mx-auto px-1 leading-relaxed">
-                        💡 數據說明：區間均價為該主力於所選天數內之「總交易金額 ÷ 總張數」加權估算；「狀態」為比對該股最新收盤價得出之帳面損益估計。
-                    </p>
                     <div id="stock-reverse-results" class="mt-6 rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[8rem]"></div>
                 </div>
             </div>
@@ -1065,84 +1062,6 @@
             return sign + '約 <span class="tabular-nums">' + Math.round(abs).toLocaleString() + '</span><span class="' + unitClass + '">萬</span>';
         }
 
-        function sameStockItemForPrice(a, b) {
-            return String(a.code || '') === String(b.code || '') && String(a.name || '') === String(b.name || '');
-        }
-
-        function findLatestStockPriceFromDb(stockItem, dateSlice) {
-            for (let i = 0; i < dateSlice.length; i++) {
-                const d = dateSlice[i];
-                const dayData = db[d];
-                if (!dayData || typeof dayData !== 'object') continue;
-                const keys = Object.keys(dayData);
-                for (let k = 0; k < keys.length; k++) {
-                    const actorKey = keys[k];
-                    if (actorKey === AI_TAB) continue;
-                    const bucket = dayData[actorKey];
-                    if (!bucket || typeof bucket !== 'object') continue;
-                    const pools = [
-                        bucket.new_buy || [],
-                        bucket.increased || [],
-                        bucket.decreased || [],
-                        bucket.sold_out || []
-                    ];
-                    for (let pi = 0; pi < pools.length; pi++) {
-                        const arr = pools[pi];
-                        for (let j = 0; j < arr.length; j++) {
-                            const item = arr[j];
-                            if (!sameStockItemForPrice(item, stockItem)) continue;
-                            const p = item.price;
-                            if (p != null && Number.isFinite(Number(p))) {
-                                return Math.round(Number(p) * 100) / 100;
-                            }
-                        }
-                    }
-                }
-            }
-            return 0;
-        }
-
-        function enrichStockSearchEntry(entry, dateSlice, dayCount) {
-            const it = entry.item;
-            const currentPrice = findLatestStockPriceFromDb(it, dateSlice);
-            entry.currentPrice = currentPrice;
-            entry._costLineDayCount = dayCount != null ? dayCount : currentDays;
-            entry._costLineKind = 'etf';
-            let avgPrice = null;
-            const tc = entry.totalCost;
-            const vs = entry.valid_shares_for_avg;
-            if (vs != null && vs > 1e-9 && tc != null) {
-                avgPrice = Math.round((tc / vs) * 100) / 100;
-            }
-            entry.avgPrice = avgPrice;
-            if (avgPrice != null) {
-                entry.status = currentPrice < avgPrice ? '套牢中' : '獲利中';
-            } else {
-                entry.status = null;
-            }
-        }
-
-        function buildStockSearchCostLine(entry) {
-            const avgPrice = entry.avgPrice;
-            const currentPrice = entry.currentPrice;
-            const status = entry.status;
-            let statusHtml = '<span class="theme-text-dim font-medium">—</span>';
-            if (status === '套牢中') {
-                statusHtml = '<span class="text-green-600 font-medium">套牢中</span>';
-            } else if (status === '獲利中') {
-                statusHtml = '<span class="text-red-600 font-medium">獲利中</span>';
-            }
-            const currentStr = (currentPrice != null && Number.isFinite(Number(currentPrice))) ? Number(currentPrice).toFixed(2) : '—';
-            const avgStr = (avgPrice != null && Number.isFinite(Number(avgPrice))) ? Number(avgPrice).toFixed(2) : '—';
-            return '<div class="flex flex-wrap items-center gap-x-1 gap-y-0.5 mt-1.5 text-[10px] sm:text-xs leading-tight text-gray-400 dark:text-gray-500">' +
-                '<span>現價: ' + currentStr + ' 元</span>' +
-                '<span class="text-gray-300 dark:text-gray-600">|</span>' +
-                '<span>均價: ' + avgStr + ' 元</span>' +
-                '<span class="text-gray-300 dark:text-gray-600">|</span>' +
-                '<span>狀態: ' + statusHtml + '</span>' +
-                '</div>';
-        }
-
         function runStockReverseSearch() {
             const inp = document.getElementById('stock-reverse-input');
             const out = document.getElementById('stock-reverse-results');
@@ -1168,16 +1087,10 @@
 
             function addSigned(actorKey, item, sign) {
                 const k = mergeKey(actorKey, item);
-                const prev = netMap.get(k) || { actorKey: actorKey, item: item, netDiff: 0, netAmount: 0, totalCost: 0, valid_shares_for_avg: 0 };
+                const prev = netMap.get(k) || { actorKey: actorKey, item: item, netDiff: 0, netAmount: 0 };
                 const signedDiff = (item.diff || 0) * sign;
                 prev.netDiff += signedDiff;
                 prev.netAmount += (item.amount || 0) * sign;
-                const absD = Math.abs(item.diff || 0);
-                const p = item.price;
-                if (absD > 0 && p != null && Number(p) > 0) {
-                    prev.totalCost = (prev.totalCost || 0) + absD * Number(p);
-                    prev.valid_shares_for_avg = (prev.valid_shares_for_avg || 0) + absD;
-                }
                 prev.item = item;
                 netMap.set(k, prev);
             }
@@ -1233,11 +1146,6 @@
             brokerBuy.sort(sortDesc);
             brokerSell.sort(sortDesc);
 
-            etfBuy.forEach(function(e) { enrichStockSearchEntry(e, dateSlice, currentDays); });
-            etfSell.forEach(function(e) { enrichStockSearchEntry(e, dateSlice, currentDays); });
-            brokerBuy.forEach(function(e) { enrichStockSearchEntry(e, dateSlice, currentDays); });
-            brokerSell.forEach(function(e) { enrichStockSearchEntry(e, dateSlice, currentDays); });
-
             if (buys.length === 0 && sells.length === 0) {
                 out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">區間內無主力異動紀錄</div>';
                 return;
@@ -1263,12 +1171,11 @@
                 const nums = '<div class="flex flex-col items-end justify-start shrink-0 gap-1 pl-2 font-mono ' + color + '">' +
                     '<span class="text-lg sm:text-xl font-extrabold tabular-nums leading-none tracking-tight">' + diffStr + '</span>' +
                     '<span class="text-lg sm:text-xl font-extrabold leading-tight text-right whitespace-nowrap">' + amtHtml + '</span></div>';
-                const costLine = buildStockSearchCostLine(entry);
                 return '<div class="flex flex-row items-start justify-between gap-2 sm:gap-3 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
                     '<div class="min-w-0 flex-1 flex flex-col">' +
                     '<div class="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-snug break-words">' + actorLabel + '</div>' +
                     '<div class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono tracking-tight">' + stockLine + '</div>' +
-                    costLine + '</div>' +
+                    '</div>' +
                     nums + '</div>';
             }
 
