@@ -1048,6 +1048,79 @@
             return (neg ? '−' : '+') + inner;
         }
 
+        function sameStockItemForPrice(a, b) {
+            return String(a.code || '') === String(b.code || '') && String(a.name || '') === String(b.name || '');
+        }
+
+        function findLatestStockTradePrice(stockItem, dateSlice) {
+            for (let i = 0; i < dateSlice.length; i++) {
+                const d = dateSlice[i];
+                const dayData = db[d];
+                if (!dayData || typeof dayData !== 'object') continue;
+                const keys = Object.keys(dayData);
+                for (let k = 0; k < keys.length; k++) {
+                    const actorKey = keys[k];
+                    if (actorKey === AI_TAB) continue;
+                    const bucket = dayData[actorKey];
+                    if (!bucket || typeof bucket !== 'object') continue;
+                    const pools = [
+                        bucket.new_buy || [],
+                        bucket.increased || [],
+                        bucket.decreased || [],
+                        bucket.sold_out || []
+                    ];
+                    for (let pi = 0; pi < pools.length; pi++) {
+                        const arr = pools[pi];
+                        for (let j = 0; j < arr.length; j++) {
+                            const item = arr[j];
+                            if (!sameStockItemForPrice(item, stockItem)) continue;
+                            const diff = item.diff || 0;
+                            if (Math.abs(diff) < 1e-9) continue;
+                            const amt = item.amount || 0;
+                            const price = (amt * 10) / Math.abs(diff);
+                            return Math.round(price * 100) / 100;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        function enrichStockSearchEntry(entry, dateSlice, dayCount) {
+            const absDiff = Math.abs(entry.netDiff);
+            const netAmt = entry.netAmount;
+            let avgPrice = null;
+            if (absDiff > 1e-9) {
+                avgPrice = Math.round((Math.abs(netAmt) * 10 / absDiff) * 100) / 100;
+            }
+            const it = entry.item;
+            const currentPrice = findLatestStockTradePrice(it, dateSlice);
+            entry.avgPrice = avgPrice;
+            entry.currentPrice = currentPrice;
+            if (avgPrice != null && currentPrice != null) {
+                entry.status = currentPrice < avgPrice ? '套牢中' : '獲利中';
+            } else {
+                entry.status = null;
+            }
+            entry._costLineDayCount = dayCount != null ? dayCount : currentDays;
+        }
+
+        function buildStockSearchCostLine(entry) {
+            const avgPrice = entry.avgPrice;
+            const currentPrice = entry.currentPrice;
+            const status = entry.status;
+            let statusHtml = '<span class="theme-text-dim">—</span>';
+            if (status === '套牢中') {
+                statusHtml = '<span class="text-green-600">套牢中</span>';
+            } else if (status === '獲利中') {
+                statusHtml = '<span class="text-red-600">獲利中</span>';
+            }
+            const x = entry._costLineDayCount != null ? entry._costLineDayCount : currentDays;
+            return '<div class="text-xs mt-1 text-zinc-500 dark:text-zinc-400 leading-snug break-words max-w-full">' +
+                '近 ' + x + ' 日均價：約 ' + (avgPrice != null ? avgPrice.toFixed(2) : '—') + ' 元 | 狀態：' + statusHtml +
+                '</div>';
+        }
+
         function runStockReverseSearch() {
             const inp = document.getElementById('stock-reverse-input');
             const out = document.getElementById('stock-reverse-results');
@@ -1131,6 +1204,10 @@
             brokerBuy.sort(sortDesc);
             brokerSell.sort(sortDesc);
 
+            [etfBuy, etfSell, brokerBuy, brokerSell].forEach(function(arr) {
+                arr.forEach(function(e) { enrichStockSearchEntry(e, dateSlice, currentDays); });
+            });
+
             if (buys.length === 0 && sells.length === 0) {
                 out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">區間內無主力異動紀錄</div>';
                 return;
@@ -1153,14 +1230,16 @@
                 const diffStr = (nd >= 0 ? '+' : '') + nd.toLocaleString() + ' 張';
                 const amtStr = formatAmountNetDisplay(na);
                 const color = isBuySide ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
-                const nums = '<div class="flex flex-wrap items-center justify-end sm:justify-end gap-x-0 font-mono text-xs sm:text-sm font-bold ' + color + ' w-full sm:w-auto shrink-0 mt-1 sm:mt-0">' +
+                const nums = '<div class="flex flex-wrap items-center justify-end sm:justify-end gap-x-0 font-mono text-xs sm:text-sm font-bold ' + color + ' w-full sm:w-auto shrink-0 mt-1 sm:mt-0 sm:min-w-[11rem] sm:self-start">' +
                     '<span class="tabular-nums">' + diffStr + '</span>' +
                     '<span class="inline-flex items-center mx-1.5 sm:mx-2 text-zinc-300 dark:text-zinc-600 select-none" aria-hidden="true"><span class="hidden sm:inline w-px h-3.5 bg-zinc-300 dark:bg-zinc-600"></span><span class="sm:hidden text-[10px] px-0.5">|</span></span>' +
                     '<span class="tabular-nums">' + amtStr + '</span></div>';
+                const costLine = buildStockSearchCostLine(entry);
                 return '<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
-                    '<div class="min-w-0 flex-1 pr-0 sm:pr-1">' +
+                    '<div class="min-w-0 flex-1 pr-0 sm:pr-2">' +
                     '<div class="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-snug break-words">' + actorLabel + '</div>' +
-                    '<div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-mono tracking-tight">' + stockLine + '</div></div>' +
+                    '<div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-mono tracking-tight">' + stockLine + '</div>' +
+                    costLine + '</div>' +
                     nums + '</div>';
             }
 
