@@ -767,6 +767,38 @@
             return etf === KAIJI_TAB || brokerCodes.indexOf(etf) >= 0;
         }
 
+        /** 走勢圖標的丸：僅實際 ETF／分點代號，不含全家族／大聯盟／AI 等聚合列 */
+        function trendBrokerBranchList() {
+            return brokerCodes.filter(b => allKeys.has(b)).sort((a, b) => brokerCodes.indexOf(a) - brokerCodes.indexOf(b));
+        }
+        function pickDefaultTrendEtf() {
+            try {
+                const le = localStorage.getItem('lastETF');
+                if (le && etfCodes.includes(le)) return le;
+            } catch (e) {}
+            return etfCodes.length ? etfCodes[0] : FAMILY_TAB;
+        }
+        function pickDefaultTrendBroker() {
+            const br = trendBrokerBranchList();
+            try {
+                const le = localStorage.getItem('lastETF');
+                if (le && br.includes(le)) return le;
+            } catch (e) {}
+            return br.length ? br[0] : KAIJI_TAB;
+        }
+        function normalizeCurrentEtfForTrend() {
+            if (trendViewMode === 'ETF') {
+                if (currentETF === FAMILY_TAB || currentETF === AI_TAB || !etfCodes.includes(currentETF)) {
+                    currentETF = pickDefaultTrendEtf();
+                }
+            } else {
+                const br = trendBrokerBranchList();
+                if (currentETF === KAIJI_TAB || !br.includes(currentETF)) {
+                    currentETF = pickDefaultTrendBroker();
+                }
+            }
+        }
+
         currentMode = 'ETF';
         currentETF = FAMILY_TAB;
         currentDate = availableDatesDesc.length > 0 ? availableDatesDesc[0] : '';
@@ -1285,16 +1317,17 @@
                     try {
                         const le = localStorage.getItem('lastETF');
                         if (le && etfList.includes(le)) {
-                            if (trendViewMode === 'ETF' && isEtfModeSelection(le)) currentETF = le;
-                            else if (trendViewMode === 'BROKER' && isBrokerModeSelection(le)) currentETF = le;
-                            else currentETF = trendViewMode === 'ETF' ? FAMILY_TAB : KAIJI_TAB;
+                            if (trendViewMode === 'ETF' && etfCodes.includes(le)) currentETF = le;
+                            else if (trendViewMode === 'BROKER' && trendBrokerBranchList().includes(le)) currentETF = le;
+                            else currentETF = trendViewMode === 'ETF' ? pickDefaultTrendEtf() : pickDefaultTrendBroker();
                         } else {
-                            currentETF = trendViewMode === 'ETF' ? FAMILY_TAB : KAIJI_TAB;
+                            currentETF = trendViewMode === 'ETF' ? pickDefaultTrendEtf() : pickDefaultTrendBroker();
                         }
                     } catch (e) {
-                        currentETF = trendViewMode === 'ETF' ? FAMILY_TAB : KAIJI_TAB;
+                        currentETF = trendViewMode === 'ETF' ? pickDefaultTrendEtf() : pickDefaultTrendBroker();
                     }
                 }
+                normalizeCurrentEtfForTrend();
                 syncTrendSubTabs();
                 renderTrendTargetPills();
                 onTrendETFChange();
@@ -1400,18 +1433,15 @@
 
         function getTrendDropdownEtfList() {
             if (trendViewMode === 'ETF') {
-                return [FAMILY_TAB, AI_TAB, ...etfCodes];
+                return [...etfCodes];
             }
-            const brokers = brokerCodes.filter(b => allKeys.has(b)).sort((a, b) => brokerCodes.indexOf(a) - brokerCodes.indexOf(b));
-            return [KAIJI_TAB, ...brokers];
+            return trendBrokerBranchList();
         }
 
         function getTrendETFGroupForRender(etf) {
             if (trendViewMode === 'ETF') {
-                if (etf === FAMILY_TAB || etf === AI_TAB) return 'core';
                 return 'etf';
             }
-            if (etf === KAIJI_TAB) return 'core';
             return 'broker';
         }
 
@@ -1436,17 +1466,9 @@
                 localStorage.setItem('lastEtfBrokerTab', mode);
             } catch (e) {}
             if (mode === 'ETF') {
-                currentETF = FAMILY_TAB;
-                try {
-                    const le = localStorage.getItem('lastETF');
-                    if (le && etfList.includes(le) && isEtfModeSelection(le)) currentETF = le;
-                } catch (e) {}
+                currentETF = pickDefaultTrendEtf();
             } else {
-                currentETF = KAIJI_TAB;
-                try {
-                    const le = localStorage.getItem('lastETF');
-                    if (le && etfList.includes(le) && isBrokerModeSelection(le)) currentETF = le;
-                } catch (e) {}
+                currentETF = pickDefaultTrendBroker();
             }
             renderTrendTargetPills();
             onTrendETFChange();
@@ -1739,6 +1761,7 @@
             if (currentMode !== 'TREND') {
                 setMode('TREND');
             } else {
+                normalizeCurrentEtfForTrend();
                 syncTrendSubTabs();
                 renderTrendTargetPills();
                 onTrendETFChange();

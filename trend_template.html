@@ -155,6 +155,25 @@
             return etf === KAIJI_TAB || brokerCodes.indexOf(etf) >= 0;
         }
 
+        function trendBrokerBranchList() {
+            return brokerCodes.filter(function(b) { return allKeys.has(b); }).sort(function(a, b) { return brokerCodes.indexOf(a) - brokerCodes.indexOf(b); });
+        }
+        function pickDefaultTrendEtf() {
+            try {
+                var le = localStorage.getItem('lastETF');
+                if (le && etfCodes.indexOf(le) >= 0) return le;
+            } catch (e) {}
+            return etfCodes.length ? etfCodes[0] : FAMILY_TAB;
+        }
+        function pickDefaultTrendBroker() {
+            var br = trendBrokerBranchList();
+            try {
+                var le = localStorage.getItem('lastETF');
+                if (le && br.indexOf(le) >= 0) return le;
+            } catch (e) {}
+            return br.length ? br[0] : KAIJI_TAB;
+        }
+
         function escapeHtmlText(s) {
             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
@@ -171,19 +190,14 @@
             return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
         }
         function getDropdownEtfList() {
-            if (currentMode === 'ETF') return [FAMILY_TAB].concat(etfCodes);
-            return [KAIJI_TAB].concat(brokerCodes.filter(function(b) { return allKeys.has(b); }).sort(function(a, b) { return brokerCodes.indexOf(a) - brokerCodes.indexOf(b); }));
+            if (currentMode === 'ETF') return etfCodes.slice();
+            return trendBrokerBranchList();
         }
         function getETFGroupForRender(etf) {
-            if (currentMode === 'ETF') {
-                if (etf === FAMILY_TAB) return 'core';
-                return 'etf';
-            }
-            if (etf === KAIJI_TAB) return 'core';
+            if (currentMode === 'ETF') return 'etf';
             return 'broker';
         }
         const ETF_GROUP_DEFS = [
-            { id: 'core', title: '【 核心決策 】' },
             { id: 'etf', title: '【 ETF 標的 】' },
             { id: 'broker', title: '【 主力分點 】' }
         ];
@@ -236,7 +250,7 @@
         function onTrendETFChange() {
             var titleEl = document.getElementById('trend-etf-title');
             if (titleEl) {
-                titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF));
+                titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (currentETF === AI_TAB ? 'AI_AGENT' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
             }
             updatePillActiveState();
             var inp = document.getElementById('trend-code-input');
@@ -253,17 +267,9 @@
             if (eBtn) eBtn.className = base + (mode === 'ETF' ? 'tab-inner-active' : 'tab-inner-inactive');
             if (bBtn) bBtn.className = base + (mode === 'BROKER' ? 'tab-inner-active' : 'tab-inner-inactive');
             if (mode === 'ETF') {
-                currentETF = FAMILY_TAB;
-                try {
-                    var le = localStorage.getItem('lastETF');
-                    if (le && etfList.indexOf(le) >= 0 && isEtfModeSelection(le)) currentETF = le;
-                } catch (err) {}
+                currentETF = pickDefaultTrendEtf();
             } else {
-                currentETF = KAIJI_TAB;
-                try {
-                    var le2 = localStorage.getItem('lastETF');
-                    if (le2 && etfList.indexOf(le2) >= 0 && isBrokerModeSelection(le2)) currentETF = le2;
-                } catch (err2) {}
+                currentETF = pickDefaultTrendBroker();
             }
             renderTargetPills();
             onTrendETFChange();
@@ -320,7 +326,7 @@
 
         function getTrendMapForCurrentEtf() {
             if (!holdingsTrend || typeof holdingsTrend !== 'object') return null;
-            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) return null;
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) return null;
             if (brokerCodes.indexOf(currentETF) >= 0) {
                 return holdingsTrend.broker && holdingsTrend.broker[currentETF] ? holdingsTrend.broker[currentETF] : null;
             }
@@ -377,7 +383,7 @@
 
             var asTarget = findEtfOrBrokerKeyInTrendData(code);
             if (asTarget) {
-                if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
+                if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) {
                     if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
                         if (inp) inp.value = '';
                         if (hint) hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請改輸入<strong class="theme-text">股票代號或名稱</strong>後再按繪製。';
@@ -395,7 +401,7 @@
                 }
             }
 
-            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) {
                 if (hint) hint.textContent = '請選單一 ETF 或分點，或輸入 ETF／分點代號切換。';
                 return;
             }
@@ -538,7 +544,10 @@
             if (mode === 'broker') setTrendViewMode('BROKER');
             else setTrendViewMode('ETF');
 
-            if (target && etfList.indexOf(target) >= 0) selectTarget(target);
+            if (target) {
+                if (currentMode === 'ETF' && etfCodes.indexOf(target) >= 0) selectTarget(target);
+                else if (currentMode === 'BROKER' && trendBrokerBranchList().indexOf(target) >= 0) selectTarget(target);
+            }
 
             if (code) {
                 var inp = document.getElementById('trend-code-input');
