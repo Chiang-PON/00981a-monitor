@@ -159,18 +159,45 @@ def collect_daily_real_prices(file_map: dict[str, list[tuple[str, str]]]) -> dic
     return daily_real_prices
 
 
+def _broker_row_amount_10k(net_shares: int, net_amount: float, real_p: float, csv_avg: float) -> float:
+    """分點單列金額（萬元）：與張數一致。優先 ETF 參考價，其次玩股網均價，最後 CSV 淨金額（萬元）。"""
+    mag = abs(net_shares)
+    if real_p > 0:
+        return mag * real_p / 10.0
+    if csv_avg > 0:
+        return mag * csv_avg / 10.0
+    return abs(net_amount)
+
+
+def _code_lookup_candidates(code_val: str) -> list[str]:
+    """ETF 持股與分點 CSV 的股票代碼格式可能不同（前導零、字串），查價時多試幾種鍵。"""
+    s = str(code_val or "").strip()
+    if not s:
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+
+    def add(x: str) -> None:
+        if x and x not in seen:
+            seen.add(x)
+            out.append(x)
+
+    add(s)
+    if s.isdigit():
+        n = int(s)
+        add(str(n))
+        if n < 100000:
+            add(f"{n:04d}")
+            add(f"{n:05d}")
+    return out
+
+
 def _lookup_real_price(
     daily_real_prices: dict[str, dict[str, float]], date_str: str, code_val: str
 ) -> float:
-    if not code_val:
-        return 0.0
     d = daily_real_prices.get(date_str) or {}
-    p = d.get(code_val)
-    if p is not None and p > 0:
-        return float(p)
-    if code_val.isdigit():
-        alt = str(int(code_val))
-        p = d.get(alt)
+    for c in _code_lookup_candidates(code_val):
+        p = d.get(c)
         if p is not None and p > 0:
             return float(p)
     return 0.0
@@ -223,11 +250,7 @@ def process_broker_file(
                 else:
                     avg_price_val = csv_avg
                     price_val = csv_avg
-                # 有 ETF 參考價時：張 * 元 / 10 = 萬元（與 ETF 持倉一致）；否則沿用 CSV 淨金額
-                if real_p > 0:
-                    amt_mag = abs(net_shares) * real_p / 10.0
-                else:
-                    amt_mag = abs(net_amount)
+                amt_mag = _broker_row_amount_10k(net_shares, net_amount, real_p, csv_avg)
                 base_item = {
                     "name": c_name,
                     "code": code_val,
@@ -240,7 +263,7 @@ def process_broker_file(
                     "sell_shares": sell_shares,
                 }
                 if net_shares > 0:
-                    increased.append({**base_item, "diff": net_shares, "amount": net_amount if real_p <= 0 else net_shares * real_p / 10.0})
+                    increased.append({**base_item, "diff": net_shares, "amount": amt_mag})
                 elif net_shares < 0:
                     decreased.append({**base_item, "diff": abs(net_shares), "amount": amt_mag})
             increased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))

@@ -657,6 +657,13 @@
         setInterval(updateClock, 1000);
         updateClock();
 
+        /** 凱基分點／ETF 彙總鍵：代號＋名稱，避免同名不同股被合併 */
+        function aggregateRowKey(i) {
+            const c = String(i.code || '').trim();
+            const n = String(i.name || '').trim();
+            return c ? (c + '\t' + n) : n;
+        }
+
         function aggregateData(etf, days) {
             if (availableDatesDesc.length === 0) return { buy: [], sell: [] };
             let dateIndex = availableDatesDesc.indexOf(currentDate);
@@ -675,14 +682,14 @@
                     const dayData = dataOfDay[e];
                     if (!dayData) return;
                     [...(dayData.new_buy || []), ...(dayData.increased || [])].forEach(i => {
-                        const key = i.name;
-                        if (!agg[key]) agg[key] = { name: key, code: i.code || '', sector: i.sector || '其他', diff: 0, amount: 0 };
+                        const key = aggregateRowKey(i);
+                        if (!agg[key]) agg[key] = { name: String(i.name || '').trim() || key, code: String(i.code || '').trim(), sector: i.sector || '其他', diff: 0, amount: 0 };
                         agg[key].diff += i.diff;
                         agg[key].amount += (i.amount || 0);
                     });
                     [...(dayData.decreased || []), ...(dayData.sold_out || [])].forEach(i => {
-                        const key = i.name;
-                        if (!agg[key]) agg[key] = { name: key, code: i.code || '', sector: i.sector || '其他', diff: 0, amount: 0 };
+                        const key = aggregateRowKey(i);
+                        if (!agg[key]) agg[key] = { name: String(i.name || '').trim() || key, code: String(i.code || '').trim(), sector: i.sector || '其他', diff: 0, amount: 0 };
                         agg[key].diff -= i.diff;
                         agg[key].amount -= (i.amount || 0);
                     });
@@ -1307,13 +1314,32 @@
             return Array.from(map.values());
         }
 
+        /** 該分點在可查區間內曾出現過的股票（跨所有交易日合併），避免僅基準日有列才掃得到 */
+        function collectAllStocksForActorAcrossDates(actorKey) {
+            const seen = new Set();
+            const out = [];
+            availableDatesDesc.forEach(function(d) {
+                const dayData = db[d];
+                if (!dayData || !dayData[actorKey]) return;
+                const b = dayData[actorKey];
+                if (actorBucketIsMomentumEmptyWindow(b)) return;
+                collectStocksFromActorDay(b).forEach(function(s) {
+                    const k = String(s.code || '') + '\t' + String(s.name || '');
+                    if (seen.has(k)) return;
+                    seen.add(k);
+                    out.push(s);
+                });
+            });
+            return out;
+        }
+
         /** 基準日：increased 或 decreased 有任一筆資料（依需求）；否則退回「四池皆空以外」的第一日 */
         function actorBucketHasIncreasedOrDecreased(bucket) {
             if (!bucket) return false;
             return (bucket.increased || []).length > 0 || (bucket.decreased || []).length > 0;
         }
 
-        /** 空窗日：四個池皆無資料（假日／無動作）；若有 new_buy 等仍視為交易日，不跳過 */
+        /** 該分點當日四池皆空（無任何持倉異動列）；與「曆日是否放假」無直接對應，僅表示此 key 下無列可算 */
         function actorBucketIsMomentumEmptyWindow(bucket) {
             if (!bucket) return true;
             const nb = (bucket.new_buy || []).length;
@@ -1341,6 +1367,11 @@
             return -1;
         }
 
+        /**
+         * 連續買／賣：以「交易日」為連續（不是連續曆日）。
+         * availableDatesDesc 僅含 DB 內有資料的日期鍵；休市不會出現在陣列中。
+         * 若某日 DB 有該日但該凱基分點缺 CSV（無 actorKey），視為該分點時間序列斷裂，中止連續（與跨週末無資料不同）。
+         */
         function computeMomentumStreak(actorKey, code, name) {
             const dates = availableDatesDesc;
             if (dates.length === 0) return null;
@@ -1364,7 +1395,7 @@
             let totalAmt = f0.netAmount;
             for (i = anchorIdx + 1; i < dates.length; i++) {
                 const dayData = db[dates[i]];
-                if (!dayData || !dayData[actorKey]) continue;
+                if (!dayData || !dayData[actorKey]) break;
                 const b = dayData[actorKey];
                 if (actorBucketIsMomentumEmptyWindow(b)) continue;
                 const f = netFlowForStockInBucket(b, code, name);
@@ -1436,12 +1467,11 @@
                 out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">無資料</div>';
                 return;
             }
-            const baseIdx = findMomentumBaselineDateIndex(actorKey);
-            if (baseIdx < 0) {
-                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">該主力在可查區間內無有效交易基準日</div>';
+            const stocks = collectAllStocksForActorAcrossDates(actorKey);
+            if (stocks.length === 0) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">該主力在可查區間內無持股異動紀錄</div>';
                 return;
             }
-            const stocks = collectStocksFromActorDay(db[dates[baseIdx]][actorKey]);
             const results = [];
             stocks.forEach(function(s) {
                 const r = computeMomentumStreak(actorKey, s.code, s.name);
@@ -1491,11 +1521,7 @@
             const results = [];
             const seen = new Set();
             getMomentumActorKeys().forEach(function(actorKey) {
-                const baseIdx = findMomentumBaselineDateIndex(actorKey);
-                if (baseIdx < 0) return;
-                const dayBase = db[dates[baseIdx]];
-                if (!dayBase || !dayBase[actorKey]) return;
-                const stocks = collectStocksFromActorDay(dayBase[actorKey]).filter(function(s) {
+                const stocks = collectAllStocksForActorAcrossDates(actorKey).filter(function(s) {
                     const codeNorm = String(s.code || '').trim();
                     const nameStr = String(s.name || '');
                     const codeMatch = codeNorm === qRaw;
