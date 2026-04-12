@@ -133,6 +133,238 @@ def _row_to_item(row: pd.Series, c_name: str, code: str, diff: int, amount: floa
     }
 
 
+def collect_daily_real_prices(file_map: dict[str, list[tuple[str, str]]]) -> dict[str, dict[str, float]]:
+    """從各 ETF 持股 CSV 建立每日真實成交價：{ "YYYY-MM-DD": { "2330": 800.0, ... } }。"""
+    daily_real_prices: dict[str, dict[str, float]] = {}
+    for etf_code, files in file_map.items():
+        if etf_code in BROKER_LIST:
+            continue
+        files.sort(key=lambda x: x[0])
+        for date_str, f in files:
+            try:
+                df = pd.read_csv(f, dtype={"code": str})
+                if "code" not in df.columns or "price" not in df.columns:
+                    continue
+                df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0.0)
+                for _, row in df.iterrows():
+                    p = _scalar_numeric(row.get("price", 0), 0.0)
+                    if p <= 0:
+                        continue
+                    c = str(row.get("code", "") or "").strip()
+                    if not c:
+                        continue
+                    daily_real_prices.setdefault(date_str, {})[c] = p
+            except Exception as e:
+                print(f"收集 ETF 價格 {etf_code} {f} 失敗: {e}")
+    return daily_real_prices
+
+
+def _lookup_real_price(
+    daily_real_prices: dict[str, dict[str, float]], date_str: str, code_val: str
+) -> float:
+    if not code_val:
+        return 0.0
+    d = daily_real_prices.get(date_str) or {}
+    p = d.get(code_val)
+    if p is not None and p > 0:
+        return float(p)
+    if code_val.isdigit():
+        alt = str(int(code_val))
+        p = d.get(alt)
+        if p is not None and p > 0:
+            return float(p)
+    return 0.0
+
+
+def process_broker_file(
+    etf_code: str,
+    files: list[tuple[str, str]],
+    database: dict[str, dict],
+    daily_real_prices: dict[str, dict[str, float]],
+) -> None:
+    """處理分點 CSV：股價優先使用 ETF 匯總之真實價格，不再用金額／張數反推。"""
+    files.sort(key=lambda x: x[0])
+    for date_str, f in files:
+        try:
+            df = pd.read_csv(f, dtype={"code": str})
+            if "net_shares" not in df.columns or "net_amount" not in df.columns:
+                continue
+            df["net_shares"] = pd.to_numeric(df["net_shares"], errors="coerce").fillna(0).astype(int)
+            df["net_amount"] = pd.to_numeric(df["net_amount"], errors="coerce").fillna(0.0)
+            if "buy_shares" not in df.columns:
+                df["buy_shares"] = 0
+            if "sell_shares" not in df.columns:
+                df["sell_shares"] = 0
+            df["buy_shares"] = pd.to_numeric(df["buy_shares"], errors="coerce").fillna(0).astype(int)
+            df["sell_shares"] = pd.to_numeric(df["sell_shares"], errors="coerce").fillna(0).astype(int)
+            if "avg_price" not in df.columns:
+                df["avg_price"] = 0.0
+            df["avg_price"] = pd.to_numeric(df["avg_price"], errors="coerce").fillna(0.0)
+            if "name" in df.columns:
+                df["name"] = df["name"].apply(
+                    lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
+                )
+            if date_str not in database:
+                database[date_str] = {}
+            increased, decreased = [], []
+            for _, row in df.iterrows():
+                net_shares = _scalar_int(row.get("net_shares", 0), 0)
+                net_amount = _scalar_numeric(row.get("net_amount", 0), 0.0)
+                buy_shares = _scalar_int(row.get("buy_shares", 0), 0)
+                sell_shares = _scalar_int(row.get("sell_shares", 0), 0)
+                csv_avg = _scalar_numeric(row.get("avg_price", 0), 0.0)
+                c_name = clean_stock_name(row.get("name", ""))
+                code_val = str(row.get("code", "") or "").strip()
+                sector = SECTOR_MAP.get(c_name, "其他")
+                real_p = _lookup_real_price(daily_real_prices, date_str, code_val)
+                if real_p > 0:
+                    avg_price_val = real_p
+                    price_val = real_p
+                else:
+                    avg_price_val = csv_avg
+                    price_val = csv_avg
+                # 有 ETF 參考價時：張 * 元 / 10 = 萬元（與 ETF 持倉一致）；否則沿用 CSV 淨金額
+                if real_p > 0:
+                    amt_mag = abs(net_shares) * real_p / 10.0
+                else:
+                    amt_mag = abs(net_amount)
+                base_item = {
+                    "name": c_name,
+                    "code": code_val,
+                    "sector": sector,
+                    "weight": 0,
+                    "w_diff": 0,
+                    "avg_price": avg_price_val,
+                    "price": price_val,
+                    "buy_shares": buy_shares,
+                    "sell_shares": sell_shares,
+                }
+                if net_shares > 0:
+                    increased.append({**base_item, "diff": net_shares, "amount": net_amount if real_p <= 0 else net_shares * real_p / 10.0})
+                elif net_shares < 0:
+                    decreased.append({**base_item, "diff": abs(net_shares), "amount": amt_mag})
+            increased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
+            decreased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
+            database[date_str][etf_code] = {"new_buy": [], "sold_out": [], "increased": increased, "decreased": decreased}
+        except Exception as e:
+            print(f"處理經紀 {etf_code} {f} 失敗: {e}")
+
+
+def process_etf_file(
+    etf_code: str,
+    files: list[tuple[str, str]],
+    database: dict[str, dict],
+    daily_real_prices: dict[str, dict[str, float]],
+) -> None:
+    """ETF 前後日差分；並將當日 CSV 中 price>0 寫入 daily_real_prices（與 collect 重複時以本次為準）。"""
+    files.sort(key=lambda x: x[0])
+    for i in range(1, len(files)):
+        prev_date, prev_file = files[i - 1]
+        curr_date, curr_file = files[i]
+
+        if curr_date not in database:
+            database[curr_date] = {}
+
+        try:
+            df_prev = pd.read_csv(prev_file, dtype={"code": str})
+            df_curr = pd.read_csv(curr_file, dtype={"code": str})
+            for df in (df_prev, df_curr):
+                if "price" not in df.columns:
+                    df["price"] = 0.0
+                if "weight" not in df.columns:
+                    df["weight"] = 0.0
+                if "weight" in df.columns:
+                    df["weight"] = pd.to_numeric(df["weight"], errors="coerce").fillna(0.0)
+                if "price" in df.columns:
+                    df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0.0)
+                if "shares" in df.columns:
+                    df["shares"] = pd.to_numeric(df["shares"], errors="coerce").fillna(0)
+                if "name" in df.columns:
+                    df["name"] = df["name"].apply(
+                        lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
+                    )
+
+            # 當日真實價寫入全域表（供分點與後續查詢）
+            for _, row in df_curr.iterrows():
+                p = _scalar_numeric(row.get("price", 0), 0.0)
+                if p <= 0:
+                    continue
+                cc = str(row.get("code", "") or "").strip()
+                if cc:
+                    daily_real_prices.setdefault(curr_date, {})[cc] = p
+
+            df_prev["code"] = df_prev["code"].astype(str)
+            df_curr["code"] = df_curr["code"].astype(str)
+            prev_idx = df_prev.set_index("code")
+            curr_idx = df_curr.set_index("code")
+
+            prev_codes = set(prev_idx.index)
+            curr_codes = set(curr_idx.index)
+            common_codes = prev_codes & curr_codes
+
+            new_buy, sold_out, increased, decreased = [], [], [], []
+
+            for c in (curr_codes - prev_codes):
+                row = _normalize_index_row(curr_idx.loc[c])
+                shares = _shares_thousands(row["shares"])
+                price = _scalar_numeric(row.get("price", 0), 0.0)
+                c_name = clean_stock_name(row.get("name", ""))
+                amount_10k = (shares * price) / 10 if price > 0 else 0
+                new_buy.append(_row_to_item(row, c_name, c, shares, amount_10k, _scalar_numeric(row.get("weight", 0), 0.0)))
+
+            for c in (prev_codes - curr_codes):
+                row = _normalize_index_row(prev_idx.loc[c])
+                shares = _shares_thousands(row["shares"])
+                price = _scalar_numeric(row.get("price", 0), 0.0)
+                weight = _scalar_numeric(row.get("weight", 0), 0.0)
+                c_name = clean_stock_name(row.get("name", ""))
+                amount_10k = (shares * price) / 10 if price > 0 else 0
+                sold_out.append({
+                    "name": c_name,
+                    "code": str(c),
+                    "diff": shares,
+                    "weight": 0.0,
+                    "w_diff": -weight,
+                    "amount": amount_10k,
+                    "sector": SECTOR_MAP.get(c_name, "其他"),
+                    "price": price,
+                })
+
+            for c in common_codes:
+                row_curr = _normalize_index_row(curr_idx.loc[c])
+                row_prev = _normalize_index_row(prev_idx.loc[c])
+                shares_curr = _shares_thousands(row_curr["shares"])
+                shares_prev = _shares_thousands(row_prev["shares"])
+                diff = shares_curr - shares_prev
+                if diff == 0:
+                    continue
+                weight_curr = _scalar_numeric(row_curr.get("weight", 0), 0.0)
+                weight_prev = _scalar_numeric(row_prev.get("weight", 0), 0.0)
+                w_diff = weight_curr - weight_prev
+                price_curr = _scalar_numeric(row_curr.get("price", 0), 0.0)
+                c_name = clean_stock_name(row_curr.get("name", ""))
+                amount_10k = (abs(diff) * price_curr) / 10 if price_curr > 0 else 0
+                if diff > 0:
+                    increased.append(_row_to_item(row_curr, c_name, c, diff, amount_10k, w_diff))
+                else:
+                    decreased.append(_row_to_item(row_curr, c_name, c, abs(diff), amount_10k, w_diff))
+
+            sort_key = lambda x: (-x["diff"], -x.get("amount", 0))
+            new_buy.sort(key=sort_key)
+            sold_out.sort(key=sort_key)
+            increased.sort(key=sort_key)
+            decreased.sort(key=sort_key)
+
+            database[curr_date][etf_code] = {
+                "new_buy": new_buy,
+                "sold_out": sold_out,
+                "increased": increased,
+                "decreased": decreased,
+            }
+        except Exception as e:
+            print(f"處理 {curr_file} 失敗: {e}")
+
+
 def process_all_data() -> dict:
     all_files = glob.glob(os.path.join(HISTORY_DIR, "*.csv"))
     if not all_files:
@@ -148,162 +380,14 @@ def process_all_data() -> dict:
                 file_map[code] = []
             file_map[code].append((date_str, f))
 
+    daily_real_prices: dict[str, dict[str, float]] = collect_daily_real_prices(file_map)
     database: dict[str, dict] = {}
 
     for etf_code, files in file_map.items():
-        files.sort(key=lambda x: x[0])
-
         if etf_code in BROKER_LIST:
-            for date_str, f in files:
-                try:
-                    df = pd.read_csv(f, dtype={"code": str})
-                    if "net_shares" not in df.columns or "net_amount" not in df.columns:
-                        continue
-                    df["net_shares"] = pd.to_numeric(df["net_shares"], errors="coerce").fillna(0).astype(int)
-                    df["net_amount"] = pd.to_numeric(df["net_amount"], errors="coerce").fillna(0.0)
-                    if "buy_shares" not in df.columns:
-                        df["buy_shares"] = 0
-                    if "sell_shares" not in df.columns:
-                        df["sell_shares"] = 0
-                    df["buy_shares"] = pd.to_numeric(df["buy_shares"], errors="coerce").fillna(0).astype(int)
-                    df["sell_shares"] = pd.to_numeric(df["sell_shares"], errors="coerce").fillna(0).astype(int)
-                    if "avg_price" not in df.columns:
-                        df["avg_price"] = 0.0
-                    df["avg_price"] = pd.to_numeric(df["avg_price"], errors="coerce").fillna(0.0)
-                    if "name" in df.columns:
-                        df["name"] = df["name"].apply(
-                            lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
-                        )
-                    if date_str not in database:
-                        database[date_str] = {}
-                    increased, decreased = [], []
-                    for _, row in df.iterrows():
-                        net_shares = _scalar_int(row.get("net_shares", 0), 0)
-                        net_amount = _scalar_numeric(row.get("net_amount", 0), 0.0)
-                        buy_shares = _scalar_int(row.get("buy_shares", 0), 0)
-                        sell_shares = _scalar_int(row.get("sell_shares", 0), 0)
-                        avg_price_val = _scalar_numeric(row.get("avg_price", 0), 0.0)
-                        c_name = clean_stock_name(row.get("name", ""))
-                        code_val = str(row.get("code", "") or "")
-                        sector = SECTOR_MAP.get(c_name, "其他")
-                        base_item = {
-                            "name": c_name,
-                            "code": code_val,
-                            "sector": sector,
-                            "weight": 0,
-                            "w_diff": 0,
-                            "avg_price": avg_price_val,
-                            "price": avg_price_val,
-                            "buy_shares": buy_shares,
-                            "sell_shares": sell_shares,
-                        }
-                        if net_shares > 0:
-                            increased.append({**base_item, "diff": net_shares, "amount": net_amount})
-                        elif net_shares < 0:
-                            decreased.append({**base_item, "diff": abs(net_shares), "amount": abs(net_amount)})
-                    increased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
-                    decreased.sort(key=lambda x: (-x["diff"], -x.get("amount", 0)))
-                    database[date_str][etf_code] = {"new_buy": [], "sold_out": [], "increased": increased, "decreased": decreased}
-                except Exception as e:
-                    print(f"處理經紀 {etf_code} {f} 失敗: {e}")
-            continue
-
-        for i in range(1, len(files)):
-            prev_date, prev_file = files[i - 1]
-            curr_date, curr_file = files[i]
-
-            if curr_date not in database:
-                database[curr_date] = {}
-
-            try:
-                df_prev = pd.read_csv(prev_file, dtype={"code": str})
-                df_curr = pd.read_csv(curr_file, dtype={"code": str})
-                for df in (df_prev, df_curr):
-                    if "price" not in df.columns:
-                        df["price"] = 0.0
-                    if "weight" not in df.columns:
-                        df["weight"] = 0.0
-                    if "weight" in df.columns:
-                        df["weight"] = pd.to_numeric(df["weight"], errors="coerce").fillna(0.0)
-                    if "price" in df.columns:
-                        df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0.0)
-                    if "shares" in df.columns:
-                        df["shares"] = pd.to_numeric(df["shares"], errors="coerce").fillna(0)
-                    if "name" in df.columns:
-                        df["name"] = df["name"].apply(
-                            lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
-                        )
-
-                df_prev["code"] = df_prev["code"].astype(str)
-                df_curr["code"] = df_curr["code"].astype(str)
-                prev_idx = df_prev.set_index("code")
-                curr_idx = df_curr.set_index("code")
-
-                prev_codes = set(prev_idx.index)
-                curr_codes = set(curr_idx.index)
-                common_codes = prev_codes & curr_codes
-
-                new_buy, sold_out, increased, decreased = [], [], [], []
-
-                for c in (curr_codes - prev_codes):
-                    row = _normalize_index_row(curr_idx.loc[c])
-                    shares = _shares_thousands(row["shares"])
-                    price = _scalar_numeric(row.get("price", 0), 0.0)
-                    c_name = clean_stock_name(row.get("name", ""))
-                    amount_10k = (shares * price) / 10 if price > 0 else 0
-                    new_buy.append(_row_to_item(row, c_name, c, shares, amount_10k, _scalar_numeric(row.get("weight", 0), 0.0)))
-
-                for c in (prev_codes - curr_codes):
-                    row = _normalize_index_row(prev_idx.loc[c])
-                    shares = _shares_thousands(row["shares"])
-                    price = _scalar_numeric(row.get("price", 0), 0.0)
-                    weight = _scalar_numeric(row.get("weight", 0), 0.0)
-                    c_name = clean_stock_name(row.get("name", ""))
-                    amount_10k = (shares * price) / 10 if price > 0 else 0
-                    sold_out.append({
-                        "name": c_name,
-                        "code": str(c),
-                        "diff": shares,
-                        "weight": 0.0,
-                        "w_diff": -weight,
-                        "amount": amount_10k,
-                        "sector": SECTOR_MAP.get(c_name, "其他"),
-                        "price": price,
-                    })
-
-                for c in common_codes:
-                    row_curr = _normalize_index_row(curr_idx.loc[c])
-                    row_prev = _normalize_index_row(prev_idx.loc[c])
-                    shares_curr = _shares_thousands(row_curr["shares"])
-                    shares_prev = _shares_thousands(row_prev["shares"])
-                    diff = shares_curr - shares_prev
-                    if diff == 0:
-                        continue
-                    weight_curr = _scalar_numeric(row_curr.get("weight", 0), 0.0)
-                    weight_prev = _scalar_numeric(row_prev.get("weight", 0), 0.0)
-                    w_diff = weight_curr - weight_prev
-                    price_curr = _scalar_numeric(row_curr.get("price", 0), 0.0)
-                    c_name = clean_stock_name(row_curr.get("name", ""))
-                    amount_10k = (abs(diff) * price_curr) / 10 if price_curr > 0 else 0
-                    if diff > 0:
-                        increased.append(_row_to_item(row_curr, c_name, c, diff, amount_10k, w_diff))
-                    else:
-                        decreased.append(_row_to_item(row_curr, c_name, c, abs(diff), amount_10k, w_diff))
-
-                sort_key = lambda x: (-x["diff"], -x.get("amount", 0))
-                new_buy.sort(key=sort_key)
-                sold_out.sort(key=sort_key)
-                increased.sort(key=sort_key)
-                decreased.sort(key=sort_key)
-
-                database[curr_date][etf_code] = {
-                    "new_buy": new_buy,
-                    "sold_out": sold_out,
-                    "increased": increased,
-                    "decreased": decreased,
-                }
-            except Exception as e:
-                print(f"處理 {curr_file} 失敗: {e}")
+            process_broker_file(etf_code, files, database, daily_real_prices)
+        else:
+            process_etf_file(etf_code, files, database, daily_real_prices)
 
     return database
 
