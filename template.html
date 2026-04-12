@@ -1181,21 +1181,67 @@
             return Array.from(map.values());
         }
 
+        /** 基準日：increased 或 decreased 有任一筆資料（依需求）；否則退回「四池皆空以外」的第一日 */
+        function actorBucketHasIncreasedOrDecreased(bucket) {
+            if (!bucket) return false;
+            return (bucket.increased || []).length > 0 || (bucket.decreased || []).length > 0;
+        }
+
+        /** 空窗日：四個池皆無資料（假日／無動作）；若有 new_buy 等仍視為交易日，不跳過 */
+        function actorBucketIsMomentumEmptyWindow(bucket) {
+            if (!bucket) return true;
+            const nb = (bucket.new_buy || []).length;
+            const inc = (bucket.increased || []).length;
+            const dec = (bucket.decreased || []).length;
+            const so = (bucket.sold_out || []).length;
+            return nb === 0 && inc === 0 && dec === 0 && so === 0;
+        }
+
+        function findMomentumBaselineDateIndex(actorKey) {
+            const dates = availableDatesDesc;
+            let i;
+            for (i = 0; i < dates.length; i++) {
+                const dayData = db[dates[i]];
+                if (!dayData || !dayData[actorKey]) continue;
+                const b = dayData[actorKey];
+                if (actorBucketHasIncreasedOrDecreased(b)) return i;
+            }
+            for (i = 0; i < dates.length; i++) {
+                const dayData = db[dates[i]];
+                if (!dayData || !dayData[actorKey]) continue;
+                const b = dayData[actorKey];
+                if (!actorBucketIsMomentumEmptyWindow(b)) return i;
+            }
+            return -1;
+        }
+
         function computeMomentumStreak(actorKey, code, name) {
             const dates = availableDatesDesc;
             if (dates.length === 0) return null;
-            const day0 = db[dates[0]];
-            if (!day0 || !day0[actorKey]) return null;
-            const f0 = netFlowForStockInBucket(day0[actorKey], code, name);
-            if (f0.netDiff === 0) return null;
+            let anchorIdx = -1;
+            let i;
+            for (i = 0; i < dates.length; i++) {
+                const dayData = db[dates[i]];
+                if (!dayData || !dayData[actorKey]) continue;
+                const b = dayData[actorKey];
+                if (actorBucketIsMomentumEmptyWindow(b)) continue;
+                const f = netFlowForStockInBucket(b, code, name);
+                if (f.netDiff === 0) continue;
+                anchorIdx = i;
+                break;
+            }
+            if (anchorIdx < 0) return null;
+            const f0 = netFlowForStockInBucket(db[dates[anchorIdx]][actorKey], code, name);
             const dir = f0.netDiff > 0 ? 1 : -1;
             let streak = 1;
             let totalDiff = f0.netDiff;
             let totalAmt = f0.netAmount;
-            for (let i = 1; i < dates.length; i++) {
+            for (i = anchorIdx + 1; i < dates.length; i++) {
                 const dayData = db[dates[i]];
-                if (!dayData || !dayData[actorKey]) break;
-                const f = netFlowForStockInBucket(dayData[actorKey], code, name);
+                if (!dayData || !dayData[actorKey]) continue;
+                const b = dayData[actorKey];
+                if (actorBucketIsMomentumEmptyWindow(b)) continue;
+                const f = netFlowForStockInBucket(b, code, name);
                 if (f.netDiff === 0) break;
                 const d = f.netDiff > 0 ? 1 : -1;
                 if (d !== dir) break;
@@ -1247,12 +1293,12 @@
                 out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">無資料</div>';
                 return;
             }
-            const day0 = db[dates[0]];
-            if (!day0 || !day0[actorKey]) {
-                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">該主力在最新日無資料</div>';
+            const baseIdx = findMomentumBaselineDateIndex(actorKey);
+            if (baseIdx < 0) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">該主力在可查區間內無有效交易基準日</div>';
                 return;
             }
-            const stocks = collectStocksFromActorDay(day0[actorKey]);
+            const stocks = collectStocksFromActorDay(db[dates[baseIdx]][actorKey]);
             const results = [];
             stocks.forEach(function(s) {
                 const r = computeMomentumStreak(actorKey, s.code, s.name);
@@ -1295,9 +1341,11 @@
             const results = [];
             const seen = new Set();
             getMomentumActorKeys().forEach(function(actorKey) {
-                const day0 = db[dates[0]];
-                if (!day0 || !day0[actorKey]) return;
-                const stocks = collectStocksFromActorDay(day0[actorKey]).filter(function(s) {
+                const baseIdx = findMomentumBaselineDateIndex(actorKey);
+                if (baseIdx < 0) return;
+                const dayBase = db[dates[baseIdx]];
+                if (!dayBase || !dayBase[actorKey]) return;
+                const stocks = collectStocksFromActorDay(dayBase[actorKey]).filter(function(s) {
                     const codeNorm = String(s.code || '').trim();
                     const nameStr = String(s.name || '');
                     const codeMatch = codeNorm === qRaw;
