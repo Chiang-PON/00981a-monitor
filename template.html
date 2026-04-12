@@ -350,11 +350,11 @@
                 <div class="max-w-3xl mx-auto rounded-xl border theme-border bg-[var(--bg-panel)] p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]">
                     <div class="text-center mb-6">
                         <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">個股主力追蹤</h2>
-                        <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依下方「累計天數」與主畫面「結束日期」計算區間，掃描 ETF／分點持倉異動；排序依主畫面「單位」。</p>
+                        <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依下方「累計交易日數」與「結束日期」決定<strong class="theme-text font-semibold">交易日</strong>區間（不含週末／休市日），掃描 ETF／分點持倉異動；排序依主畫面「單位」。結束日期留空時以資料庫<strong class="theme-text font-semibold">最新</strong>交易日為基準。</p>
                     </div>
                     <div class="flex flex-wrap items-end justify-center gap-4 mb-4">
                         <div class="min-w-[10rem]">
-                            <label for="stock-reverse-timeframe" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">累計天數</label>
+                            <label for="stock-reverse-timeframe" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">累計交易日數</label>
                             <select id="stock-reverse-timeframe" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors w-full min-h-[2.75rem] focus:border-[var(--border-focus)]">
                                 <option value="1">近1日</option>
                                 <option value="5" selected>近5日</option>
@@ -363,6 +363,11 @@
                                 <option value="30">近30日</option>
                                 <option value="60">近60日</option>
                             </select>
+                        </div>
+                        <div class="min-w-[10rem] sm:min-w-[11rem]">
+                            <label for="search-date" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">結束日期</label>
+                            <input type="text" id="search-date" placeholder="選擇結束日期 (預設最新)" autocomplete="off"
+                                class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]">
                         </div>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:items-end justify-center">
@@ -535,6 +540,7 @@
         let brokerMapBasemapLayer = null;
         let brokerMapMarkers = {};
         let datePickerInstance = null;
+        let searchDatePickerInstance = null;
         let currentMode = 'ETF';
         let currentETF = 'GLOBAL_CONSENSUS';
         let currentDate = '';
@@ -622,6 +628,9 @@
             updateBrokerMapThemeClass();
             if (datePickerInstance && typeof datePickerInstance.redraw === 'function') {
                 datePickerInstance.redraw();
+            }
+            if (searchDatePickerInstance && typeof searchDatePickerInstance.redraw === 'function') {
+                searchDatePickerInstance.redraw();
             }
         }
         function updateThemeIcons(theme) {
@@ -982,6 +991,25 @@
             return dateRangeLabel(daysOpt);
         }
 
+        /** database 之日期鍵＝交易日；由新到舊排序後自結束日起取 N 個交易日（與動能掃描一致） */
+        function getTradingDateSliceFromEnd(endDateKey, nDays) {
+            const allDates = Object.keys(db).sort(function(a, b) { return b.localeCompare(a); });
+            if (allDates.length === 0) return [];
+            let startIndex = allDates.indexOf(endDateKey);
+            if (startIndex === -1) startIndex = 0;
+            const n = parseInt(nDays, 10);
+            const count = !isNaN(n) && n > 0 ? n : 5;
+            return allDates.slice(startIndex, startIndex + count);
+        }
+
+        /** 個股搜尋專用：累計區間的交易日字串（最舊 ~ 最新） */
+        function getStockSearchDateRangeLabel() {
+            const slice = getDateSliceForStockSearch();
+            if (slice.length === 0) return '—';
+            if (slice.length === 1) return slice[0];
+            return slice[slice.length - 1] + ' ~ ' + slice[0];
+        }
+
         function getStockReverseDays() {
             const el = document.getElementById('stock-reverse-timeframe');
             if (!el) return currentDays;
@@ -1053,6 +1081,39 @@
             });
         }
 
+        /** 個股搜尋專用：可留空＝以資料庫最新交易日為基準；僅能選 db 內交易日 */
+        function initSearchDatePicker() {
+            const inp = document.getElementById('search-date');
+            if (!inp) return;
+            if (searchDatePickerInstance) {
+                searchDatePickerInstance.destroy();
+                searchDatePickerInstance = null;
+            }
+            if (typeof flatpickr === 'undefined') {
+                inp.disabled = true;
+                inp.placeholder = 'Flatpickr 載入失敗';
+                return;
+            }
+            const enableDates = availableDates.length ? availableDates.slice() : [];
+            if (!enableDates.length) {
+                inp.disabled = true;
+                inp.value = '';
+                inp.placeholder = '無可用日期';
+                return;
+            }
+            inp.disabled = false;
+            inp.placeholder = '選擇結束日期 (預設最新)';
+            searchDatePickerInstance = flatpickr(inp, {
+                dateFormat: 'Y-m-d',
+                maxDate: 'today',
+                enable: enableDates,
+                allowInput: true,
+                onChange: function() {
+                    maybeRefreshStockReverseSearch();
+                }
+            });
+        }
+
         function initApiKey() {
             const key = localStorage.getItem('openai_api_key');
             if (key) {
@@ -1089,6 +1150,7 @@
             updateModeTabStyles();
             renderTargetPills();
             initDatePicker();
+            initSearchDatePicker();
             const tfSel = document.getElementById('timeframe-selector');
             if (tfSel) tfSel.value = String(currentDays);
             const srt = document.getElementById('stock-reverse-timeframe');
@@ -1125,11 +1187,26 @@
         }
 
         function getDateSliceForStockSearch() {
-            if (availableDatesDesc.length === 0) return [];
-            let dateIndex = availableDatesDesc.indexOf(currentDate);
-            if (dateIndex === -1) dateIndex = 0;
-            const days = getStockReverseDays();
-            return availableDatesDesc.slice(dateIndex, dateIndex + Math.min(days, availableDatesDesc.length - dateIndex));
+            const allDates = Object.keys(db).sort(function(a, b) { return b.localeCompare(a); });
+            if (allDates.length === 0) return [];
+            const sel = document.getElementById('search-date');
+            const selectedDate = sel && sel.value ? String(sel.value).trim() : '';
+            let startIndex = 0;
+            if (selectedDate) {
+                startIndex = -1;
+                for (let i = 0; i < allDates.length; i++) {
+                    if (allDates[i] <= selectedDate) {
+                        startIndex = i;
+                        break;
+                    }
+                }
+                if (startIndex === -1) {
+                    return [];
+                }
+            }
+            const n = parseInt(getStockReverseDays(), 10);
+            const count = !isNaN(n) && n > 0 ? n : 5;
+            return allDates.slice(startIndex, startIndex + count);
         }
 
         function formatAmountNetDisplay(amount_10k) {
@@ -1508,6 +1585,10 @@
             }
             const q = raw.toLowerCase();
             const dateSlice = getDateSliceForStockSearch();
+            if (!dateSlice.length) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">選擇的結束日期早於資料庫最早交易日，無法計算區間</div>';
+                return;
+            }
             const netMap = new Map();
 
             function mergeKey(actorKey, item) {
@@ -1630,9 +1711,10 @@
             }
 
             const titleExtra = stockTag ? (' ' + stockTag) : '';
-            const rangeStr = getDateRangeDisplayString(getStockReverseDays());
+            const nTrading = getStockReverseDays();
+            const rangeStr = getStockSearchDateRangeLabel();
             const rangeSpanHtml = (rangeStr && rangeStr !== '—')
-                ? '<span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2 tracking-normal">' + rangeStr + '</span>'
+                ? '<span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2 tracking-normal">近 ' + nTrading + ' 交易日 · ' + rangeStr + '</span>'
                 : '';
             const h3Class = 'px-3 sm:px-4 py-2.5 text-sm sm:text-base font-black theme-text tracking-wide border-b theme-border bg-[var(--bg-base)] leading-snug flex flex-wrap items-baseline gap-x-1';
             const etfSection = '<section class="rounded-xl border theme-border overflow-hidden bg-[var(--bg-panel)]">' +
