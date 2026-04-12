@@ -3,7 +3,7 @@
 1. 前後端分離：HTML 模板抽離至 template.html
 2. Pandas 效能優化：set_index O(1) 查找、向量化運算
 3. AI Agent 錯誤處理強化：HTTP 401/429/500 友善提示
-4. Chart.js：template.html 以 __HOLDINGS_TREND_JSON__ 嵌入持股／分點歷史序列
+4. 走勢圖：持股歷史序列嵌入 index.html（__HOLDINGS_TREND_JSON__）；另產 trend.html 供書籤／離線備援
 """
 
 import os
@@ -20,6 +20,8 @@ from broker_config import BROKER_LIST
 HISTORY_DIR = "history"
 OUTPUT_FILE = "index.html"
 TEMPLATE_FILE = "template.html"
+TREND_TEMPLATE_FILE = "trend_template.html"
+TREND_OUTPUT_FILE = "trend.html"
 # 每檔股票走勢序列最多保留筆數（依交易日），避免嵌入 HTML 過大
 MAX_TREND_POINTS = 252
 
@@ -481,6 +483,15 @@ def load_template() -> str:
         return f.read()
 
 
+def load_trend_template() -> str:
+    script_dir = Path(__file__).resolve().parent
+    path = script_dir / TREND_TEMPLATE_FILE
+    if not path.exists():
+        raise FileNotFoundError(f"找不到走勢模板: {path}")
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
 def load_digest(script_dir: Path) -> dict:
     """每日批次快照（fetch_digest.py）；若無檔案則嵌入空物件。"""
     path = script_dir / "digest.json"
@@ -525,6 +536,7 @@ def main() -> None:
     file_map = collect_file_map()
     trend_obj = build_holdings_trend_series(file_map) if file_map else {"etf": {}, "broker": {}}
     template = load_template()
+    trend_template = load_trend_template()
     script_dir = Path(__file__).resolve().parent
 
     json_str = json.dumps(db, ensure_ascii=False)
@@ -541,7 +553,17 @@ def main() -> None:
     else:
         print("[INFO] 未偵測 digest.json 快照，總覽新聞／指數為占位（可執行 fetch_digest.py）")
     digest_str = json.dumps(digest, ensure_ascii=False)
-    print("[INFO] 已嵌入持股／分點走勢序列（Chart.js 用）")
+    print("[INFO] 已產出走勢頁 trend.html（嵌入持股／分點歷史序列）")
+    trend_html = (
+        trend_template.replace("__DB_JSON__", json_str)
+        .replace("__BROKER_JSON__", broker_str)
+        .replace("__META_JSON__", meta_str)
+        .replace("__HOLDINGS_TREND_JSON__", trend_str)
+    )
+    trend_path = script_dir / TREND_OUTPUT_FILE
+    with open(trend_path, "w", encoding="utf-8") as f:
+        f.write(trend_html)
+
     final_html = (
         template.replace("__DB_JSON__", json_str)
         .replace("__BROKER_JSON__", broker_str)
@@ -554,7 +576,7 @@ def main() -> None:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(final_html)
 
-    print(f"[OK] 成功產出 {OUTPUT_FILE}")
+    print(f"[OK] 成功產出 {OUTPUT_FILE} 與 {TREND_OUTPUT_FILE}")
     print("[INFO] 若曾修改 template 的 Tailwind class，請先於專案目錄執行：npm run build:css")
     print("[INFO] 上傳 GitHub Pages 前可執行：python3 check_deploy.py")
 

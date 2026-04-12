@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f4f4f5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
+    <title>走勢圖 · ETF 籌碼戰情室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="tailwind-built.css">
+    <style>
+        :root {
+            --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --border-dim: #e4e4e7; --border-focus: #2563eb;
+            --text-main: #18181b; --text-dim: #71717a; --color-buy: #dc2626; --color-sell: #059669; --color-accent: #2563eb;
+        }
+        [data-theme="dark"] {
+            --bg-base: #050505; --bg-nav: #050505; --bg-panel: #0d0d0d; --border-dim: #262626; --border-focus: #00f0ff;
+            --text-main: #f4f4f5; --text-dim: #84848f; --color-buy: #ff2a5f; --color-sell: #00ff9d; --color-accent: #00f0ff;
+        }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: "Noto Sans TC", sans-serif; min-height: 100dvh; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+        .font-mono { font-family: "JetBrains Mono", monospace; }
+        .theme-nav { background-color: var(--bg-nav); border-color: var(--border-dim); }
+        .theme-border { border-color: var(--border-dim); }
+        .theme-text { color: var(--text-main); }
+        .theme-text-dim { color: var(--text-dim); }
+        .theme-bg-input { background-color: var(--bg-base); color: var(--text-main); border-color: var(--border-dim); }
+        .text-buy { color: var(--color-buy); }
+        .text-sell { color: var(--color-sell); }
+        .text-accent { color: var(--color-accent); }
+        .tab-btn { transition: all 0.2s; min-height: 44px; touch-action: manipulation; }
+        .tab-active { background-color: var(--text-main); color: var(--bg-panel); font-weight: 700; }
+        [data-theme="dark"] .tab-active { background: #1a1a1a; color: var(--color-accent); border: 1px solid var(--color-accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); }
+        .tab-inactive { background-color: var(--bg-base); color: var(--text-dim); border: 1px solid var(--border-dim); }
+        .tab-inner-active {
+            background-color: var(--color-accent);
+            color: #fff;
+            border-color: var(--color-accent);
+            font-weight: 700;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.25);
+        }
+        [data-theme="dark"] .tab-inner-active {
+            color: #0a0a0a;
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+        }
+        .tab-inner-inactive {
+            background-color: var(--bg-base);
+            color: var(--text-dim);
+            border: 1px solid var(--border-dim);
+        }
+        .tab-inner-inactive:hover { border-color: var(--border-focus); color: var(--text-main); }
+        .ui-label { display: block; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.375rem; }
+        .ui-caption { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.06em; }
+        .page-asset-title { font-size: clamp(1.375rem, 4.2vw, 1.875rem); font-weight: 900; color: var(--text-main); letter-spacing: 0.04em; line-height: 1.2; font-family: "Noto Sans TC", sans-serif; }
+        .section-group-heading { font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; color: var(--text-main); width: 100%; margin-top: 1rem; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-dim); font-family: "JetBrains Mono", monospace; }
+        .section-group-heading:first-child { margin-top: 0; }
+        @media (min-width: 640px) { .section-group-heading { font-size: 1.0625rem; } }
+        .ui-input-stock { border-radius: 0.5rem; min-height: 2.75rem; font-family: "Noto Sans TC", sans-serif; font-size: 0.875rem; }
+        .ui-input-stock::placeholder { color: var(--text-dim); opacity: 0.9; }
+        .pill-btn { min-height: 2.5rem; padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.8125rem; font-family: "Noto Sans TC", sans-serif; border: 1px solid var(--border-dim); background: var(--bg-base); color: var(--text-main); max-width: 100%; transition: border-color 0.2s, background 0.2s, color 0.2s; }
+        .pill-btn-idle:hover { border-color: var(--border-focus); color: var(--text-main); }
+        .pill-btn-active {
+            background-color: var(--color-accent);
+            color: #fff;
+            border-color: var(--color-accent);
+            font-weight: 700;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.25);
+        }
+        [data-theme="dark"] .pill-btn-active { color: #0a0a0a; box-shadow: 0 0 14px rgba(0, 240, 255, 0.35); }
+        #trend-chart-canvas-wrap { min-height: min(78vh, 36rem); }
+        @media (min-width: 768px) {
+            #trend-chart-canvas-wrap { min-height: min(72vh, 40rem); }
+        }
+    </style>
+</head>
+<body class="pb-8 pt-6">
+    <nav class="w-full theme-nav border-b fixed top-0 z-50 flex flex-wrap justify-between items-center gap-2 px-3 sm:px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <a href="index.html" class="text-sm font-mono font-bold text-accent shrink-0 whitespace-nowrap">← 戰情室</a>
+            <span class="theme-text-dim hidden sm:inline">|</span>
+            <h1 class="text-base sm:text-lg font-black theme-text tracking-wide truncate">走勢圖</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="toggleElderTrend()" class="p-1.5 rounded-md theme-border border text-xs font-mono theme-text-dim" id="btn-elder-trend" title="大字">大字</button>
+            <button type="button" onclick="toggleTheme()" class="p-1.5 rounded-md theme-border border" title="深淺色">
+                <svg id="icon-sun-t" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="icon-moon-t" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 mt-[max(5rem,env(safe-area-inset-top))]">
+        <p id="trend-meta-bar" class="text-xs font-mono theme-text-dim mb-4"></p>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+            <button type="button" id="trend-mode-etf" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-active">ETF</button>
+            <button type="button" id="trend-mode-broker" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-inactive">分點</button>
+        </div>
+
+        <div class="mb-2">
+            <span class="ui-caption">目前標的</span>
+            <h2 id="trend-etf-title" class="page-asset-title mt-1 break-words">---</h2>
+        </div>
+
+        <label class="ui-label mb-2">目標標的（點選）</label>
+        <div id="target-pills-container" class="space-y-3 mb-6"></div>
+
+        <div class="rounded-xl border theme-border theme-bg-input p-4 sm:p-6">
+            <p class="text-sm theme-text-dim mb-4 leading-relaxed">輸入<strong class="theme-text">代號或中文名稱</strong>後按「繪製」。全家族／大聯盟可先輸入 ETF 代號切換標的；圖表為歷史 CSV。</p>
+            <div class="flex flex-wrap items-end gap-2 mb-3">
+                <input type="text" id="trend-code-input" maxlength="40" placeholder="代號或名稱，如 2330、台積電"
+                    class="theme-bg-input border theme-border ui-input-stock px-3 py-3 text-base theme-text flex-1 min-w-[10rem] min-h-[48px]">
+                <button type="button" id="btn-trend-draw" class="tab-btn px-5 py-3 font-mono rounded-lg border theme-border text-base min-h-[48px]">繪製</button>
+            </div>
+            <p id="trend-chart-hint" class="text-sm font-mono theme-text-dim mb-4 min-h-[1.25rem]"></p>
+            <div id="trend-chart-canvas-wrap" class="relative w-full -mx-1 sm:mx-0">
+                <canvas id="holdings-trend-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        const __META__ = __META_JSON__;
+        const db = __DB_JSON__;
+        const holdingsTrend = __HOLDINGS_TREND_JSON__;
+        const brokerLabels = __BROKER_JSON__ || {};
+
+        let holdingsTrendChartInstance = null;
+        let currentMode = 'ETF';
+        let currentETF = 'GLOBAL_CONSENSUS';
+        let etfList = [];
+
+        const availableDatesDesc = Object.keys(db).sort().reverse();
+        const FAMILY_TAB = 'GLOBAL_CONSENSUS';
+        const KAIJI_TAB = 'KAIJI_CONSENSUS';
+        const AI_TAB = 'AI_AGENT';
+
+        let allKeys = new Set();
+        Object.values(db).forEach(function(d) { Object.keys(d).forEach(function(k) { allKeys.add(k); }); });
+        const brokerCodes = Object.keys(brokerLabels);
+        const etfCodes = Array.from(allKeys).filter(function(k) { return brokerCodes.indexOf(k) < 0 && k !== AI_TAB; }).sort();
+
+        etfList = [FAMILY_TAB].concat(etfCodes);
+        if (brokerCodes.some(function(b) { return allKeys.has(b); })) {
+            etfList.push(KAIJI_TAB);
+            etfList = etfList.concat(brokerCodes.filter(function(b) { return allKeys.has(b); }).sort(function(a, b) { return brokerCodes.indexOf(a) - brokerCodes.indexOf(b); }));
+        }
+
+        function isEtfModeSelection(etf) {
+            return etf === FAMILY_TAB || etfCodes.indexOf(etf) >= 0;
+        }
+        function isBrokerModeSelection(etf) {
+            return etf === KAIJI_TAB || brokerCodes.indexOf(etf) >= 0;
+        }
+
+        function escapeHtmlText(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function getETFLabel(etf) {
+            if (etf === FAMILY_TAB) return 'GLOBAL_CONSENSUS (全家族共識)';
+            if (etf === KAIJI_TAB) return 'KAIJI_CONSENSUS (凱基大聯盟)';
+            if (brokerLabels[etf]) return etf + ' ' + brokerLabels[etf];
+            return etf;
+        }
+        function getPillButtonLabel(etf) {
+            const full = getETFLabel(etf);
+            if (currentMode !== 'BROKER') return full;
+            return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
+        }
+        function getDropdownEtfList() {
+            if (currentMode === 'ETF') return [FAMILY_TAB].concat(etfCodes);
+            return [KAIJI_TAB].concat(brokerCodes.filter(function(b) { return allKeys.has(b); }).sort(function(a, b) { return brokerCodes.indexOf(a) - brokerCodes.indexOf(b); }));
+        }
+        function getETFGroupForRender(etf) {
+            if (currentMode === 'ETF') {
+                if (etf === FAMILY_TAB) return 'core';
+                return 'etf';
+            }
+            if (etf === KAIJI_TAB) return 'core';
+            return 'broker';
+        }
+        const ETF_GROUP_DEFS = [
+            { id: 'core', title: '【 核心決策 】' },
+            { id: 'etf', title: '【 ETF 標的 】' },
+            { id: 'broker', title: '【 主力分點 】' }
+        ];
+
+        function renderTargetPills() {
+            const container = document.getElementById('target-pills-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const rows = getDropdownEtfList();
+            var lastGroup = null;
+            var rowEl = null;
+            rows.forEach(function(etf) {
+                var group = getETFGroupForRender(etf);
+                if (group !== lastGroup) {
+                    var h = document.createElement('div');
+                    h.className = 'section-group-heading';
+                    var gdef = ETF_GROUP_DEFS.find(function(g) { return g.id === group; });
+                    h.textContent = gdef ? gdef.title : '';
+                    container.appendChild(h);
+                    rowEl = document.createElement('div');
+                    rowEl.className = 'flex flex-wrap gap-2';
+                    container.appendChild(rowEl);
+                    lastGroup = group;
+                }
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.etf = etf;
+                btn.className = 'pill-btn pill-btn-idle';
+                btn.textContent = getPillButtonLabel(etf);
+                btn.onclick = function() { selectTarget(etf); };
+                rowEl.appendChild(btn);
+            });
+            updatePillActiveState();
+        }
+
+        function updatePillActiveState() {
+            document.querySelectorAll('#target-pills-container [data-etf]').forEach(function(btn) {
+                var on = btn.dataset.etf === currentETF;
+                btn.classList.toggle('pill-btn-active', on);
+                btn.classList.toggle('pill-btn-idle', !on);
+            });
+        }
+
+        function selectTarget(etf) {
+            currentETF = etf;
+            try { localStorage.setItem('lastETF', etf); } catch (e) {}
+            onTrendETFChange();
+        }
+
+        function onTrendETFChange() {
+            var titleEl = document.getElementById('trend-etf-title');
+            if (titleEl) {
+                titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF));
+            }
+            updatePillActiveState();
+            var inp = document.getElementById('trend-code-input');
+            if (inp && inp.value.trim()) renderHoldingsTrendChart();
+            else destroyHoldingsTrendChart();
+        }
+
+        function setTrendViewMode(mode) {
+            if (mode !== 'ETF' && mode !== 'BROKER') return;
+            currentMode = mode;
+            var eBtn = document.getElementById('trend-mode-etf');
+            var bBtn = document.getElementById('trend-mode-broker');
+            var base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border ';
+            if (eBtn) eBtn.className = base + (mode === 'ETF' ? 'tab-inner-active' : 'tab-inner-inactive');
+            if (bBtn) bBtn.className = base + (mode === 'BROKER' ? 'tab-inner-active' : 'tab-inner-inactive');
+            if (mode === 'ETF') {
+                currentETF = FAMILY_TAB;
+                try {
+                    var le = localStorage.getItem('lastETF');
+                    if (le && etfList.indexOf(le) >= 0 && isEtfModeSelection(le)) currentETF = le;
+                } catch (err) {}
+            } else {
+                currentETF = KAIJI_TAB;
+                try {
+                    var le2 = localStorage.getItem('lastETF');
+                    if (le2 && etfList.indexOf(le2) >= 0 && isBrokerModeSelection(le2)) currentETF = le2;
+                } catch (err2) {}
+            }
+            renderTargetPills();
+            onTrendETFChange();
+        }
+
+        document.getElementById('trend-mode-etf').onclick = function() { setTrendViewMode('ETF'); };
+        document.getElementById('trend-mode-broker').onclick = function() { setTrendViewMode('BROKER'); };
+
+        function findTrendSeriesEntry(mapByCode, rawCode) {
+            if (!mapByCode || !rawCode) return null;
+            var s = String(rawCode).trim();
+            if (mapByCode[s]) return mapByCode[s];
+            var sn = s.replace(/^0+/, '') || '0';
+            for (var i = 0; i < Object.keys(mapByCode).length; i++) {
+                var k = Object.keys(mapByCode)[i];
+                var kn = String(k).replace(/^0+/, '') || '0';
+                if (kn === sn) return mapByCode[k];
+            }
+            return null;
+        }
+
+        function normalizeTrendNameQuery(s) {
+            return String(s || '').trim().replace(/\s+/g, '');
+        }
+
+        function findTrendSeriesEntryByCodeOrName(mapByCode, raw) {
+            if (!mapByCode || !raw) return { entry: null, hint: null };
+            var q = normalizeTrendNameQuery(raw);
+            if (!q) return { entry: null, hint: null };
+
+            var byCode = findTrendSeriesEntry(mapByCode, q);
+            if (byCode) return { entry: byCode, hint: null };
+
+            var keys = Object.keys(mapByCode);
+            var exactHits = [];
+            var partialHits = [];
+            for (var j = 0; j < keys.length; j++) {
+                var ent = mapByCode[keys[j]];
+                var nm = ent && ent.n ? String(ent.n).trim() : '';
+                if (!nm) continue;
+                if (nm === q) exactHits.push(ent);
+                else if (nm.indexOf(q) !== -1 || q.indexOf(nm) !== -1) partialHits.push(ent);
+            }
+            if (exactHits.length === 1) return { entry: exactHits[0], hint: null };
+            if (exactHits.length > 1) {
+                return { entry: null, hint: '名稱「' + q + '」對應多檔，請改用股票代號。' };
+            }
+            if (partialHits.length === 1) return { entry: partialHits[0], hint: null };
+            if (partialHits.length > 1) {
+                return { entry: null, hint: '「' + q + '」對應多檔，請輸入股票代號或更完整名稱。' };
+            }
+            return { entry: null, hint: null };
+        }
+
+        function getTrendMapForCurrentEtf() {
+            if (!holdingsTrend || typeof holdingsTrend !== 'object') return null;
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) return null;
+            if (brokerCodes.indexOf(currentETF) >= 0) {
+                return holdingsTrend.broker && holdingsTrend.broker[currentETF] ? holdingsTrend.broker[currentETF] : null;
+            }
+            return holdingsTrend.etf && holdingsTrend.etf[currentETF] ? holdingsTrend.etf[currentETF] : null;
+        }
+
+        function findEtfOrBrokerKeyInTrendData(raw) {
+            var t = String(raw || '').trim();
+            if (!t || !holdingsTrend) return null;
+            var etfMap = holdingsTrend.etf || {};
+            var brMap = holdingsTrend.broker || {};
+            if (etfMap[t]) return { kind: 'etf', key: t };
+            if (brMap[t]) return { kind: 'broker', key: t };
+            var up = t.toUpperCase();
+            if (etfMap[up]) return { kind: 'etf', key: up };
+            if (brMap[up]) return { kind: 'broker', key: up };
+            return null;
+        }
+
+        function navigateTrendToEtfOrBroker(targetKey, kind) {
+            var k = String(targetKey || '').trim();
+            if (!k || etfList.indexOf(k) < 0) return false;
+            if (kind === 'broker') {
+                if (currentMode !== 'BROKER') setTrendViewMode('BROKER');
+            } else {
+                if (currentMode !== 'ETF') setTrendViewMode('ETF');
+            }
+            selectTarget(k);
+            return true;
+        }
+
+        function destroyHoldingsTrendChart() {
+            if (holdingsTrendChartInstance) {
+                holdingsTrendChartInstance.destroy();
+                holdingsTrendChartInstance = null;
+            }
+        }
+
+        function renderHoldingsTrendChart() {
+            var hint = document.getElementById('trend-chart-hint');
+            var canvas = document.getElementById('holdings-trend-canvas');
+            if (!canvas) return;
+            if (typeof Chart === 'undefined') {
+                if (hint) hint.textContent = 'Chart.js 未載入';
+                return;
+            }
+            destroyHoldingsTrendChart();
+            var inp = document.getElementById('trend-code-input');
+            var code = inp && inp.value ? String(inp.value).trim() : '';
+            if (!code) {
+                if (hint) hint.textContent = '請輸入股票代號或名稱。';
+                return;
+            }
+
+            var asTarget = findEtfOrBrokerKeyInTrendData(code);
+            if (asTarget) {
+                if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
+                    if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
+                        if (inp) inp.value = '';
+                        if (hint) hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請改輸入<strong class="theme-text">股票代號或名稱</strong>後再按繪製。';
+                    }
+                    return;
+                }
+                if (currentETF === asTarget.key) {
+                    if (hint) hint.textContent = '請輸入成分股代號或名稱（如 2330、台積電），不是 ETF／分點代號。';
+                    return;
+                }
+                if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
+                    if (inp) inp.value = '';
+                    if (hint) hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請輸入股票代號或名稱。';
+                    return;
+                }
+            }
+
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
+                if (hint) hint.textContent = '請選單一 ETF 或分點，或輸入 ETF／分點代號切換。';
+                return;
+            }
+
+            var map = getTrendMapForCurrentEtf();
+            var resolved = findTrendSeriesEntryByCodeOrName(map, code);
+            if (resolved.hint) {
+                if (hint) hint.textContent = resolved.hint;
+                return;
+            }
+            var entry = resolved.entry;
+            if (!entry || !entry.pts || !entry.pts.length) {
+                if (hint) hint.textContent = '此代號或名稱在「' + currentETF + '」歷史 CSV 中無資料。';
+                return;
+            }
+            var pts = entry.pts;
+            var isBroker = brokerCodes.indexOf(currentETF) >= 0;
+            var labels = pts.map(function(p) { return p.d; });
+            var accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#2563eb';
+            var buyC = getComputedStyle(document.documentElement).getPropertyValue('--color-buy').trim() || '#dc2626';
+            var grey = getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim() || '#71717a';
+            var chartFont = { family: '"JetBrains Mono",sans-serif', size: window.innerWidth < 640 ? 11 : 12 };
+
+            try {
+                if (isBroker) {
+                    var dataN = pts.map(function(p) { return p.n; });
+                    holdingsTrendChartInstance = new Chart(canvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '分點淨買賣（股）',
+                                data: dataN,
+                                borderColor: accent,
+                                backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                                fill: true,
+                                tension: 0.2,
+                                pointRadius: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: grey, font: chartFont } },
+                                tooltip: { mode: 'index', intersect: false }
+                            },
+                            scales: {
+                                x: { ticks: { color: grey, maxRotation: 45, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' } },
+                                y: { ticks: { color: grey, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' } }
+                            }
+                        }
+                    });
+                    if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + '分點 net_shares（股）';
+                    return;
+                }
+                var dataS = pts.map(function(p) { return p.s; });
+                var dataW = pts.map(function(p) { return p.w; });
+                holdingsTrendChartInstance = new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: '持股（千張）', data: dataS, yAxisID: 'y', borderColor: buyC, tension: 0.2, pointRadius: 0 },
+                            { label: '權重（%）', data: dataW, yAxisID: 'y1', borderColor: accent, tension: 0.2, pointRadius: 0 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { labels: { color: grey, font: chartFont } },
+                            tooltip: { mode: 'index', intersect: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: grey, maxRotation: 45, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' } },
+                            y: { type: 'linear', position: 'left', ticks: { color: grey, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' }, title: { display: true, text: '千張', color: grey } },
+                            y1: { type: 'linear', position: 'right', ticks: { color: grey, font: chartFont }, grid: { drawOnChartArea: false }, title: { display: true, text: '%', color: grey } }
+                        }
+                    }
+                });
+                if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + 'ETF 持股千張與權重';
+            } catch (err) {
+                if (hint) hint.textContent = '繪圖失敗：' + (err && err.message ? err.message : String(err));
+            }
+        }
+
+        function initTheme() {
+            var saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            updateThemeIconsTrend(saved);
+        }
+        function toggleTheme() {
+            var html = document.documentElement;
+            var cur = html.getAttribute('data-theme');
+            var next = cur === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIconsTrend(next);
+            if (holdingsTrendChartInstance) renderHoldingsTrendChart();
+        }
+        function updateThemeIconsTrend(theme) {
+            var sun = document.getElementById('icon-sun-t');
+            var moon = document.getElementById('icon-moon-t');
+            if (!sun || !moon) return;
+            if (theme === 'dark') { sun.classList.remove('hidden'); moon.classList.add('hidden'); }
+            else { sun.classList.add('hidden'); moon.classList.remove('hidden'); }
+        }
+
+        function toggleElderTrend() {
+            document.documentElement.classList.toggle('elder-mode');
+            var on = document.documentElement.classList.contains('elder-mode');
+            try { localStorage.setItem('elderMode', on ? '1' : '0'); } catch (e) {}
+        }
+
+        function initTrendMetaBar() {
+            var el = document.getElementById('trend-meta-bar');
+            if (!el) return;
+            var thru = __META__ && __META__.data_through ? String(__META__.data_through) : '';
+            var gen = __META__ && __META__.generated_at ? String(__META__.generated_at) : '';
+            var parts = [];
+            if (thru) parts.push('籌碼最新交易日：' + thru);
+            if (gen) parts.push('頁面產生：' + gen);
+            el.textContent = parts.join(' ｜ ') || '（無元資料）';
+        }
+
+        function initTrendPage() {
+            try {
+                if (localStorage.getItem('elderMode') === '1') document.documentElement.classList.add('elder-mode');
+            } catch (e) {}
+            initTheme();
+            initTrendMetaBar();
+
+            var params = new URLSearchParams(window.location.search);
+            var mode = params.get('mode');
+            var target = params.get('target');
+            var code = params.get('code');
+
+            if (mode === 'broker') setTrendViewMode('BROKER');
+            else setTrendViewMode('ETF');
+
+            if (target && etfList.indexOf(target) >= 0) selectTarget(target);
+
+            if (code) {
+                var inp = document.getElementById('trend-code-input');
+                if (inp) inp.value = code;
+                renderHoldingsTrendChart();
+            }
+
+            document.getElementById('btn-trend-draw').addEventListener('click', function() { renderHoldingsTrendChart(); });
+            var inp2 = document.getElementById('trend-code-input');
+            if (inp2) {
+                inp2.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') { e.preventDefault(); renderHoldingsTrendChart(); }
+                });
+            }
+        }
+        window.onload = initTrendPage;
+    </script>
+</body>
+</html>

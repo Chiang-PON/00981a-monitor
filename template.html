@@ -148,11 +148,96 @@
         .bg-neutral { background-color: #e4e4e7; }
         [data-theme="dark"] .bg-neutral { background-color: #262626; }
 
+        /* 全站 UI：欄位標籤、標題、輸入框 */
+        .ui-label {
+            display: block;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 0.375rem;
+        }
+        .ui-caption {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+        }
+        .page-asset-title {
+            font-size: clamp(1.375rem, 4.2vw, 1.875rem);
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: 0.04em;
+            line-height: 1.2;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+        .panel-section-title {
+            font-size: 1.125rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            color: var(--text-main);
+            line-height: 1.3;
+        }
+        @media (min-width: 768px) {
+            .panel-section-title { font-size: 1.25rem; }
+        }
+        .section-group-heading {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--text-main);
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-dim);
+            font-family: "JetBrains Mono", monospace;
+        }
+        .section-group-heading:first-child { margin-top: 0; }
+        @media (min-width: 640px) {
+            .section-group-heading { font-size: 1.0625rem; }
+        }
+        .panel-summary {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+        .ui-input-stock {
+            border-radius: 0.5rem;
+            min-height: 2.75rem;
+            font-family: "Noto Sans TC", sans-serif;
+            font-size: 0.875rem;
+        }
+        .ui-input-stock::placeholder {
+            color: var(--text-dim);
+            opacity: 0.9;
+        }
+
         .tab-btn { transition: all 0.2s; white-space: nowrap; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; touch-action: manipulation; min-height: 44px; }
         .tab-active { background-color: var(--text-main); color: var(--bg-panel); font-weight: 700; }
         [data-theme="dark"] .tab-active { background: #1a1a1a; color: var(--color-accent); border: 1px solid var(--color-accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); }
         .tab-inactive { background-color: var(--bg-base); color: var(--text-dim); border: 1px solid var(--border-dim); }
         .tab-inactive:hover { border-color: var(--text-main); color: var(--text-main); }
+
+        /* 頁面內層切換（走勢 ETF/分點、連續買賣子模式等）：選中為強調藍 */
+        .tab-inner-active {
+            background-color: var(--color-accent);
+            color: #fff;
+            border-color: var(--color-accent);
+            font-weight: 700;
+            box-shadow: var(--shadow-accent);
+        }
+        [data-theme="dark"] .tab-inner-active {
+            color: #0a0a0a;
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+        }
+        .tab-inner-inactive {
+            background-color: var(--bg-base);
+            color: var(--text-dim);
+            border: 1px solid var(--border-dim);
+        }
+        .tab-inner-inactive:hover { border-color: var(--border-focus); color: var(--text-main); }
 
         .tab-ai-agent { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #00f0ff 100%); color: #fff; border: 1px solid rgba(0, 240, 255, 0.5); font-weight: 700; box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); }
         [data-theme="dark"] .tab-ai-agent { background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #06b6d4 100%); border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); color: var(--text-main); }
@@ -169,18 +254,19 @@
         .pill-btn {
             min-height: 2.5rem;
             padding: 0.375rem 0.75rem;
-            border-radius: 9999px;
+            border-radius: 0.5rem;
             font-size: 0.8125rem;
             line-height: 1.35;
-            font-family: "JetBrains Mono", ui-monospace, monospace;
+            font-family: "Noto Sans TC", sans-serif;
             border: 1px solid var(--border-dim);
             background-color: var(--bg-base);
             color: var(--text-main);
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
             text-align: center;
             max-width: 100%;
         }
         .pill-btn-idle:hover { border-color: var(--border-focus); color: var(--text-main); }
+        /* 標的丸選中：與內層按鈕同為強調藍 */
         .pill-btn-active {
             background-color: var(--color-accent);
             color: #fff;
@@ -197,6 +283,10 @@
                 min-height: 2.75rem;
                 padding: 0.5rem 1rem;
             }
+        }
+        #trend-chart-canvas-wrap { min-height: min(78vh, 36rem); }
+        @media (min-width: 768px) {
+            #trend-chart-canvas-wrap { min-height: min(72vh, 40rem); }
         }
         .table-num-cell { white-space: nowrap; font-size: 0.8125rem; }
         @media (min-width: 640px) {
@@ -255,8 +345,6 @@
         html.elder-mode #home-panel table { font-size: 1.05rem; }
         html.elder-mode #home-panel .rounded-xl { font-size: 1.04rem; }
         html.elder-mode #data-freshness-bar { font-size: 0.95rem; line-height: 1.65; }
-        html.elder-mode #watchlist-bar .pill-btn { min-height: 2.75rem; padding-left: 0.9rem; padding-right: 0.9rem; }
-
         .news-kw-highlight {
             background-color: rgba(250, 204, 21, 0.42);
             box-decoration-break: clone;
@@ -264,10 +352,6 @@
         }
         [data-theme="dark"] .news-kw-highlight {
             background-color: rgba(250, 204, 21, 0.22);
-        }
-        /* 捲到走勢區時避開 fixed 導覽列（不依賴 tailwind rebuild） */
-        #trend-chart-panel {
-            scroll-margin-top: 6.5rem;
         }
     </style>
 </head>
@@ -311,36 +395,7 @@
                     <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
                     <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
                     <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">連續買賣</button>
-                </div>
-                <div id="watchlist-bar" class="rounded-lg border theme-border theme-bg-input p-3 mb-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                        <span class="font-mono text-xs theme-text-dim uppercase tracking-wider">關注清單（僅存本機瀏覽器）</span>
-                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                            <button type="button" onclick="exportWatchlistCsv()" class="text-xs font-mono theme-text-dim hover:theme-text min-h-[44px] px-1">匯出 CSV</button>
-                            <button type="button" onclick="restoreWatchlistBackup()" class="text-xs font-mono theme-text-dim hover:theme-text min-h-[44px] px-1">還原上次</button>
-                            <button type="button" onclick="clearWatchlist()" class="text-xs font-mono text-sell hover:opacity-90 min-h-[44px] px-1">清空</button>
-                        </div>
-                    </div>
-                    <div id="watchlist-chips" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        <input type="text" id="watchlist-input" placeholder="股票代號，例如 2330" maxlength="12" class="theme-bg-base border theme-border rounded-lg px-3 py-2 text-sm font-mono theme-text flex-1 min-w-[8rem] max-w-xs">
-                        <button type="button" onclick="addWatchlistItem()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm">加入</button>
-                        <span class="hidden sm:inline text-[11px] theme-text-dim self-center">點擊關注可開啟個股搜尋</span>
-                    </div>
-                    <details class="mt-3 border-t theme-border pt-3">
-                        <summary class="text-xs font-mono theme-text-dim cursor-pointer select-none hover:theme-text">批次貼上／匯入代號</summary>
-                        <div class="mt-2 space-y-2">
-                            <textarea id="watchlist-batch" rows="3" placeholder="可貼多個代號：逗號、空白、換行、分號皆可，例如：&#10;2330,2317 2454&#10;3008" class="theme-bg-input border theme-border rounded-lg px-3 py-2 text-sm font-mono theme-text w-full min-h-[5rem] resize-y"></textarea>
-                            <div class="flex flex-wrap gap-2 items-center">
-                                <button type="button" onclick="addWatchlistBatchFromText()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm min-h-[44px]">解析並加入</button>
-                                <label class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm cursor-pointer min-h-[44px] inline-flex items-center">
-                                    <input type="file" id="watchlist-file-import" class="hidden" accept=".csv,.txt,text/csv">
-                                    選擇檔案（CSV／純文字）
-                                </label>
-                            </div>
-                            <p class="text-[10px] theme-text-dim leading-relaxed">CSV 會讀取<strong class="theme-text">第一欄</strong>為代號；與單筆加入相同，重複代號會略過。</p>
-                        </div>
-                    </details>
+                    <button type="button" id="mode-tab-trend" onclick="setMode('TREND')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">走勢圖</button>
                 </div>
             </div>
 
@@ -348,12 +403,12 @@
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-7">
                     <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
                         <div>
-                            <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">快速總覽</h2>
+                            <h2 class="panel-section-title">快速總覽</h2>
                             <p class="text-sm theme-text-dim mt-1 leading-relaxed">整合：本機籌碼摘要、嵌入的快照指數與財經 RSS（由 <span class="font-mono">fetch_digest.py</span> 每日批次爬取，非即時）。手機開 <span class="font-mono">index.html</span> 或上傳靜態空間皆可，無需 PHP。</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <button type="button" onclick="refreshHomeDashboard()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm">重新整理儀表</button>
-                            <button type="button" onclick="setMode('ETF')" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm bg-accent text-white border-accent">進入戰情室（ETF）</button>
+                            <button type="button" onclick="setMode('ETF')" class="tab-btn px-4 py-2 font-mono rounded-lg border text-sm tab-inner-active">進入戰情室（ETF）</button>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2 text-xs font-mono theme-text-dim">
@@ -384,8 +439,8 @@
                         <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
                         <div id="home-news-filter-wrap" class="hidden mb-3 space-y-2">
                             <div>
-                                <label for="home-news-filter" class="block font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-1.5">篩選關鍵字（標題內會高亮）</label>
-                                <input type="search" id="home-news-filter" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="搜尋標題、來源…" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full min-h-[44px] transition-colors focus:border-[var(--border-focus)]">
+                                <label for="home-news-filter" class="ui-label mb-1.5">篩選關鍵字（標題內會高亮）</label>
+                                <input type="search" id="home-news-filter" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="搜尋標題、來源…" class="theme-bg-input border theme-border ui-input-stock px-3 py-2.5 text-sm theme-text w-full min-h-[44px] transition-colors focus:border-[var(--border-focus)]">
                             </div>
                             <div id="home-news-source-chips" class="hidden flex flex-wrap gap-1.5 items-center"></div>
                         </div>
@@ -394,26 +449,20 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
-                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">本機資料 · 近1日 全家族買／賣超（金額）</h3>
-                        <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
-                    </div>
-                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
-                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">關注股 · 近5日 淨流摘要（本機 DB）</h3>
-                        <div id="home-watchlist-summary" class="text-sm overflow-x-auto"></div>
-                    </div>
+                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                    <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">本機資料 · 近1日 全家族買／賣超（金額）</h3>
+                    <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
                 </div>
             </div>
 
             <div id="section-pills" class="mb-4">
-                <label class="block font-mono text-xs theme-text-dim mb-2 uppercase tracking-wider">目標標的（點選切換）</label>
+                <label class="ui-label mb-2">目標標的（點選切換）</label>
                 <div id="target-pills-container" class="space-y-3"></div>
             </div>
 
             <div id="timeframe-unit-row" class="flex flex-wrap items-center gap-4 mb-6">
                 <div>
-                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">天數</label>
+                    <label class="ui-label">天數</label>
                     <select id="timeframe-selector" onchange="onTimeframeChange()" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors focus:border-focus">
                         <option value="1">近1日</option>
                         <option value="5">近5日</option>
@@ -424,7 +473,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">單位</label>
+                    <label class="ui-label">單位</label>
                     <div class="flex rounded-lg overflow-hidden border theme-border" role="group">
                         <button type="button" id="unit-btn-amount" onclick="setUnit('amount')" class="unit-btn unit-btn-amount px-4 py-2.5 text-sm font-mono font-bold border-r theme-border transition-colors">
                             金額
@@ -435,13 +484,13 @@
                     </div>
                 </div>
                 <div class="min-w-[10rem] sm:min-w-[11rem]">
-                    <label for="date-picker" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">結束日期</label>
-                    <input type="text" id="date-picker" readonly placeholder="選擇日期"
+                    <label for="date-picker" class="ui-label">結束日期</label>
+                    <input type="text" id="date-picker" readonly placeholder="選擇日期（點選）"
                         class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]"
                         autocomplete="off">
                 </div>
                 <div class="w-full sm:w-auto flex flex-col gap-1">
-                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">比較</label>
+                    <label class="ui-label">比較</label>
                     <label class="flex items-center gap-2 cursor-pointer text-sm font-mono theme-text whitespace-nowrap">
                         <input type="checkbox" id="dod-toggle" class="rounded border theme-border" onchange="onDodToggleChange()">
                         與前一段區間比（整組平移一個交易日）
@@ -453,15 +502,15 @@
             </div>
 
             <div id="search-mode-panel" class="hidden mb-6">
-                <div class="max-w-3xl mx-auto rounded-xl border theme-border bg-[var(--bg-panel)] p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]">
-                    <div class="text-center mb-6">
-                        <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">個股主力追蹤</h2>
+                <div class="w-full rounded-xl border theme-border bg-[var(--bg-panel)] p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]">
+                    <div class="text-left mb-6">
+                        <h2 class="panel-section-title">個股主力追蹤</h2>
                         <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依下方「累計交易日數」與「結束日期」決定<strong class="theme-text font-semibold">交易日</strong>區間（不含週末／休市日），掃描 ETF／分點持倉異動；排序依主畫面「單位」。結束日期留空時以資料庫<strong class="theme-text font-semibold">最新</strong>交易日為基準。</p>
                         <p class="mt-3 text-xs theme-text-dim leading-relaxed border-t theme-border pt-3">※ 金額欄位優先以 ETF 持股參考價推算，其次為玩股網均價或淨額欄位；與實際成交金額可能不同，僅供參考。</p>
                     </div>
-                    <div class="flex flex-wrap items-end justify-center gap-4 mb-4">
+                    <div class="flex flex-wrap items-end justify-start gap-4 mb-4">
                         <div class="min-w-[10rem]">
-                            <label for="stock-reverse-timeframe" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">累計交易日數</label>
+                            <label for="stock-reverse-timeframe" class="ui-label">累計交易日數</label>
                             <select id="stock-reverse-timeframe" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors w-full min-h-[2.75rem] focus:border-[var(--border-focus)]">
                                 <option value="1">近1日</option>
                                 <option value="5" selected>近5日</option>
@@ -472,16 +521,16 @@
                             </select>
                         </div>
                         <div class="min-w-[10rem] sm:min-w-[11rem]">
-                            <label for="search-date" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">結束日期</label>
-                            <input type="text" id="search-date" placeholder="選擇結束日期 (預設最新)" autocomplete="off"
+                            <label for="search-date" class="ui-label">結束日期</label>
+                            <input type="text" id="search-date" placeholder="選擇結束日期（預設最新）" autocomplete="off"
                                 class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]">
                         </div>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:items-end justify-center">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:items-end justify-start">
                         <div class="w-full sm:flex-1 sm:min-w-[14rem]">
-                            <label for="stock-reverse-input" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">股票代號／名稱</label>
-                            <input type="text" id="stock-reverse-input" placeholder="輸入股票代號或名稱，例如: 2330 或 台積電" autocomplete="off"
-                                class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full">
+                            <label for="stock-reverse-input" class="ui-label">股票代號或名稱</label>
+                            <input type="text" id="stock-reverse-input" placeholder="代號或名稱，如 2330、台積電" autocomplete="off"
+                                class="theme-bg-input border theme-border ui-input-stock px-3 py-2.5 text-sm theme-text w-full">
                         </div>
                         <button type="button" id="stock-reverse-btn" onclick="runStockReverseSearch()" class="tab-btn px-6 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors whitespace-nowrap w-full sm:w-auto">
                             搜尋
@@ -493,15 +542,15 @@
 
             <div id="view-momentum" class="hidden mb-6">
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
-                    <h2 class="text-lg md:text-xl font-black theme-text tracking-wide mb-2">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
+                    <h2 class="panel-section-title mb-2">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
                     <p class="text-xs theme-text-dim mb-4 leading-relaxed">※ 以「交易日」連續計算；休市日不會出現在資料中。若某交易日該分點缺 CSV，連續會中斷。金額計價方式與主表相同。</p>
                     <div class="flex flex-wrap gap-2 mb-4">
-                        <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-active">【 掃描特定主力 】</button>
-                        <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inactive">【 掃描特定個股 】</button>
+                        <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inner-active">【 掃描特定主力 】</button>
+                        <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inner-inactive">【 掃描特定個股 】</button>
                     </div>
                     <div class="flex flex-wrap items-end gap-4 mb-4">
                         <div>
-                            <label for="momentum-min-days" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">最小連續天數</label>
+                            <label for="momentum-min-days" class="ui-label">最小連續天數</label>
                             <select id="momentum-min-days" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer">
                                 <option value="2">連續 2 天以上</option>
                                 <option value="3" selected>連續 3 天以上</option>
@@ -512,15 +561,15 @@
                     </div>
                     <div id="momentum-input-actor" class="flex flex-wrap gap-3 items-end mb-4">
                         <div class="min-w-[12rem] flex-1">
-                            <label for="momentum-actor-select" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">選擇主力</label>
+                            <label for="momentum-actor-select" class="ui-label">選擇主力</label>
                             <select id="momentum-actor-select" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full"></select>
                         </div>
                         <button type="button" id="momentum-scan-actor" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">掃描</button>
                     </div>
                     <div id="momentum-input-stock" class="hidden flex flex-wrap gap-3 items-end mb-4">
                         <div class="min-w-[10rem] flex-1 sm:max-w-xs">
-                            <label for="momentum-stock-input" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">股票代號／名稱</label>
-                            <input type="text" id="momentum-stock-input" placeholder="例如 2330 或 台積電" autocomplete="off" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full">
+                            <label for="momentum-stock-input" class="ui-label">股票代號或名稱</label>
+                            <input type="text" id="momentum-stock-input" placeholder="代號或名稱，如 2330、台積電" autocomplete="off" class="theme-bg-input border theme-border ui-input-stock px-3 py-2.5 text-sm theme-text w-full">
                         </div>
                         <button type="button" id="momentum-scan-stock" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">搜尋</button>
                     </div>
@@ -528,13 +577,38 @@
                 </div>
             </div>
 
+            <div id="trend-panel" class="hidden mb-6">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button type="button" id="trend-mode-etf" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-active">ETF</button>
+                    <button type="button" id="trend-mode-broker" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-inactive">分點</button>
+                </div>
+                <div class="mb-4">
+                    <span class="ui-caption">目前標的</span>
+                    <h2 id="trend-etf-title" class="page-asset-title mt-1 break-words">---</h2>
+                </div>
+                <label class="ui-label mb-2">目標標的（點選）</label>
+                <div id="trend-target-pills-container" class="space-y-3 mb-6"></div>
+                <div class="rounded-xl border theme-border theme-bg-input p-4 sm:p-6">
+                    <p class="text-sm theme-text-dim mb-4 leading-relaxed">輸入<strong class="theme-text">代號或中文名稱</strong>後按「繪製」。全家族／大聯盟可先輸入 ETF 代號切換標的；圖表為歷史 CSV。</p>
+                    <div class="flex flex-wrap items-end gap-2 mb-3">
+                        <input type="text" id="trend-code-input" maxlength="40" placeholder="代號或名稱，如 2330、台積電"
+                            class="theme-bg-input border theme-border ui-input-stock px-3 py-3 text-base theme-text flex-1 min-w-[10rem] min-h-[48px]">
+                        <button type="button" id="btn-trend-draw" class="tab-btn px-5 py-3 font-mono rounded-lg border theme-border text-base min-h-[48px]">繪製</button>
+                    </div>
+                    <p id="trend-chart-hint" class="text-sm font-mono theme-text-dim mb-4 min-h-[1.25rem]"></p>
+                    <div id="trend-chart-canvas-wrap" class="relative w-full -mx-1 sm:mx-0">
+                        <canvas id="holdings-trend-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <div id="dashboard-mode-panel">
 
             <div id="header-main" class="flex flex-col gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
-                    <span class="font-mono text-xs theme-text-dim tracking-widest uppercase">TARGET_ASSET</span>
+                    <span class="ui-caption tracking-widest uppercase">TARGET_ASSET</span>
                     <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                        <h2 id="current-etf-title" class="text-3xl md:text-4xl font-black theme-text tracking-wider">---</h2>
+                        <h2 id="current-etf-title" class="page-asset-title">---</h2>
                         <span id="dashboard-title-date-range" class="hidden text-sm font-normal text-gray-500 dark:text-gray-400 ml-0 sm:ml-2 tracking-normal whitespace-nowrap" aria-label="資料日期區間"></span>
                     </div>
                 </div>
@@ -542,17 +616,17 @@
 
             <div id="sector-flow-container" class="mb-4 flex gap-3 overflow-x-auto hide-scrollbar pb-2"></div>
             <details id="sector-rank-details" class="mb-6 rounded-xl border theme-border theme-bg-input p-4 hidden">
-                <summary class="font-mono text-sm font-bold theme-text cursor-pointer select-none hover:theme-text">產業／板塊彙總排行（依本表買／賣超列加總）</summary>
+                <summary class="panel-summary theme-text cursor-pointer select-none hover:theme-text">產業／板塊彙總排行（依本表買／賣超列加總）</summary>
                 <div id="sector-rank-table-wrap" class="mt-4 overflow-x-auto text-sm"></div>
             </details>
 
             <details id="compare-diff-wrap" class="mb-6 rounded-xl border theme-border theme-bg-input p-4">
-                <summary class="font-mono text-sm font-bold theme-text cursor-pointer select-none hover:theme-text">跨日對照（雙區間 · 相同天數）</summary>
+                <summary class="panel-summary theme-text cursor-pointer select-none hover:theme-text">跨日對照（雙區間 · 相同天數）</summary>
                 <p class="text-xs theme-text-dim mt-3 mb-3 leading-relaxed">基準結束日 <span class="font-mono theme-text">A</span>＝上方「結束日期」；對照結束日 <span class="font-mono theme-text">B</span>＝下方。兩邊皆取「天數」設定的連續 <span class="font-mono">N</span> 個交易日加總（與主表邏輯相同）。</p>
                 <div class="flex flex-wrap items-end gap-3">
                     <div class="min-w-[10rem] sm:min-w-[11rem]">
-                        <label for="compare-date-picker" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">對照結束日（B）</label>
-                        <input type="text" id="compare-date-picker" readonly placeholder="選擇 B 日"
+                        <label for="compare-date-picker" class="ui-label">對照結束日（B）</label>
+                        <input type="text" id="compare-date-picker" readonly placeholder="選擇對照結束日（B）"
                             class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]"
                             autocomplete="off">
                     </div>
@@ -560,24 +634,6 @@
                 </div>
                 <div id="compare-diff-out" class="mt-4 overflow-x-auto text-sm min-h-[2rem]"></div>
             </details>
-
-            <div id="trend-chart-panel" class="mb-8 rounded-xl border theme-border theme-bg-input p-4 sm:p-5">
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="font-mono text-xs theme-text-dim uppercase tracking-wider">持股／分點走勢</span>
-                    <span class="text-xs theme-text-dim">（歷史 CSV · Chart.js）</span>
-                </div>
-                <p class="text-[11px] theme-text-dim mb-3 leading-relaxed">① 先選<strong class="theme-text">單一</strong> ETF 或單一分點（勿用全家族／大聯盟彙總）。② 此欄填<strong class="theme-text">個股／成分股代號</strong>（如 2330），不是 ETF 代號（如 00981A）。若仍停在全家族，可在下方<strong class="theme-text">直接輸入 00981A 或分點代號</strong>後按繪製，會自動切換到該標的並提示你改輸入個股代號。</p>
-                <p class="text-[11px] theme-text-dim mb-3 leading-relaxed border-t theme-border pt-2">買／賣超表右側的<strong class="theme-text">「走勢」</strong>：用該列<strong class="theme-text">個股代號</strong>在本區繪製歷史持股（千張）與權重（%）或分點淨買賣；圖表在<strong class="theme-text">表格上方</strong>，點擊後頁面會自動捲到此區。</p>
-                <div class="flex flex-wrap items-end gap-2 mb-3">
-                    <input type="text" id="trend-code-input" maxlength="12" placeholder="個股代號 2330（非 00981A）"
-                        class="theme-bg-input border theme-border rounded-lg px-3 py-2 text-sm font-mono theme-text w-[12.5rem] min-h-[44px]">
-                    <button type="button" id="btn-trend-draw" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm min-h-[44px]">繪製走勢</button>
-                </div>
-                <p id="trend-chart-hint" class="text-xs font-mono theme-text-dim mb-3 leading-relaxed"></p>
-                <div class="relative h-72 w-full min-w-0">
-                    <canvas id="holdings-trend-canvas"></canvas>
-                </div>
-            </div>
 
             <div id="normal-view">
                 <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
@@ -633,7 +689,7 @@
                         <span class="theme-text-dim font-mono mr-2 text-sm">KEY</span>
                         <input type="password" id="api-key-input" placeholder="輸入 OpenAI API Key (僅存於本地瀏覽器)" class="bg-transparent text-sm flex-1 font-mono theme-text border-none focus:outline-none">
                     </div>
-                    <button onclick="saveApiKey()" class="tab-btn px-4 py-2 font-mono rounded-sm border theme-border hover:theme-text transition-colors">
+                    <button onclick="saveApiKey()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border hover:theme-text transition-colors">
                         [ SAVE_KEY ]
                     </button>
                     <span id="api-key-status" class="font-mono text-xs theme-text-dim ml-2"></span>
@@ -643,9 +699,9 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <div class="theme-bg-input border rounded-md flex items-center px-3 py-2 transition-colors flex-1 min-w-[200px] focus-within:border-accent">
                             <span class="theme-text-dim font-mono mr-2 text-sm">TICKER</span>
-                            <input type="text" id="ai-ticker-input" placeholder="輸入股票代號 (例: 2330 或 台積電)" class="bg-transparent text-sm flex-1 font-mono theme-text border-none focus:outline-none">
+                            <input type="text" id="ai-ticker-input" placeholder="代號或名稱，如 2330、台積電" class="bg-transparent text-sm flex-1 theme-text border-none focus:outline-none ui-input-stock">
                         </div>
-                        <button id="btn-run-ai" onclick="runAIAnalysis()" class="tab-btn px-4 py-2 font-mono rounded-sm border border-accent text-accent hover:bg-accent hover:text-white transition-colors shadow-sm">
+                        <button id="btn-run-ai" onclick="runAIAnalysis()" class="tab-btn px-4 py-2 font-mono rounded-lg border border-accent text-accent hover:bg-accent hover:text-white transition-colors shadow-sm">
                             [ EXECUTE_ANALYSIS ]
                         </button>
                     </div>
@@ -661,8 +717,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         const __META__ = __META_JSON__;
@@ -676,13 +732,13 @@
         let currentUnit = 'amount';
         let currentDays = 5;
         let etfList = [];
-        let watchlist = [];
-        let holdingsTrendChartInstance = null;
         let compareDatePickerInstance = null;
 
         const db = __DB_JSON__;
         const holdingsTrend = __HOLDINGS_TREND_JSON__;
         const brokerLabels = __BROKER_JSON__ || {};
+        let holdingsTrendChartInstance = null;
+        let trendViewMode = 'ETF';
         const availableDatesDesc = Object.keys(db).sort().reverse();
         const availableDates = availableDatesDesc;
         const FAMILY_TAB = "GLOBAL_CONSENSUS";
@@ -847,262 +903,6 @@
             return new Map(Object.entries(agg));
         }
 
-        function findTrendSeriesEntry(mapByCode, rawCode) {
-            if (!mapByCode || !rawCode) return null;
-            const s = String(rawCode).trim();
-            if (mapByCode[s]) return mapByCode[s];
-            const sn = s.replace(/^0+/, '') || '0';
-            for (const k of Object.keys(mapByCode)) {
-                const kn = String(k).replace(/^0+/, '') || '0';
-                if (kn === sn) return mapByCode[k];
-            }
-            return null;
-        }
-
-        function getTrendMapForCurrentEtf() {
-            if (!holdingsTrend || typeof holdingsTrend !== 'object') return null;
-            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) return null;
-            if (brokerCodes.indexOf(currentETF) >= 0) {
-                return holdingsTrend.broker && holdingsTrend.broker[currentETF] ? holdingsTrend.broker[currentETF] : null;
-            }
-            return holdingsTrend.etf && holdingsTrend.etf[currentETF] ? holdingsTrend.etf[currentETF] : null;
-        }
-
-        /** 輸入是否為資料裡的 ETF／分點「標的代號」（非個股） */
-        function findEtfOrBrokerKeyInTrendData(raw) {
-            const t = String(raw || '').trim();
-            if (!t || !holdingsTrend) return null;
-            const etfMap = holdingsTrend.etf || {};
-            const brMap = holdingsTrend.broker || {};
-            if (etfMap[t]) return { kind: 'etf', key: t };
-            if (brMap[t]) return { kind: 'broker', key: t };
-            const up = t.toUpperCase();
-            if (up !== t && etfMap[up]) return { kind: 'etf', key: up };
-            if (etfMap[up]) return { kind: 'etf', key: up };
-            if (brMap[up]) return { kind: 'broker', key: up };
-            return null;
-        }
-
-        /** 從「走勢」輸入框切換到對應 ETF 或分點（用於全家族／大聯盟時只輸入 00981A／9207） */
-        function navigateTrendToEtfOrBroker(targetKey, kind) {
-            const k = String(targetKey || '').trim();
-            if (!k || !etfList.includes(k)) return false;
-            if (kind === 'broker') {
-                if (currentMode !== 'BROKER') setMode('BROKER');
-            } else {
-                if (currentMode !== 'ETF') setMode('ETF');
-            }
-            selectTarget(k);
-            return true;
-        }
-
-        function destroyHoldingsTrendChart() {
-            if (holdingsTrendChartInstance) {
-                holdingsTrendChartInstance.destroy();
-                holdingsTrendChartInstance = null;
-            }
-        }
-
-        function renderHoldingsTrendChart() {
-            const hint = document.getElementById('trend-chart-hint');
-            const canvas = document.getElementById('holdings-trend-canvas');
-            if (!canvas) return;
-            if (typeof Chart === 'undefined') {
-                if (hint) hint.textContent = 'Chart.js 未載入（請檢查網路或 CDN）';
-                return;
-            }
-            destroyHoldingsTrendChart();
-            const inp = document.getElementById('trend-code-input');
-            let code = inp && inp.value ? String(inp.value).trim() : '';
-            if (!code) {
-                if (hint) hint.textContent = '請輸入個股／成分股代號（如 2330）。';
-                return;
-            }
-
-            const asTarget = findEtfOrBrokerKeyInTrendData(code);
-            if (asTarget) {
-                if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
-                    if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
-                        if (inp) inp.value = '';
-                        if (hint) {
-                            hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請改輸入<strong class="theme-text">個股代號</strong>（如 2330）後再按「繪製走勢」。';
-                        }
-                    } else {
-                        if (hint) hint.textContent = '無法切換至「' + code + '」（資料中無此標的）。';
-                    }
-                    return;
-                }
-                if (currentETF === asTarget.key) {
-                    if (hint) {
-                        hint.textContent = '您輸入的是 ETF／分點「標的代號」，不是個股。請改輸入成分股代號（例如 2330、2303）。';
-                    }
-                    return;
-                }
-                if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
-                    if (inp) inp.value = '';
-                    if (hint) {
-                        hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請輸入<strong class="theme-text">個股代號</strong>後再按「繪製走勢」。';
-                    }
-                    return;
-                }
-            }
-
-            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
-                if (hint) {
-                    hint.textContent = '請先選單一 ETF 或單一凱基分點；或在此欄輸入 ETF／分點代號（如 00981A）讓系統自動切換。';
-                }
-                return;
-            }
-            if (currentETF === AI_TAB) {
-                if (hint) hint.textContent = 'AI 模式下無走勢。';
-                return;
-            }
-            const map = getTrendMapForCurrentEtf();
-            const entry = findTrendSeriesEntry(map, code);
-            if (!entry || !entry.pts || !entry.pts.length) {
-                if (hint) {
-                    hint.textContent = '此個股代號在「' + currentETF + '」歷史 CSV 中無資料。請確認代號正確（為成分股，不是 ETF 代號）。';
-                }
-                return;
-            }
-            const pts = entry.pts;
-            const isBroker = brokerCodes.indexOf(currentETF) >= 0;
-            const labels = pts.map(p => p.d);
-            const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#2563eb';
-            const buyC = getComputedStyle(document.documentElement).getPropertyValue('--color-buy').trim() || '#dc2626';
-            const grey = getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim() || '#71717a';
-
-            try {
-            if (isBroker) {
-                const dataN = pts.map(p => p.n);
-                const ctx = canvas.getContext('2d');
-                holdingsTrendChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: '分點淨買賣（股）',
-                            data: dataN,
-                            borderColor: accent,
-                            backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                            fill: true,
-                            tension: 0.2,
-                            pointRadius: 0,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { labels: { color: grey } },
-                            tooltip: { mode: 'index', intersect: false }
-                        },
-                        scales: {
-                            x: { ticks: { color: grey, maxRotation: 45 }, grid: { color: 'rgba(128,128,128,0.15)' } },
-                            y: { ticks: { color: grey }, grid: { color: 'rgba(128,128,128,0.15)' } }
-                        }
-                    }
-                });
-                if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + '分點 CSV 之 net_shares（股）；非累積持倉。';
-                return;
-            }
-            const dataS = pts.map(p => p.s);
-            const dataW = pts.map(p => p.w);
-            const ctx = canvas.getContext('2d');
-            holdingsTrendChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [
-                        {
-                            label: '持股（千張）',
-                            data: dataS,
-                            yAxisID: 'y',
-                            borderColor: buyC,
-                            backgroundColor: 'rgba(220, 38, 38, 0.06)',
-                            fill: false,
-                            tension: 0.2,
-                            pointRadius: 0,
-                        },
-                        {
-                            label: '權重（%）',
-                            data: dataW,
-                            yAxisID: 'y1',
-                            borderColor: accent,
-                            backgroundColor: 'rgba(37, 99, 235, 0.04)',
-                            fill: false,
-                            tension: 0.2,
-                            pointRadius: 0,
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { labels: { color: grey } },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        x: { ticks: { color: grey, maxRotation: 45 }, grid: { color: 'rgba(128,128,128,0.15)' } },
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                            ticks: { color: grey },
-                            grid: { color: 'rgba(128,128,128,0.15)' },
-                            title: { display: true, text: '千張', color: grey }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            ticks: { color: grey },
-                            grid: { drawOnChartArea: false },
-                            title: { display: true, text: '%', color: grey }
-                        }
-                    }
-                }
-            });
-            if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + 'ETF 持股千張與權重（各交易日 CSV 快照）。';
-            } catch (err) {
-                if (hint) hint.textContent = '繪圖失敗：' + (err && err.message ? err.message : String(err));
-            }
-        }
-
-        function scrollTrendPanelIntoView() {
-            const panel = document.getElementById('trend-chart-panel');
-            if (!panel) return;
-            requestAnimationFrame(function() {
-                requestAnimationFrame(function() {
-                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            });
-        }
-
-        function setTrendCodeAndRender(code) {
-            const inp = document.getElementById('trend-code-input');
-            if (inp) inp.value = String(code || '').trim();
-            renderHoldingsTrendChart();
-            scrollTrendPanelIntoView();
-        }
-
-        /** 掛在 window 供除錯；表格內改為 data-trend-code + 委派，避免內聯 onclick 的 event 相容問題 */
-        window.setTrendCodeAndRender = setTrendCodeAndRender;
-        window.scrollTrendPanelIntoView = scrollTrendPanelIntoView;
-
-        function initTrendTableDelegation() {
-            const nv = document.getElementById('normal-view');
-            if (!nv || nv.dataset.trendDelegateBound === '1') return;
-            nv.dataset.trendDelegateBound = '1';
-            nv.addEventListener('click', function(e) {
-                const btn = e.target.closest('[data-trend-code]');
-                if (!btn) return;
-                e.preventDefault();
-                e.stopPropagation();
-                const code = btn.getAttribute('data-trend-code');
-                if (code) setTrendCodeAndRender(code);
-            });
-        }
 
         function renderSectorRankingTable(buy, sell) {
             const wrap = document.getElementById('sector-rank-details');
@@ -1166,7 +966,7 @@
                 out.innerHTML = '<div class="theme-text-dim font-mono text-xs">請選擇對照結束日（B）</div>';
                 return;
             }
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentETF === AI_TAB) {
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND' || currentETF === AI_TAB) {
                 out.innerHTML = '';
                 return;
             }
@@ -1238,40 +1038,6 @@
             });
         }
 
-        function dailyNetAmountForFamilyCode(code, endDate) {
-            const agg = aggregateData(FAMILY_TAB, 1, endDate);
-            const c = String(code).trim();
-            const findIn = function(list) {
-                for (let i = 0; i < list.length; i++) {
-                    if (String(list[i].code || '').trim() === c) return list[i].amount || 0;
-                }
-                return null;
-            };
-            const b = findIn(agg.buy);
-            const s = findIn(agg.sell);
-            if (b != null) return b;
-            if (s != null) return -Math.abs(s);
-            return 0;
-        }
-
-        function watchlistFiveDayAmounts(code) {
-            const dates = availableDatesDesc.slice(0, 5);
-            return dates.slice().reverse().map(function(d) {
-                return dailyNetAmountForFamilyCode(code, d);
-            });
-        }
-
-        function watchlistSparkBarsHtml(amounts) {
-            const abs = amounts.map(function(a) { return Math.abs(a) || 0; });
-            const mx = Math.max.apply(null, abs.concat([1]));
-            return '<div class="flex items-end justify-end gap-px h-7 w-[3.25rem] shrink-0" title="近 5 交易日淨額(萬)，左舊右新">' +
-                amounts.map(function(a) {
-                    const h = Math.max(3, Math.round((Math.abs(a) / mx) * 24));
-                    const bg = a >= 0 ? 'bg-buy' : 'bg-sell';
-                    return '<div class="flex-1 min-w-[3px] rounded-sm ' + bg + ' opacity-90" style="height:' + h + 'px"></div>';
-                }).join('') + '</div>';
-        }
-
         function getETFLabel(etf) {
             if (etf === FAMILY_TAB) return 'GLOBAL_CONSENSUS (全家族共識)';
             if (etf === KAIJI_TAB) return 'KAIJI_CONSENSUS (凱基大聯盟)';
@@ -1316,6 +1082,7 @@
             const brokerBtn = document.getElementById('mode-tab-broker');
             const searchBtn = document.getElementById('mode-tab-search');
             const momBtn = document.getElementById('mode-tab-momentum');
+            const trendBtn = document.getElementById('mode-tab-trend');
             if (!etfBtn || !brokerBtn || !searchBtn) return;
             const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors';
             if (homeBtn) homeBtn.className = base + ' ' + (currentMode === 'HOME' ? 'tab-active' : 'tab-inactive');
@@ -1323,6 +1090,7 @@
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
             searchBtn.className = base + ' ' + (currentMode === 'SEARCH' ? 'tab-active' : 'tab-inactive');
             if (momBtn) momBtn.className = base + ' ' + (currentMode === 'MOMENTUM' ? 'tab-active' : 'tab-inactive');
+            if (trendBtn) trendBtn.className = base + ' ' + (currentMode === 'TREND' ? 'tab-active' : 'tab-inactive');
         }
 
         function todayYmdLocal() {
@@ -1434,155 +1202,14 @@
             refreshTable();
         }
 
-        function loadWatchlist() {
-            try {
-                const raw = localStorage.getItem('watchlistCodes');
-                if (raw) {
-                    const a = JSON.parse(raw);
-                    if (Array.isArray(a)) {
-                        return a.map(function(x) { return String(x).trim(); }).filter(Boolean);
-                    }
-                }
-            } catch (e) {}
-            return [];
-        }
-
-        function saveWatchlist() {
-            try {
-                const prev = localStorage.getItem('watchlistCodes');
-                if (prev) {
-                    try {
-                        const a = JSON.parse(prev);
-                        if (Array.isArray(a) && a.length) localStorage.setItem('watchlistCodes_backup', prev);
-                    } catch (e) {}
-                }
-                localStorage.setItem('watchlistCodes', JSON.stringify(watchlist));
-            } catch (e) {}
-        }
-
-        function clearWatchlist() {
-            if (!watchlist.length) {
-                alert('關注清單目前是空的。');
-                return;
-            }
-            if (!confirm('確定要清空關注清單？（可先按「還原上次」救回上一份）')) return;
-            watchlist = [];
-            saveWatchlist();
-            renderWatchlist();
-            if (currentMode === 'HOME') renderHomeWatchlistSummary();
-        }
-
-        function restoreWatchlistBackup() {
-            const b = localStorage.getItem('watchlistCodes_backup');
-            if (!b) {
-                alert('尚無備份：變更過關注清單後會自動保留上一份。');
-                return;
-            }
-            if (!confirm('還原成上一次的關注清單？')) return;
-            try {
-                const a = JSON.parse(b);
-                if (!Array.isArray(a)) throw new Error('bad');
-                watchlist = a.map(function(x) { return String(x).trim(); }).filter(Boolean);
-                saveWatchlist();
-                renderWatchlist();
-                if (currentMode === 'HOME') renderHomeWatchlistSummary();
-            } catch (e) {
-                alert('備份資料異常，無法還原。');
-            }
-        }
-
-        function renderWatchlist() {
-            const box = document.getElementById('watchlist-chips');
-            if (!box) return;
-            if (!watchlist.length) {
-                box.innerHTML = '<span class="text-xs theme-text-dim font-mono">尚無關注標的</span>';
-                return;
-            }
-            box.innerHTML = watchlist.map(function(code) {
-                const c = escapeHtmlText(code);
-                return '<button type="button" class="pill-btn pill-btn-idle text-sm py-1 px-3" data-watch-code="' + c.replace(/"/g, '&quot;') + '">' + c + '</button>';
-            }).join('');
-        }
-
-        function addWatchlistItem() {
-            const inp = document.getElementById('watchlist-input');
-            if (!inp) return;
-            const raw = String(inp.value || '').trim().replace(/\s+/g, '');
-            if (!raw) return;
-            if (watchlist.indexOf(raw) === -1) {
-                watchlist.push(raw);
-                saveWatchlist();
-                renderWatchlist();
-                if (currentMode === 'HOME') {
-                    renderHomeWatchlistSummary();
-                }
-            }
-            inp.value = '';
-        }
-
-        function openWatchlistCode(code) {
-            if (!code) return;
-            setMode('SEARCH');
-            const inp = document.getElementById('stock-reverse-input');
-            if (inp) inp.value = code;
-            runStockReverseSearch();
-        }
-
         function csvEscapeCell(s) {
             const t = String(s == null ? '' : s);
             if (/[",\n\r]/.test(t)) return '"' + t.replace(/"/g, '""') + '"';
             return t;
         }
 
-        function exportWatchlistCsv() {
-            const lines = ['code'].concat(watchlist.map(function(c) { return csvEscapeCell(c); }));
-            const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'watchlist.csv';
-            a.click();
-            URL.revokeObjectURL(a.href);
-        }
-
-        function parseWatchlistCodesFromText(text) {
-            return String(text || '').split(/[\s,;，、\n\r\t]+/).map(function(s) { return s.trim(); }).filter(Boolean);
-        }
-
-        function mergeWatchlistCodes(newCodes) {
-            let added = 0;
-            newCodes.forEach(function(c) {
-                const code = String(c || '').trim();
-                if (!code) return;
-                if (watchlist.indexOf(code) === -1) {
-                    watchlist.push(code);
-                    added++;
-                }
-            });
-            if (added) {
-                saveWatchlist();
-                renderWatchlist();
-                if (currentMode === 'HOME') renderHomeWatchlistSummary();
-            }
-            return added;
-        }
-
-        function addWatchlistBatchFromText() {
-            const ta = document.getElementById('watchlist-batch');
-            if (!ta) return;
-            const codes = parseWatchlistCodesFromText(ta.value);
-            const n = mergeWatchlistCodes(codes);
-            if (n) ta.value = '';
-            alert(n ? ('已加入 ' + n + ' 筆代號（重複已略過）') : '沒有新增：請確認代號格式，或皆已存在於關注清單。');
-        }
-
-        function importWatchlistFromFileText(text) {
-            const codes = parseWatchlistCodesFromText(text);
-            const n = mergeWatchlistCodes(codes);
-            alert(n ? ('已從檔案加入 ' + n + ' 筆代號') : '沒有新增：檔案內無有效代號或皆重複。');
-        }
-
         function exportCurrentRankCsv() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentETF === AI_TAB) {
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND' || currentETF === AI_TAB) {
                 alert('請先切換到 ETF／分點模式並選擇標的（非 AI）');
                 return;
             }
@@ -1609,12 +1236,18 @@
         }
 
         function setMode(mode) {
-            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM' && mode !== 'HOME') return;
+            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM' && mode !== 'HOME' && mode !== 'TREND') return;
             if (mode === currentMode) return;
+            const prevMode = currentMode;
             currentMode = mode;
             try {
                 localStorage.setItem('lastMode', mode);
             } catch (e) {}
+            if (mode === 'ETF' || mode === 'BROKER') {
+                try {
+                    localStorage.setItem('lastEtfBrokerTab', mode);
+                } catch (e) {}
+            }
             updateModeTabStyles();
             const dashPanel = document.getElementById('dashboard-mode-panel');
             const searchPanel = document.getElementById('search-mode-panel');
@@ -1622,7 +1255,9 @@
             const pillsSection = document.getElementById('section-pills');
             const tfrRow = document.getElementById('timeframe-unit-row');
             const homePanel = document.getElementById('home-panel');
+            const trendPanel = document.getElementById('trend-panel');
             if (mode === 'HOME') {
+                if (trendPanel) trendPanel.classList.add('hidden');
                 if (pillsSection) pillsSection.classList.add('hidden');
                 if (tfrRow) tfrRow.classList.add('hidden');
                 if (dashPanel) dashPanel.classList.add('hidden');
@@ -1634,6 +1269,39 @@
                 return;
             }
             if (homePanel) homePanel.classList.add('hidden');
+            if (mode === 'TREND') {
+                if (pillsSection) pillsSection.classList.add('hidden');
+                if (tfrRow) tfrRow.classList.add('hidden');
+                if (dashPanel) dashPanel.classList.add('hidden');
+                if (searchPanel) searchPanel.classList.add('hidden');
+                if (momentumPanel) momentumPanel.classList.add('hidden');
+                if (trendPanel) trendPanel.classList.remove('hidden');
+                try {
+                    trendViewMode = localStorage.getItem('lastEtfBrokerTab') === 'BROKER' ? 'BROKER' : 'ETF';
+                } catch (e) {
+                    trendViewMode = 'ETF';
+                }
+                if (prevMode !== 'ETF' && prevMode !== 'BROKER') {
+                    try {
+                        const le = localStorage.getItem('lastETF');
+                        if (le && etfList.includes(le)) {
+                            if (trendViewMode === 'ETF' && isEtfModeSelection(le)) currentETF = le;
+                            else if (trendViewMode === 'BROKER' && isBrokerModeSelection(le)) currentETF = le;
+                            else currentETF = trendViewMode === 'ETF' ? FAMILY_TAB : KAIJI_TAB;
+                        } else {
+                            currentETF = trendViewMode === 'ETF' ? FAMILY_TAB : KAIJI_TAB;
+                        }
+                    } catch (e) {
+                        currentETF = trendViewMode === 'ETF' ? FAMILY_TAB : KAIJI_TAB;
+                    }
+                }
+                syncTrendSubTabs();
+                renderTrendTargetPills();
+                onTrendETFChange();
+                renderCompareDiff();
+                return;
+            }
+            if (trendPanel) trendPanel.classList.add('hidden');
             if (mode === 'SEARCH') {
                 if (pillsSection) pillsSection.classList.add('hidden');
                 if (tfrRow) tfrRow.classList.add('hidden');
@@ -1701,7 +1369,7 @@
                 const group = getETFGroupForRender(etf);
                 if (group !== lastGroup) {
                     const h = document.createElement('div');
-                    h.className = 'text-lg sm:text-xl font-bold tracking-wide theme-text font-mono w-full mt-4 first:mt-0 mb-2 border-b theme-border pb-2';
+                    h.className = 'section-group-heading';
                     const gdef = ETF_GROUP_DEFS.find(g => g.id === group);
                     h.textContent = gdef ? gdef.title : '';
                     container.appendChild(h);
@@ -1730,8 +1398,362 @@
             });
         }
 
+        function getTrendDropdownEtfList() {
+            if (trendViewMode === 'ETF') {
+                return [FAMILY_TAB, AI_TAB, ...etfCodes];
+            }
+            const brokers = brokerCodes.filter(b => allKeys.has(b)).sort((a, b) => brokerCodes.indexOf(a) - brokerCodes.indexOf(b));
+            return [KAIJI_TAB, ...brokers];
+        }
+
+        function getTrendETFGroupForRender(etf) {
+            if (trendViewMode === 'ETF') {
+                if (etf === FAMILY_TAB || etf === AI_TAB) return 'core';
+                return 'etf';
+            }
+            if (etf === KAIJI_TAB) return 'core';
+            return 'broker';
+        }
+
+        function getTrendPillButtonLabel(etf) {
+            const full = getETFLabel(etf);
+            if (trendViewMode !== 'BROKER') return full;
+            return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
+        }
+
+        function syncTrendSubTabs() {
+            const eBtn = document.getElementById('trend-mode-etf');
+            const bBtn = document.getElementById('trend-mode-broker');
+            const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border ';
+            if (eBtn) eBtn.className = base + (trendViewMode === 'ETF' ? 'tab-inner-active' : 'tab-inner-inactive');
+            if (bBtn) bBtn.className = base + (trendViewMode === 'BROKER' ? 'tab-inner-active' : 'tab-inner-inactive');
+        }
+
+        function setTrendViewMode(mode) {
+            if (mode !== 'ETF' && mode !== 'BROKER') return;
+            trendViewMode = mode;
+            try {
+                localStorage.setItem('lastEtfBrokerTab', mode);
+            } catch (e) {}
+            if (mode === 'ETF') {
+                currentETF = FAMILY_TAB;
+                try {
+                    const le = localStorage.getItem('lastETF');
+                    if (le && etfList.includes(le) && isEtfModeSelection(le)) currentETF = le;
+                } catch (e) {}
+            } else {
+                currentETF = KAIJI_TAB;
+                try {
+                    const le = localStorage.getItem('lastETF');
+                    if (le && etfList.includes(le) && isBrokerModeSelection(le)) currentETF = le;
+                } catch (e) {}
+            }
+            renderTrendTargetPills();
+            onTrendETFChange();
+            syncTrendSubTabs();
+        }
+
+        function renderTrendTargetPills() {
+            const container = document.getElementById('trend-target-pills-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const rows = getTrendDropdownEtfList();
+            let lastGroup = null;
+            let rowEl = null;
+            rows.forEach(etf => {
+                const group = getTrendETFGroupForRender(etf);
+                if (group !== lastGroup) {
+                    const h = document.createElement('div');
+                    h.className = 'section-group-heading';
+                    const gdef = ETF_GROUP_DEFS.find(g => g.id === group);
+                    h.textContent = gdef ? gdef.title : '';
+                    container.appendChild(h);
+                    rowEl = document.createElement('div');
+                    rowEl.className = 'flex flex-wrap gap-2';
+                    container.appendChild(rowEl);
+                    lastGroup = group;
+                }
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.etf = etf;
+                btn.className = 'pill-btn pill-btn-idle';
+                btn.textContent = getTrendPillButtonLabel(etf);
+                btn.onclick = () => selectTrendBoardTarget(etf);
+                rowEl.appendChild(btn);
+            });
+            updateTrendPillActiveState();
+        }
+
+        function updateTrendPillActiveState() {
+            document.querySelectorAll('#trend-target-pills-container [data-etf]').forEach(btn => {
+                const on = btn.dataset.etf === currentETF;
+                btn.classList.toggle('pill-btn-active', on);
+                btn.classList.toggle('pill-btn-idle', !on);
+            });
+        }
+
+        function selectTrendBoardTarget(etf) {
+            currentETF = etf;
+            try {
+                localStorage.setItem('lastETF', etf);
+            } catch (e) {}
+            onTrendETFChange();
+        }
+
+        function onTrendETFChange() {
+            const titleEl = document.getElementById('trend-etf-title');
+            if (titleEl) {
+                titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (currentETF === AI_TAB ? 'AI_AGENT' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
+            }
+            updateTrendPillActiveState();
+            const inp = document.getElementById('trend-code-input');
+            if (inp && inp.value.trim()) {
+                renderHoldingsTrendChart();
+            } else {
+                destroyHoldingsTrendChart();
+                const th = document.getElementById('trend-chart-hint');
+                if (th) th.textContent = '';
+            }
+        }
+
+        function findTrendSeriesEntry(mapByCode, rawCode) {
+            if (!mapByCode || !rawCode) return null;
+            const s = String(rawCode).trim();
+            if (mapByCode[s]) return mapByCode[s];
+            const sn = s.replace(/^0+/, '') || '0';
+            for (let i = 0; i < Object.keys(mapByCode).length; i++) {
+                const k = Object.keys(mapByCode)[i];
+                const kn = String(k).replace(/^0+/, '') || '0';
+                if (kn === sn) return mapByCode[k];
+            }
+            return null;
+        }
+
+        function normalizeTrendNameQuery(s) {
+            return String(s || '').trim().replace(/\s+/g, '');
+        }
+
+        /** 以代號（含去前導 0）或成分股中文名稱（精確或唯一模糊）解析走勢序列 */
+        function findTrendSeriesEntryByCodeOrName(mapByCode, raw) {
+            if (!mapByCode || !raw) return { entry: null, hint: null };
+            const q = normalizeTrendNameQuery(raw);
+            if (!q) return { entry: null, hint: null };
+
+            const byCode = findTrendSeriesEntry(mapByCode, q);
+            if (byCode) return { entry: byCode, hint: null };
+
+            const keys = Object.keys(mapByCode);
+            const exactHits = [];
+            const partialHits = [];
+            for (let i = 0; i < keys.length; i++) {
+                const ent = mapByCode[keys[i]];
+                const nm = ent && ent.n ? String(ent.n).trim() : '';
+                if (!nm) continue;
+                if (nm === q) exactHits.push(ent);
+                else if (nm.indexOf(q) !== -1 || q.indexOf(nm) !== -1) partialHits.push(ent);
+            }
+            if (exactHits.length === 1) return { entry: exactHits[0], hint: null };
+            if (exactHits.length > 1) {
+                return { entry: null, hint: '名稱「' + q + '」對應多檔，請改用股票代號。' };
+            }
+            if (partialHits.length === 1) return { entry: partialHits[0], hint: null };
+            if (partialHits.length > 1) {
+                return { entry: null, hint: '「' + q + '」對應多檔，請輸入股票代號或更完整名稱。' };
+            }
+            return { entry: null, hint: null };
+        }
+
+        function getTrendMapForCurrentEtf() {
+            if (!holdingsTrend || typeof holdingsTrend !== 'object') return null;
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) return null;
+            if (brokerCodes.indexOf(currentETF) >= 0) {
+                return holdingsTrend.broker && holdingsTrend.broker[currentETF] ? holdingsTrend.broker[currentETF] : null;
+            }
+            return holdingsTrend.etf && holdingsTrend.etf[currentETF] ? holdingsTrend.etf[currentETF] : null;
+        }
+
+        function findEtfOrBrokerKeyInTrendData(raw) {
+            const t = String(raw || '').trim();
+            if (!t || !holdingsTrend) return null;
+            const etfMap = holdingsTrend.etf || {};
+            const brMap = holdingsTrend.broker || {};
+            if (etfMap[t]) return { kind: 'etf', key: t };
+            if (brMap[t]) return { kind: 'broker', key: t };
+            const up = t.toUpperCase();
+            if (etfMap[up]) return { kind: 'etf', key: up };
+            if (brMap[up]) return { kind: 'broker', key: up };
+            return null;
+        }
+
+        function navigateTrendToEtfOrBroker(targetKey, kind) {
+            const k = String(targetKey || '').trim();
+            if (!k || etfList.indexOf(k) < 0) return false;
+            if (kind === 'broker') {
+                if (trendViewMode !== 'BROKER') setTrendViewMode('BROKER');
+            } else {
+                if (trendViewMode !== 'ETF') setTrendViewMode('ETF');
+            }
+            selectTrendBoardTarget(k);
+            return true;
+        }
+
+        function destroyHoldingsTrendChart() {
+            if (holdingsTrendChartInstance) {
+                holdingsTrendChartInstance.destroy();
+                holdingsTrendChartInstance = null;
+            }
+        }
+
+        function renderHoldingsTrendChart() {
+            const hint = document.getElementById('trend-chart-hint');
+            const canvas = document.getElementById('holdings-trend-canvas');
+            if (!canvas) return;
+            if (typeof Chart === 'undefined') {
+                if (hint) hint.textContent = 'Chart.js 未載入';
+                return;
+            }
+            destroyHoldingsTrendChart();
+            const inp = document.getElementById('trend-code-input');
+            const code = inp && inp.value ? String(inp.value).trim() : '';
+            if (!code) {
+                if (hint) hint.textContent = '請輸入股票代號或名稱。';
+                return;
+            }
+
+            const asTarget = findEtfOrBrokerKeyInTrendData(code);
+            if (asTarget) {
+                if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) {
+                    if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
+                        if (inp) inp.value = '';
+                        if (hint) hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請改輸入<strong class="theme-text">股票代號或名稱</strong>後再按繪製。';
+                    }
+                    return;
+                }
+                if (currentETF === asTarget.key) {
+                    if (hint) hint.textContent = '請輸入成分股代號或名稱（如 2330、台積電），不是 ETF／分點代號。';
+                    return;
+                }
+                if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
+                    if (inp) inp.value = '';
+                    if (hint) hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請輸入股票代號或名稱。';
+                    return;
+                }
+            }
+
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) {
+                if (hint) hint.textContent = '請選單一 ETF 或分點，或輸入 ETF／分點代號切換。';
+                return;
+            }
+
+            const map = getTrendMapForCurrentEtf();
+            const resolved = findTrendSeriesEntryByCodeOrName(map, code);
+            if (resolved.hint) {
+                if (hint) hint.textContent = resolved.hint;
+                return;
+            }
+            const entry = resolved.entry;
+            if (!entry || !entry.pts || !entry.pts.length) {
+                if (hint) hint.textContent = '此代號或名稱在「' + currentETF + '」歷史 CSV 中無資料。';
+                return;
+            }
+            const pts = entry.pts;
+            const isBroker = brokerCodes.indexOf(currentETF) >= 0;
+            const labels = pts.map(p => p.d);
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#2563eb';
+            const buyC = getComputedStyle(document.documentElement).getPropertyValue('--color-buy').trim() || '#dc2626';
+            const grey = getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim() || '#71717a';
+            const chartFont = { family: '"JetBrains Mono",sans-serif', size: window.innerWidth < 640 ? 11 : 12 };
+
+            try {
+                if (isBroker) {
+                    const dataN = pts.map(p => p.n);
+                    holdingsTrendChartInstance = new Chart(canvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '分點淨買賣（股）',
+                                data: dataN,
+                                borderColor: accent,
+                                backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                                fill: true,
+                                tension: 0.2,
+                                pointRadius: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: grey, font: chartFont } },
+                                tooltip: { mode: 'index', intersect: false }
+                            },
+                            scales: {
+                                x: { ticks: { color: grey, maxRotation: 45, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' } },
+                                y: { ticks: { color: grey, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' } }
+                            }
+                        }
+                    });
+                    if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + '分點 net_shares（股）';
+                    return;
+                }
+                const dataS = pts.map(p => p.s);
+                const dataW = pts.map(p => p.w);
+                holdingsTrendChartInstance = new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: '持股（千張）', data: dataS, yAxisID: 'y', borderColor: buyC, tension: 0.2, pointRadius: 0 },
+                            { label: '權重（%）', data: dataW, yAxisID: 'y1', borderColor: accent, tension: 0.2, pointRadius: 0 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { labels: { color: grey, font: chartFont } },
+                            tooltip: { mode: 'index', intersect: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: grey, maxRotation: 45, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' } },
+                            y: { type: 'linear', position: 'left', ticks: { color: grey, font: chartFont }, grid: { color: 'rgba(128,128,128,0.15)' }, title: { display: true, text: '千張', color: grey } },
+                            y1: { type: 'linear', position: 'right', ticks: { color: grey, font: chartFont }, grid: { drawOnChartArea: false }, title: { display: true, text: '%', color: grey } }
+                        }
+                    }
+                });
+                if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + 'ETF 持股千張與權重';
+            } catch (err) {
+                if (hint) hint.textContent = '繪圖失敗：' + (err && err.message ? err.message : String(err));
+            }
+        }
+
+        function openTrendForChart(code) {
+            const c = String(code || '').trim();
+            if (!c) return;
+            try {
+                localStorage.setItem('lastEtfBrokerTab', currentMode === 'BROKER' ? 'BROKER' : 'ETF');
+            } catch (e) {}
+            trendViewMode = currentMode === 'BROKER' ? 'BROKER' : 'ETF';
+            if (currentMode !== 'TREND') {
+                setMode('TREND');
+            } else {
+                syncTrendSubTabs();
+                renderTrendTargetPills();
+                onTrendETFChange();
+            }
+            const inp = document.getElementById('trend-code-input');
+            if (inp) inp.value = c;
+            renderHoldingsTrendChart();
+            requestAnimationFrame(function() {
+                const wrap = document.getElementById('trend-chart-canvas-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        }
+
         function onETFChange() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND') return;
             const isAI = currentETF === AI_TAB;
             const tfr = document.getElementById('timeframe-unit-row');
             if (tfr) tfr.classList.toggle('hidden', isAI);
@@ -1824,7 +1846,7 @@
         function updateDashboardTitleDateRange() {
             const el = document.getElementById('dashboard-title-date-range');
             if (!el) return;
-            if (currentMode === 'SEARCH' || currentETF === AI_TAB || currentMode === 'HOME') {
+            if (currentMode === 'SEARCH' || currentETF === AI_TAB || currentMode === 'HOME' || currentMode === 'TREND') {
                 el.textContent = '';
                 el.classList.add('hidden');
                 return;
@@ -1985,24 +2007,6 @@
             initDatePicker();
             initCompareDatePicker();
             initSearchDatePicker();
-            initTrendTableDelegation();
-            const btnTrend = document.getElementById('btn-trend-draw');
-            if (btnTrend) {
-                btnTrend.addEventListener('click', function() {
-                    renderHoldingsTrendChart();
-                    scrollTrendPanelIntoView();
-                });
-            }
-            const trendInp = document.getElementById('trend-code-input');
-            if (trendInp) {
-                trendInp.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        renderHoldingsTrendChart();
-                        scrollTrendPanelIntoView();
-                    }
-                });
-            }
             const tfSel = document.getElementById('timeframe-selector');
             if (tfSel) tfSel.value = String(currentDays);
             const srt = document.getElementById('stock-reverse-timeframe');
@@ -2013,22 +2017,6 @@
             if (titleEl) titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
 
             initDataFreshnessBar();
-            watchlist = loadWatchlist();
-            renderWatchlist();
-            const wc = document.getElementById('watchlist-chips');
-            if (wc) {
-                wc.addEventListener('click', function(e) {
-                    const btn = e.target.closest('[data-watch-code]');
-                    if (!btn) return;
-                    openWatchlistCode(btn.getAttribute('data-watch-code'));
-                });
-            }
-            const wInp = document.getElementById('watchlist-input');
-            if (wInp) {
-                wInp.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') addWatchlistItem();
-                });
-            }
             const hnf = document.getElementById('home-news-filter');
             if (hnf) {
                 hnf.addEventListener('input', applyHomeNewsFilter);
@@ -2043,19 +2031,6 @@
                     homeNewsSourceFilter = v === '' || v === null ? null : v;
                     renderHomeNewsSourceChips();
                     applyHomeNewsFilter();
-                });
-            }
-            const wf = document.getElementById('watchlist-file-import');
-            if (wf) {
-                wf.addEventListener('change', function(e) {
-                    const f = e.target.files && e.target.files[0];
-                    if (!f) return;
-                    const reader = new FileReader();
-                    reader.onload = function() {
-                        importWatchlistFromFileText(String(reader.result || ''));
-                    };
-                    reader.readAsText(f);
-                    e.target.value = '';
                 });
             }
             const btnTop = document.getElementById('btn-scroll-top');
@@ -2073,7 +2048,7 @@
             let lm = 'ETF';
             try {
                 const x = localStorage.getItem('lastMode');
-                if (x === 'HOME' || x === 'ETF' || x === 'BROKER' || x === 'SEARCH' || x === 'MOMENTUM') {
+                if (x === 'HOME' || x === 'ETF' || x === 'BROKER' || x === 'SEARCH' || x === 'MOMENTUM' || x === 'TREND') {
                     lm = x;
                 }
             } catch (e) {}
@@ -2097,6 +2072,40 @@
                 });
             }
             initMomentumUI();
+
+            const tEtf = document.getElementById('trend-mode-etf');
+            const tBrk = document.getElementById('trend-mode-broker');
+            if (tEtf) tEtf.addEventListener('click', function() { setTrendViewMode('ETF'); });
+            if (tBrk) tBrk.addEventListener('click', function() { setTrendViewMode('BROKER'); });
+            const btnTrendDraw = document.getElementById('btn-trend-draw');
+            if (btnTrendDraw) btnTrendDraw.addEventListener('click', function() { renderHoldingsTrendChart(); });
+            const trendInp = document.getElementById('trend-code-input');
+            if (trendInp) {
+                trendInp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        renderHoldingsTrendChart();
+                    }
+                });
+            }
+            const buyRankBody = document.getElementById('buy-rank-tbody');
+            if (buyRankBody) {
+                buyRankBody.addEventListener('click', function(e) {
+                    const btn = e.target.closest('[data-trend-code]');
+                    if (!btn) return;
+                    e.preventDefault();
+                    openTrendForChart(btn.getAttribute('data-trend-code'));
+                });
+            }
+            const sellRankBody = document.getElementById('sell-rank-tbody');
+            if (sellRankBody) {
+                sellRankBody.addEventListener('click', function(e) {
+                    const btn = e.target.closest('[data-trend-code]');
+                    if (!btn) return;
+                    e.preventDefault();
+                    openTrendForChart(btn.getAttribute('data-trend-code'));
+                });
+            }
 
             let sectorTreemapResizeTimer;
             function onSectorTreemapResize() {
@@ -2250,26 +2259,6 @@
             return Array.from(map.values());
         }
 
-        function findStockNameForCode(code) {
-            const c = String(code || '').trim();
-            if (!c) return '';
-            for (let di = 0; di < availableDatesDesc.length; di++) {
-                const dayData = db[availableDatesDesc[di]];
-                if (!dayData) continue;
-                const keys = Object.keys(dayData);
-                for (let ki = 0; ki < keys.length; ki++) {
-                    const bucket = dayData[keys[ki]];
-                    if (!bucket) continue;
-                    const stocks = collectStocksFromActorDay(bucket);
-                    for (let si = 0; si < stocks.length; si++) {
-                        const s = stocks[si];
-                        if (String(s.code || '').trim() === c) return String(s.name || '').trim();
-                    }
-                }
-            }
-            return '';
-        }
-
         function renderHomeHotStocks() {
             const el = document.getElementById('home-hot-out');
             if (!el) return;
@@ -2295,40 +2284,6 @@
                 '<div class="min-w-0">' + head + bHtml + '</tbody></table></div>' +
                 '<div class="min-w-0">' + head2 + sHtml + '</tbody></table></div></div>' +
                 '<p class="text-[11px] theme-text-dim mt-2">依本機 JSON 資料庫「全家族共識」近 1 交易日彙總；與實際成交可能不同。</p>';
-        }
-
-        function renderHomeWatchlistSummary() {
-            const el = document.getElementById('home-watchlist-summary');
-            if (!el) return;
-            if (!watchlist.length) {
-                el.innerHTML = '<p class="theme-text-dim text-sm">尚未加入關注股；於上方輸入代號後按「加入」。</p>';
-                return;
-            }
-            const agg = aggregateData(FAMILY_TAB, 5);
-            const map = new Map();
-            agg.buy.forEach(function(i) { map.set(aggregateRowKey(i), { item: i, side: 'buy' }); });
-            agg.sell.forEach(function(i) { map.set(aggregateRowKey(i), { item: i, side: 'sell' }); });
-            const rows = watchlist.map(function(code) {
-                const c = String(code).trim();
-                let hit = null;
-                map.forEach(function(v, k) {
-                    if (hit) return;
-                    if (String(v.item.code || '').trim() === c) hit = v;
-                });
-                const name = findStockNameForCode(c) || '—';
-                const spark = watchlistSparkBarsHtml(watchlistFiveDayAmounts(c));
-                if (!hit) {
-                    return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5 min-w-[4rem]">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right theme-text-dim">無</td><td class="py-1.5 text-right align-bottom">' + spark + '</td></tr>';
-                }
-                const it = hit.item;
-                const isBuy = hit.side === 'buy';
-                const cls = isBuy ? 'text-buy' : 'text-sell';
-                const val = formatAmount(it.amount || 0);
-                const sg = isBuy ? '+ ' : '− ';
-                return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5 min-w-[4rem]">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + sg + val + '</td><td class="py-1.5 text-right align-bottom">' + spark + '</td></tr>';
-            });
-            el.innerHTML = '<table class="w-full text-sm min-w-[340px]"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs">代號</th><th class="text-left py-2 px-1 font-mono text-xs">名稱</th><th class="text-right py-2 px-1 font-mono text-xs whitespace-nowrap">5日淨額</th><th class="text-right py-2 px-1 font-mono text-xs w-16">走勢</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>' +
-                '<p class="text-[11px] theme-text-dim mt-2">點關注 chip 可開啟個股搜尋；淨額為近 5 交易日加總。右欄小條為各日淨額(萬)，紅買綠賣、左舊右新。</p>';
         }
 
         function renderHomeMarketsFromJson(j) {
@@ -2544,7 +2499,6 @@
 
         function refreshHomeDashboard() {
             renderHomeHotStocks();
-            renderHomeWatchlistSummary();
             renderHomeDataHealth();
             const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
             renderHomeMarketsFromJson(d.markets || { ok: false, items: [], error: '無 markets 資料' });
@@ -2830,8 +2784,8 @@
             const base = 'tab-btn px-4 py-2 font-mono rounded-lg border theme-border transition-colors';
             if (actorPanel) actorPanel.classList.toggle('hidden', sub !== 'actor');
             if (stockPanel) stockPanel.classList.toggle('hidden', sub !== 'stock');
-            if (btnA) btnA.className = base + ' ' + (sub === 'actor' ? 'tab-active' : 'tab-inactive');
-            if (btnS) btnS.className = base + ' ' + (sub === 'stock' ? 'tab-active' : 'tab-inactive');
+            if (btnA) btnA.className = base + ' ' + (sub === 'actor' ? 'tab-inner-active' : 'tab-inner-inactive');
+            if (btnS) btnS.className = base + ' ' + (sub === 'stock' ? 'tab-inner-active' : 'tab-inner-inactive');
         }
 
         function initMomentumUI() {
@@ -3016,7 +2970,7 @@
         }
 
         function refreshTable() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND') return;
             if (currentETF === AI_TAB) return;
             const { buy, sell } = aggregateData(currentETF, currentDays);
             const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
@@ -3102,7 +3056,7 @@
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const trendBtn = showTrendBtn && item.code
-                    ? ` <button type="button" class="trend-row-btn text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="在上方走勢區繪製此股歷史持股／權重（點擊後會捲到圖表）" aria-label="繪製走勢並捲到上方圖表">走勢</button>`
+                    ? ` <button type="button" class="text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="切換至走勢圖並繪製">走勢</button>`
                     : '';
                 const detail = formatBrokerBuySellDetailLine(item);
                 const dod = deltaLineHtml(item, buyPrevMap, true);
@@ -3113,21 +3067,12 @@
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const trendBtn = showTrendBtn && item.code
-                    ? ` <button type="button" class="trend-row-btn text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="在上方走勢區繪製此股歷史持股／權重（點擊後會捲到圖表）" aria-label="繪製走勢並捲到上方圖表">走勢</button>`
+                    ? ` <button type="button" class="text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="切換至走勢圖並繪製">走勢</button>`
                     : '';
                 const detail = formatBrokerBuySellDetailLine(item);
                 const dod = deltaLineHtml(item, sellPrevMap, false);
                 return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}${trendBtn}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
-
-            const tInp = document.getElementById('trend-code-input');
-            if (tInp && tInp.value.trim()) {
-                renderHoldingsTrendChart();
-            } else {
-                destroyHoldingsTrendChart();
-                const th = document.getElementById('trend-chart-hint');
-                if (th) th.textContent = '';
-            }
         }
 
         function formatAmount(amount_10k) {

@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
-REQUIRED_FILES = ("index.html", "tailwind-built.css", "template.html")
+REQUIRED_FILES = ("index.html", "trend.html", "tailwind-built.css", "template.html", "trend_template.html")
 
 
 def main() -> int:
@@ -35,7 +35,17 @@ def main() -> int:
     if "tailwind-built.css" not in index:
         print("[WARN] index.html 未引用 tailwind-built.css，線上可能無樣式")
 
-    print("[OK] 可部署檢查通過（GitHub Pages 請一併上傳 index.html + tailwind-built.css）")
+    trend = (ROOT / "trend.html").read_text(encoding="utf-8", errors="replace")
+    if (
+        "__DB_JSON__" in trend
+        or "__META_JSON__" in trend
+        or "__BROKER_JSON__" in trend
+        or "__HOLDINGS_TREND_JSON__" in trend
+    ):
+        print("[FAIL] trend.html 仍含占位符，請執行 python3 generate_web.py")
+        return 1
+
+    print("[OK] 可部署檢查通過（請一併上傳 index.html、trend.html、tailwind-built.css）")
     return 0
 
 
