@@ -10,33 +10,16 @@ import os
 import glob
 import re
 import json
+from datetime import datetime
+
 import pandas as pd
 from pathlib import Path
+
+from broker_config import BROKER_LIST
 
 HISTORY_DIR = "history"
 OUTPUT_FILE = "index.html"
 TEMPLATE_FILE = "template.html"
-
-BROKER_LIST = {
-    "9207": "凱基永和",
-    "920A": "凱基板橋",
-    "920D": "凱基市府",
-    "920F": "凱基站前",
-    "9216": "凱基信義",
-    "9217": "凱基松山",
-    "9218": "凱基大直",
-    "921F": "凱基天母",
-    "921J": "凱基土城",
-    "921S": "凱基新莊",
-    "9229": "凱基中山",
-    "9234": "凱基竹北",
-    "9238": "凱基士林",
-    "9239": "凱基市政",
-    "9257": "凱基林口",
-    "9272": "凱基竹科",
-    "9285": "凱基中壢",
-    "9287": "凱基內湖",
-}
 
 SECTOR_MAP = {
     "台積電": "半導體", "聯發科": "半導體", "京元電": "半導體", "日月光投控": "半導體", "瑞昱": "半導體", "聯電": "半導體", "世芯-KY": "半導體", "力旺": "半導體", "聯詠": "半導體", "南亞科": "半導體", "欣銓": "半導體", "精測": "半導體", "穎崴": "半導體", "旺矽": "半導體", "群聯": "半導體",
@@ -424,16 +407,70 @@ def load_template() -> str:
         return f.read()
 
 
+def load_digest(script_dir: Path) -> dict:
+    """每日批次快照（fetch_digest.py）；若無檔案則嵌入空物件。"""
+    path = script_dir / "digest.json"
+    if not path.is_file():
+        return {
+            "ok": False,
+            "fetchedAt": None,
+            "news": {
+                "ok": False,
+                "items": [],
+                "disclaimer": "",
+                "error": "尚未產生：請先執行 python3 fetch_digest.py 再產生網頁",
+            },
+            "markets": {
+                "ok": False,
+                "items": [],
+                "disclaimer": "",
+                "error": "尚未產生：請先執行 python3 fetch_digest.py 再產生網頁",
+            },
+            "sectors": {
+                "ok": False,
+                "items": [],
+                "error": "尚未產生：請先執行 python3 fetch_digest.py 再產生網頁",
+            },
+        }
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {
+            "ok": False,
+            "fetchedAt": None,
+            "news": {"ok": False, "items": [], "error": "digest.json 讀取失敗"},
+            "markets": {"ok": False, "items": [], "error": "digest.json 讀取失敗"},
+            "sectors": {"ok": False, "items": [], "error": "digest.json 讀取失敗"},
+        }
+
+
 def main() -> None:
     print("[INFO] 開始產出 Web Dashboard (v8.0 程式碼重構與優化)...")
     db = process_all_data()
     template = load_template()
+    script_dir = Path(__file__).resolve().parent
 
     json_str = json.dumps(db, ensure_ascii=False)
     broker_str = json.dumps(BROKER_LIST, ensure_ascii=False)
-    final_html = template.replace("__DB_JSON__", json_str).replace("__BROKER_JSON__", broker_str)
+    meta = {
+        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "data_through": max(db.keys()) if db else None,
+    }
+    meta_str = json.dumps(meta, ensure_ascii=False)
+    digest = load_digest(script_dir)
+    if digest.get("fetchedAt"):
+        print(f"[INFO] 嵌入 digest.json（快照 {digest['fetchedAt']}）")
+    else:
+        print("[INFO] 未偵測 digest.json 快照，總覽新聞／指數為占位（可執行 fetch_digest.py）")
+    digest_str = json.dumps(digest, ensure_ascii=False)
+    final_html = (
+        template.replace("__DB_JSON__", json_str)
+        .replace("__BROKER_JSON__", broker_str)
+        .replace("__META_JSON__", meta_str)
+        .replace("__DIGEST_JSON__", digest_str)
+    )
 
-    script_dir = Path(__file__).resolve().parent
     output_path = script_dir / OUTPUT_FILE
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(final_html)

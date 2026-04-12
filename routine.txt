@@ -1,9 +1,11 @@
+# 每日早上補跑凱基分點與籌碼後：先 fetch_digest（嵌入 index 的快照／RSS），再 generate_web。
 TODAY=$(date +%Y-%m-%d) && \
 DOW=$(date +%u) && \
 if [ "$DOW" -eq 1 ]; then TARGET=$(date -v-3d +%Y-%m-%d); else TARGET=$(date -v-1d +%Y-%m-%d); fi && \
 git pull --rebase origin main && \
 python main.py --force && \
 for f in history/*_$TODAY.csv; do mv "$f" "${f/_$TODAY.csv/_$TARGET.csv}"; done && \
+python3 fetch_digest.py && \
 python generate_web.py && \
 git add . && \
 git commit -m "chore: 補跑 $TARGET 凱基分點與籌碼資料" && \

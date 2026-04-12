@@ -27,6 +27,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
+from broker_config import BROKER_LIST
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -54,27 +56,7 @@ LINE_NOTIFY_LIST: list[str] = [
     "00980A", "00981A", "00982A", "00985A", "009816", "00992A"
 ]
 
-# 3. 凱基大聯盟 18 大主力分點 (wantgoo 券商買賣超監控)
-BROKER_LIST: dict[str, str] = {
-    "9207": "凱基永和",
-    "920A": "凱基板橋",
-    "920D": "凱基市府",
-    "920F": "凱基站前",
-    "9216": "凱基信義",
-    "9217": "凱基松山",
-    "9218": "凱基大直",
-    "921F": "凱基天母",
-    "921J": "凱基土城",
-    "921S": "凱基新莊",
-    "9229": "凱基中山",
-    "9234": "凱基竹北",
-    "9238": "凱基士林",
-    "9239": "凱基市政",
-    "9257": "凱基林口",
-    "9272": "凱基竹科",
-    "9285": "凱基中壢",
-    "9287": "凱基內湖",
-}
+# 3. 凱基大聯盟 18 大主力分點 — BROKER_LIST 見 broker_config.py
 
 WANTGOO_MAJOR_ID: str = "9200"
 WANTGOO_URL_TEMPLATE: str = (

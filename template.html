@@ -2,7 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f4f4f5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
     <title>ETF 籌碼決策戰情室 v8.0 - 決策雷達</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,7 +121,7 @@
             --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.5); --bar-track: #111111;
         }
 
-        body { background-color: var(--bg-base); color: var(--text-main); font-family: "Noto Sans TC", sans-serif; min-height: 100vh; transition: background-color 0.3s ease, color 0.3s ease; }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: "Noto Sans TC", sans-serif; min-height: 100vh; min-height: 100dvh; transition: background-color 0.3s ease, color 0.3s ease; padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
         [data-theme="dark"] body { background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px); background-size: 100% 4px; }
         .font-mono { font-family: "JetBrains Mono", monospace; }
 
@@ -148,7 +150,7 @@
         .bg-neutral { background-color: #e4e4e7; }
         [data-theme="dark"] .bg-neutral { background-color: #262626; }
 
-        .tab-btn { transition: all 0.2s; white-space: nowrap; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; }
+        .tab-btn { transition: all 0.2s; white-space: nowrap; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; touch-action: manipulation; min-height: 44px; }
         .tab-active { background-color: var(--text-main); color: var(--bg-panel); font-weight: 700; }
         [data-theme="dark"] .tab-active { background: #1a1a1a; color: var(--color-accent); border: 1px solid var(--color-accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 10px rgba(0, 240, 255, 0.05); }
         .tab-inactive { background-color: var(--bg-base); color: var(--text-dim); border: 1px solid var(--border-dim); }
@@ -277,19 +279,30 @@
             border-color: var(--color-accent);
             color: #0a0a0a;
         }
+
+        html.elder-mode {
+            font-size: 1.125rem;
+        }
+        html.elder-mode .theme-panel,
+        html.elder-mode .tab-btn {
+            font-size: 1.02em;
+        }
     </style>
 </head>
-<body class="pb-24 pt-6">
+<body class="pb-[max(6rem,env(safe-area-inset-bottom,0px))] pt-6">
 
-    <nav class="w-full theme-nav border-b fixed top-0 z-50 flex justify-between items-center px-4 md:px-8 py-3 transition-colors">
+    <nav class="w-full theme-nav border-b fixed top-0 z-50 flex justify-between items-center px-3 sm:px-4 md:px-8 py-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] transition-colors">
         <div class="flex items-center gap-4">
             <span class="live-dot"></span>
             <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
             <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-lg font-black tracking-[0.2em] theme-text">戰情室 <span class="theme-text-dim font-mono text-xs">v8.0</span></h1>
+            <h1 class="text-base sm:text-lg font-black tracking-[0.15em] sm:tracking-[0.2em] theme-text truncate max-w-[42vw] sm:max-w-none">戰情室 <span class="theme-text-dim font-mono text-xs">v8.0</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
+            <button type="button" onclick="toggleElderMode()" class="p-1.5 rounded-md theme-border border hover:theme-text transition-colors" title="大字模式（較易閱讀）" id="btn-elder-mode">
+                <span class="text-xs font-mono theme-text-dim">大字</span>
+            </button>
             <button onclick="toggleTheme()" class="p-1.5 rounded-md theme-border border hover:theme-text transition-colors" title="切換深淺模式">
                 <svg id="icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -297,16 +310,85 @@
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto px-4 md:px-6 mt-20">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 mt-20 min-w-0">
 
-        <div class="theme-panel border rounded-xl p-5 md:p-8 transition-colors">
+        <div class="theme-panel border rounded-xl p-4 sm:p-5 md:p-8 transition-colors min-w-0">
 
-            <div id="control-panel" class="mb-6">
-                <div class="flex flex-wrap gap-2 mb-4">
-                    <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
-                    <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
-                    <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
-                    <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">連續買賣</button>
+            <div id="data-freshness-bar" class="text-xs font-mono theme-text-dim border-b theme-border pb-3 mb-4 leading-relaxed"></div>
+
+            <div id="control-panel" class="mb-6 min-w-0">
+                <div class="-mx-1 px-1 mb-4 flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-x-visible pb-1 hide-scrollbar scroll-smooth">
+                    <button type="button" id="mode-tab-home" onclick="setMode('HOME')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">總覽</button>
+                    <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
+                    <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
+                    <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
+                    <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">連續買賣</button>
+                </div>
+                <div id="watchlist-bar" class="rounded-lg border theme-border theme-bg-input p-3 mb-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="font-mono text-xs theme-text-dim uppercase tracking-wider">關注清單（僅存本機瀏覽器）</span>
+                        <button type="button" onclick="exportWatchlistCsv()" class="text-xs font-mono theme-text-dim hover:theme-text">匯出 CSV</button>
+                    </div>
+                    <div id="watchlist-chips" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <input type="text" id="watchlist-input" placeholder="股票代號，例如 2330" maxlength="12" class="theme-bg-base border theme-border rounded-lg px-3 py-2 text-sm font-mono theme-text flex-1 min-w-[8rem] max-w-xs">
+                        <button type="button" onclick="addWatchlistItem()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm">加入</button>
+                        <span class="hidden sm:inline text-[11px] theme-text-dim self-center">點擊關注可開啟個股搜尋</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="home-panel" class="hidden mb-6 space-y-6">
+                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-7">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                        <div>
+                            <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">快速總覽</h2>
+                            <p class="text-sm theme-text-dim mt-1 leading-relaxed">整合：本機籌碼摘要、嵌入的快照指數與財經 RSS（由 <span class="font-mono">fetch_digest.py</span> 每日批次爬取，非即時）。手機開 <span class="font-mono">index.html</span> 或上傳靜態空間皆可，無需 PHP。</p>
+                            <p id="home-digest-meta" class="text-[11px] font-mono theme-text-dim mt-2"></p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="refreshHomeDashboard()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm">重新整理儀表</button>
+                            <button type="button" onclick="setMode('ETF')" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm bg-accent text-white border-accent">進入戰情室（ETF）</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs font-mono theme-text-dim">
+                        <a href="https://www.twse.com.tw/zh/trading/mi-index.html" target="_blank" rel="noopener noreferrer" class="underline hover:theme-text">證交所指數</a>
+                        <span>|</span>
+                        <a href="https://mis.twse.com.tw/stock/index.jsp" target="_blank" rel="noopener noreferrer" class="underline hover:theme-text">公開資訊觀測站</a>
+                        <span>|</span>
+                        <a href="https://www.spglobal.com/spdji/zh/indices/equity/sp-500" target="_blank" rel="noopener noreferrer" class="underline hover:theme-text">S&amp;P DJI</a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">國際／台股指數</h3>
+                        <div id="home-markets-out" class="text-sm min-h-[4rem] theme-text-dim">載入中…</div>
+                        <p id="home-markets-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
+                    </div>
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
+                        <div id="home-news-out" class="text-sm min-h-[4rem] theme-text-dim max-h-[min(55vh,28rem)] overflow-y-auto pr-1">載入中…</div>
+                        <p id="home-news-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                    <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-2">臺股產業／類股指數方塊圖</h3>
+                    <p class="text-xs theme-text-dim mb-3 leading-relaxed">證交所各類指數：<span class="text-buy font-semibold">紅＝漲</span>、<span class="text-sell font-semibold">綠＝跌</span>（相對前一交易日）；方塊愈大表示 |漲跌幅| 愈大。</p>
+                    <div id="home-sector-treemap" class="w-full min-h-[240px] md:min-h-[280px] rounded-lg border theme-border theme-bg-input overflow-hidden"></div>
+                    <p id="home-sector-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">本機資料 · 近1日 全家族買／賣超（金額）</h3>
+                        <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
+                    </div>
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">關注股 · 近5日 淨流摘要（本機 DB）</h3>
+                        <div id="home-watchlist-summary" class="text-sm overflow-x-auto"></div>
+                    </div>
                 </div>
             </div>
 
@@ -344,6 +426,16 @@
                         class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]"
                         autocomplete="off">
                 </div>
+                <div class="w-full sm:w-auto flex flex-col gap-1">
+                    <label class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">比較</label>
+                    <label class="flex items-center gap-2 cursor-pointer text-sm font-mono theme-text whitespace-nowrap">
+                        <input type="checkbox" id="dod-toggle" class="rounded border theme-border" onchange="onDodToggleChange()">
+                        與前一段區間比（整組平移一個交易日）
+                    </label>
+                </div>
+                <div class="flex flex-col justify-end">
+                    <button type="button" onclick="exportCurrentRankCsv()" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border text-sm whitespace-nowrap">匯出排行 CSV</button>
+                </div>
             </div>
 
             <div id="search-mode-panel" class="hidden mb-6">
@@ -351,6 +443,7 @@
                     <div class="text-center mb-6">
                         <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">個股主力追蹤</h2>
                         <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依下方「累計交易日數」與「結束日期」決定<strong class="theme-text font-semibold">交易日</strong>區間（不含週末／休市日），掃描 ETF／分點持倉異動；排序依主畫面「單位」。結束日期留空時以資料庫<strong class="theme-text font-semibold">最新</strong>交易日為基準。</p>
+                        <p class="mt-3 text-xs theme-text-dim leading-relaxed border-t theme-border pt-3">※ 金額欄位優先以 ETF 持股參考價推算，其次為玩股網均價或淨額欄位；與實際成交金額可能不同，僅供參考。</p>
                     </div>
                     <div class="flex flex-wrap items-end justify-center gap-4 mb-4">
                         <div class="min-w-[10rem]">
@@ -386,7 +479,8 @@
 
             <div id="view-momentum" class="hidden mb-6">
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
-                    <h2 class="text-lg md:text-xl font-black theme-text tracking-wide mb-4">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
+                    <h2 class="text-lg md:text-xl font-black theme-text tracking-wide mb-2">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
+                    <p class="text-xs theme-text-dim mb-4 leading-relaxed">※ 以「交易日」連續計算；休市日不會出現在資料中。若某交易日該分點缺 CSV，連續會中斷。金額計價方式與主表相同。</p>
                     <div class="flex flex-wrap gap-2 mb-4">
                         <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-active">【 掃描特定主力 】</button>
                         <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inactive">【 掃描特定個股 】</button>
@@ -423,6 +517,19 @@
             <div id="dashboard-mode-panel">
 
             <div id="broker-map" class="hidden h-64 md:h-80 w-full rounded-xl border theme-border z-10 mb-6 overflow-hidden" aria-hidden="true"></div>
+
+            <div id="kaiji-breakdown-panel" class="hidden mb-6 rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6">
+                <h3 class="text-lg font-bold theme-text mb-2">凱基大聯盟 · 單一股票分點拆解</h3>
+                <p class="text-xs theme-text-dim mb-3 leading-relaxed">區間與上方「天數」「結束日期」相同；列示各分點對該股之淨流加總。若該分點某日缺檔則該日不計。</p>
+                <div class="flex flex-wrap gap-2 mb-3 items-end">
+                    <div class="min-w-[10rem] flex-1 sm:max-w-xs">
+                        <label for="kaiji-breakdown-input" class="block font-mono text-xs theme-text-dim mb-1">股票代號</label>
+                        <input type="text" id="kaiji-breakdown-input" placeholder="例如 2330" maxlength="12" autocomplete="off" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full" onkeydown="if(event.key==='Enter')runKaijiBreakdown()">
+                    </div>
+                    <button type="button" onclick="runKaijiBreakdown()" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">拆解</button>
+                </div>
+                <div id="kaiji-breakdown-out" class="overflow-x-auto rounded-lg border theme-border theme-bg-base min-h-[3rem]"></div>
+            </div>
 
             <div id="header-main" class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
@@ -500,6 +607,10 @@
                     <span class="theme-text-dim opacity-50 mr-2">///</span> AI_ANALYSIS_PROTOCOL
                 </h3>
 
+                <div id="ai-no-key-hint" class="mb-4 p-4 rounded-lg border theme-border theme-bg-input text-sm theme-text-dim leading-relaxed">
+                    本區為<strong class="theme-text font-semibold">選用</strong>：儲存 OpenAI API Key 後可產生較長的基本面分析。未設定時仍可正常使用 ETF／凱基戰情室其餘功能。
+                </div>
+
                 <div class="mb-6 flex flex-wrap gap-3 items-center">
                     <div class="theme-bg-input border rounded-md flex items-center px-3 py-2 transition-colors flex-1 min-w-[250px]">
                         <span class="theme-text-dim font-mono mr-2 text-sm">KEY</span>
@@ -533,8 +644,11 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        const __META__ = __META_JSON__;
+        const __DIGEST__ = __DIGEST_JSON__;
         /* 全域狀態：須在任何 init / 主題回呼之前宣告，避免 let TDZ (Cannot access before initialization) */
         let brokerMap = null;
         let brokerMapBasemapLayer = null;
@@ -547,6 +661,7 @@
         let currentUnit = 'amount';
         let currentDays = 5;
         let etfList = [];
+        let watchlist = [];
 
         const db = __DB_JSON__;
         const brokerLabels = __BROKER_JSON__ || {};
@@ -606,6 +721,15 @@
         }
         etfList.push(AI_TAB);
 
+        function isEtfModeSelection(etf) {
+            if (!etf) return false;
+            return etf === FAMILY_TAB || etf === AI_TAB || etfCodes.indexOf(etf) >= 0;
+        }
+        function isBrokerModeSelection(etf) {
+            if (!etf) return false;
+            return etf === KAIJI_TAB || brokerCodes.indexOf(etf) >= 0;
+        }
+
         currentMode = 'ETF';
         currentETF = FAMILY_TAB;
         currentDate = availableDatesDesc.length > 0 ? availableDatesDesc[0] : '';
@@ -664,9 +788,10 @@
             return c ? (c + '\t' + n) : n;
         }
 
-        function aggregateData(etf, days) {
+        function aggregateData(etf, days, endDateOverride) {
             if (availableDatesDesc.length === 0) return { buy: [], sell: [] };
-            let dateIndex = availableDatesDesc.indexOf(currentDate);
+            const endDate = endDateOverride != null && endDateOverride !== '' ? endDateOverride : currentDate;
+            let dateIndex = availableDatesDesc.indexOf(endDate);
             if (dateIndex === -1) dateIndex = 0;
             const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(days, availableDatesDesc.length - dateIndex));
             const agg = {};
@@ -740,12 +865,14 @@
         ];
 
         function updateModeTabStyles() {
+            const homeBtn = document.getElementById('mode-tab-home');
             const etfBtn = document.getElementById('mode-tab-etf');
             const brokerBtn = document.getElementById('mode-tab-broker');
             const searchBtn = document.getElementById('mode-tab-search');
             const momBtn = document.getElementById('mode-tab-momentum');
             if (!etfBtn || !brokerBtn || !searchBtn) return;
             const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors';
+            if (homeBtn) homeBtn.className = base + ' ' + (currentMode === 'HOME' ? 'tab-active' : 'tab-inactive');
             etfBtn.className = base + ' ' + (currentMode === 'ETF' ? 'tab-active' : 'tab-inactive');
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
             searchBtn.className = base + ' ' + (currentMode === 'SEARCH' ? 'tab-active' : 'tab-inactive');
@@ -837,16 +964,166 @@
             }
         }
 
+        function updateKaijiBreakdownPanelVisibility() {
+            const el = document.getElementById('kaiji-breakdown-panel');
+            if (!el) return;
+            const show = currentMode === 'BROKER' && currentETF === KAIJI_TAB;
+            el.classList.toggle('hidden', !show);
+        }
+
+        function initDataFreshnessBar() {
+            const el = document.getElementById('data-freshness-bar');
+            if (!el) return;
+            const gen = __META__ && __META__.generated_at ? String(__META__.generated_at) : '';
+            const thru = __META__ && __META__.data_through ? String(__META__.data_through) : '';
+            const parts = [];
+            if (thru) parts.push('資料最新交易日：<span class="theme-text">' + escapeHtmlText(thru) + '</span>');
+            if (gen) parts.push('頁面產生時間：<span class="theme-text">' + escapeHtmlText(gen) + '</span>');
+            el.innerHTML = parts.length ? parts.join('　') : '<span class="theme-text-dim">（無 metadata）</span>';
+        }
+
+        function toggleElderMode() {
+            document.documentElement.classList.toggle('elder-mode');
+            const on = document.documentElement.classList.contains('elder-mode');
+            try {
+                localStorage.setItem('elderMode', on ? '1' : '0');
+            } catch (e) {}
+        }
+
+        function onDodToggleChange() {
+            const el = document.getElementById('dod-toggle');
+            try {
+                localStorage.setItem('dodCompare', el && el.checked ? '1' : '0');
+            } catch (e) {}
+            refreshTable();
+        }
+
+        function loadWatchlist() {
+            try {
+                const raw = localStorage.getItem('watchlistCodes');
+                if (raw) {
+                    const a = JSON.parse(raw);
+                    if (Array.isArray(a)) {
+                        return a.map(function(x) { return String(x).trim(); }).filter(Boolean);
+                    }
+                }
+            } catch (e) {}
+            return [];
+        }
+
+        function saveWatchlist() {
+            try {
+                localStorage.setItem('watchlistCodes', JSON.stringify(watchlist));
+            } catch (e) {}
+        }
+
+        function renderWatchlist() {
+            const box = document.getElementById('watchlist-chips');
+            if (!box) return;
+            if (!watchlist.length) {
+                box.innerHTML = '<span class="text-xs theme-text-dim font-mono">尚無關注標的</span>';
+                return;
+            }
+            box.innerHTML = watchlist.map(function(code) {
+                const c = escapeHtmlText(code);
+                return '<button type="button" class="pill-btn pill-btn-idle text-sm py-1 px-3" data-watch-code="' + c.replace(/"/g, '&quot;') + '">' + c + '</button>';
+            }).join('');
+        }
+
+        function addWatchlistItem() {
+            const inp = document.getElementById('watchlist-input');
+            if (!inp) return;
+            const raw = String(inp.value || '').trim().replace(/\s+/g, '');
+            if (!raw) return;
+            if (watchlist.indexOf(raw) === -1) {
+                watchlist.push(raw);
+                saveWatchlist();
+                renderWatchlist();
+                if (currentMode === 'HOME') {
+                    renderHomeWatchlistSummary();
+                }
+            }
+            inp.value = '';
+        }
+
+        function openWatchlistCode(code) {
+            if (!code) return;
+            setMode('SEARCH');
+            const inp = document.getElementById('stock-reverse-input');
+            if (inp) inp.value = code;
+            runStockReverseSearch();
+        }
+
+        function csvEscapeCell(s) {
+            const t = String(s == null ? '' : s);
+            if (/[",\n\r]/.test(t)) return '"' + t.replace(/"/g, '""') + '"';
+            return t;
+        }
+
+        function exportWatchlistCsv() {
+            const lines = ['code'].concat(watchlist.map(function(c) { return csvEscapeCell(c); }));
+            const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'watchlist.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function exportCurrentRankCsv() {
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentETF === AI_TAB) {
+                alert('請先切換到 ETF／分點模式並選擇標的（非 AI）');
+                return;
+            }
+            const agg = aggregateData(currentETF, currentDays);
+            const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
+            const buy = agg.buy.slice().sort(function(a, b) { return (b[sortBy] || 0) - (a[sortBy] || 0); });
+            const sell = agg.sell.slice().sort(function(a, b) { return (b[sortBy] || 0) - (a[sortBy] || 0); });
+            const unitLabel = currentUnit === 'amount' ? '淨額_萬' : '淨張數';
+            const rows = [['類型', '排名', '名稱', '代號', '產業', unitLabel].map(csvEscapeCell).join(',')];
+            buy.forEach(function(item, i) {
+                const v = currentUnit === 'amount' ? (item.amount || 0) : (item.diff || 0);
+                rows.push([csvEscapeCell('買超'), String(i + 1), csvEscapeCell(item.name), csvEscapeCell(item.code), csvEscapeCell(item.sector || ''), String(v)].join(','));
+            });
+            sell.forEach(function(item, i) {
+                const v = currentUnit === 'amount' ? (item.amount || 0) : (item.diff || 0);
+                rows.push([csvEscapeCell('賣超'), String(i + 1), csvEscapeCell(item.name), csvEscapeCell(item.code), csvEscapeCell(item.sector || ''), String(v)].join(','));
+            });
+            const blob = new Blob(['\ufeff' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'rank_' + currentETF + '_' + (currentDate || 'nodate') + '.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
         function setMode(mode) {
-            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM') return;
+            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM' && mode !== 'HOME') return;
             if (mode === currentMode) return;
             currentMode = mode;
+            try {
+                localStorage.setItem('lastMode', mode);
+            } catch (e) {}
             updateModeTabStyles();
             const dashPanel = document.getElementById('dashboard-mode-panel');
             const searchPanel = document.getElementById('search-mode-panel');
             const momentumPanel = document.getElementById('view-momentum');
             const pillsSection = document.getElementById('section-pills');
             const tfrRow = document.getElementById('timeframe-unit-row');
+            const homePanel = document.getElementById('home-panel');
+            if (mode === 'HOME') {
+                if (pillsSection) pillsSection.classList.add('hidden');
+                if (tfrRow) tfrRow.classList.add('hidden');
+                if (dashPanel) dashPanel.classList.add('hidden');
+                if (searchPanel) searchPanel.classList.add('hidden');
+                if (momentumPanel) momentumPanel.classList.add('hidden');
+                if (homePanel) homePanel.classList.remove('hidden');
+                ensureBrokerMapVisibleAndSync();
+                updateKaijiBreakdownPanelVisibility();
+                refreshHomeDashboard();
+                return;
+            }
+            if (homePanel) homePanel.classList.add('hidden');
             if (mode === 'SEARCH') {
                 if (pillsSection) pillsSection.classList.add('hidden');
                 if (tfrRow) tfrRow.classList.add('hidden');
@@ -857,6 +1134,7 @@
                 if (srt) srt.value = String(currentDays);
                 updateDashboardTitleDateRange();
                 runStockReverseSearch();
+                updateKaijiBreakdownPanelVisibility();
                 return;
             }
             if (mode === 'MOMENTUM') {
@@ -865,6 +1143,7 @@
                 if (dashPanel) dashPanel.classList.add('hidden');
                 if (searchPanel) searchPanel.classList.add('hidden');
                 if (momentumPanel) momentumPanel.classList.remove('hidden');
+                updateKaijiBreakdownPanelVisibility();
                 return;
             }
             if (pillsSection) pillsSection.classList.remove('hidden');
@@ -873,9 +1152,21 @@
             if (searchPanel) searchPanel.classList.add('hidden');
             if (momentumPanel) momentumPanel.classList.add('hidden');
             if (mode === 'ETF') {
-                currentETF = FAMILY_TAB;
+                try {
+                    const le = localStorage.getItem('lastETF');
+                    if (le && etfList.includes(le) && isEtfModeSelection(le)) currentETF = le;
+                    else currentETF = FAMILY_TAB;
+                } catch (e) {
+                    currentETF = FAMILY_TAB;
+                }
             } else {
-                currentETF = KAIJI_TAB;
+                try {
+                    const le = localStorage.getItem('lastETF');
+                    if (le && etfList.includes(le) && isBrokerModeSelection(le)) currentETF = le;
+                    else currentETF = KAIJI_TAB;
+                } catch (e) {
+                    currentETF = KAIJI_TAB;
+                }
             }
             renderTargetPills();
             onETFChange();
@@ -883,6 +1174,9 @@
 
         function selectTarget(etf) {
             currentETF = etf;
+            try {
+                localStorage.setItem('lastETF', etf);
+            } catch (e) {}
             onETFChange();
         }
 
@@ -927,7 +1221,7 @@
         }
 
         function onETFChange() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
             const searchInp = document.getElementById('search-input');
             if (searchInp) searchInp.value = '';
             const isAI = currentETF === AI_TAB;
@@ -951,6 +1245,7 @@
             }
             updatePillActiveState();
             ensureBrokerMapVisibleAndSync();
+            updateKaijiBreakdownPanelVisibility();
         }
 
         function onTimeframeChange() {
@@ -1027,7 +1322,7 @@
         function updateDashboardTitleDateRange() {
             const el = document.getElementById('dashboard-title-date-range');
             if (!el) return;
-            if (currentMode === 'SEARCH' || currentETF === AI_TAB) {
+            if (currentMode === 'SEARCH' || currentETF === AI_TAB || currentMode === 'HOME') {
                 el.textContent = '';
                 el.classList.add('hidden');
                 return;
@@ -1121,6 +1416,13 @@
             });
         }
 
+        function updateAiNoKeyHint() {
+            const hint = document.getElementById('ai-no-key-hint');
+            if (!hint) return;
+            const hasKey = !!localStorage.getItem('openai_api_key');
+            hint.classList.toggle('hidden', hasKey);
+        }
+
         function initApiKey() {
             const key = localStorage.getItem('openai_api_key');
             if (key) {
@@ -1131,6 +1433,7 @@
                 document.getElementById('api-key-status').textContent = "STATUS: NO_KEY";
                 document.getElementById('api-key-status').className = "font-mono text-xs ml-2 theme-text-dim";
             }
+            updateAiNoKeyHint();
         }
 
         function saveApiKey() {
@@ -1144,11 +1447,32 @@
                 document.getElementById('api-key-status').textContent = "STATUS: KEY_CLEARED";
                 document.getElementById('api-key-status').className = "font-mono text-xs ml-2 text-sell";
             }
+            updateAiNoKeyHint();
         }
 
         function init() {
+            try {
+                if (localStorage.getItem('elderMode') === '1') {
+                    document.documentElement.classList.add('elder-mode');
+                }
+            } catch (e) {}
+
+            const dodEl = document.getElementById('dod-toggle');
+            if (dodEl) {
+                try {
+                    dodEl.checked = localStorage.getItem('dodCompare') === '1';
+                } catch (e) {}
+            }
+
             currentMode = 'ETF';
             currentETF = FAMILY_TAB;
+            try {
+                const le = localStorage.getItem('lastETF');
+                if (le && etfList.includes(le)) {
+                    currentETF = le;
+                }
+            } catch (e) {}
+
             if (availableDatesDesc.length > 0) {
                 currentDate = availableDatesDesc[0];
             } else {
@@ -1166,7 +1490,39 @@
             setUnit(currentUnit);
             const titleEl = document.getElementById('current-etf-title');
             if (titleEl) titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
-            onETFChange();
+
+            initDataFreshnessBar();
+            watchlist = loadWatchlist();
+            renderWatchlist();
+            const wc = document.getElementById('watchlist-chips');
+            if (wc) {
+                wc.addEventListener('click', function(e) {
+                    const btn = e.target.closest('[data-watch-code]');
+                    if (!btn) return;
+                    openWatchlistCode(btn.getAttribute('data-watch-code'));
+                });
+            }
+            const wInp = document.getElementById('watchlist-input');
+            if (wInp) {
+                wInp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') addWatchlistItem();
+                });
+            }
+
+            let lm = 'ETF';
+            try {
+                const x = localStorage.getItem('lastMode');
+                if (x === 'HOME' || x === 'ETF' || x === 'BROKER' || x === 'SEARCH' || x === 'MOMENTUM') {
+                    lm = x;
+                }
+            } catch (e) {}
+
+            if (lm !== 'ETF') {
+                setMode(lm);
+            } else {
+                onETFChange();
+            }
+
             initApiKey();
             const sri = document.getElementById('stock-reverse-input');
             if (sri) {
@@ -1180,6 +1536,19 @@
                 });
             }
             initMomentumUI();
+
+            let sectorTreemapResizeTimer;
+            function onSectorTreemapResize() {
+                if (currentMode !== 'HOME') return;
+                clearTimeout(sectorTreemapResizeTimer);
+                sectorTreemapResizeTimer = setTimeout(function() {
+                    if (typeof renderSectorTreemapFromDigest === 'function') renderSectorTreemapFromDigest();
+                }, 150);
+            }
+            window.addEventListener('resize', onSectorTreemapResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onSectorTreemapResize);
+            }
         }
 
         function getActorLabelForReverseSearch(actorKey) {
@@ -1280,7 +1649,13 @@
 
         function netFlowForStockInBucket(bucket, code, name) {
             if (!bucket) return { netDiff: 0, netAmount: 0 };
-            const match = function(item) { return momentumSameStockItem(item, code, name); };
+            const c = String(code || '').trim();
+            const n = String(name || '').trim();
+            const match = function(item) {
+                if (String(item.code || '').trim() !== c) return false;
+                if (!n) return true;
+                return String(item.name || '') === n;
+            };
             let netD = 0;
             let netA = 0;
             (bucket.new_buy || []).filter(match).forEach(function(i) {
@@ -1312,6 +1687,278 @@
                 });
             });
             return Array.from(map.values());
+        }
+
+        function findStockNameForCode(code) {
+            const c = String(code || '').trim();
+            if (!c) return '';
+            for (let di = 0; di < availableDatesDesc.length; di++) {
+                const dayData = db[availableDatesDesc[di]];
+                if (!dayData) continue;
+                const keys = Object.keys(dayData);
+                for (let ki = 0; ki < keys.length; ki++) {
+                    const bucket = dayData[keys[ki]];
+                    if (!bucket) continue;
+                    const stocks = collectStocksFromActorDay(bucket);
+                    for (let si = 0; si < stocks.length; si++) {
+                        const s = stocks[si];
+                        if (String(s.code || '').trim() === c) return String(s.name || '').trim();
+                    }
+                }
+            }
+            return '';
+        }
+
+        function runKaijiBreakdown() {
+            const inp = document.getElementById('kaiji-breakdown-input');
+            const out = document.getElementById('kaiji-breakdown-out');
+            if (!inp || !out) return;
+            const raw = String(inp.value || '').trim();
+            if (!raw) {
+                out.innerHTML = '<div class="p-4 text-sm theme-text-dim">請輸入股票代號</div>';
+                return;
+            }
+            const code = raw.replace(/\s+/g, '');
+            const nameGuess = findStockNameForCode(code);
+            let dateIndex = availableDatesDesc.indexOf(currentDate);
+            if (dateIndex === -1) dateIndex = 0;
+            const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(currentDays, availableDatesDesc.length - dateIndex));
+            const rows = [];
+            brokerCodes.filter(function(b) { return allKeys.has(b); }).forEach(function(bid) {
+                let netD = 0;
+                let netA = 0;
+                dateSlice.forEach(function(d) {
+                    const dayData = db[d];
+                    if (!dayData || !dayData[bid]) return;
+                    const f = netFlowForStockInBucket(dayData[bid], code, nameGuess);
+                    netD += f.netDiff;
+                    netA += f.netAmount;
+                });
+                rows.push({ bid: bid, netD: netD, netA: netA });
+            });
+            rows.sort(function(a, b) { return Math.abs(b.netD) - Math.abs(a.netD); });
+            const head = '<table class="w-full text-sm min-w-[320px]"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-2 font-mono">分點</th><th class="text-right py-2 px-2 font-mono">淨張</th><th class="text-right py-2 px-2 font-mono">淨額(萬)</th></tr></thead><tbody>';
+            const body = rows.map(function(r) {
+                const label = brokerLabels[r.bid] ? (r.bid + ' ' + brokerLabels[r.bid]) : r.bid;
+                return '<tr class="border-b theme-border"><td class="py-2 px-2">' + escapeHtmlText(label) + '</td><td class="py-2 px-2 text-right font-mono">' + (r.netD >= 0 ? '+' : '') + r.netD.toLocaleString() + '</td><td class="py-2 px-2 text-right font-mono">' + formatAmountNetDisplayHtml(r.netA) + '</td></tr>';
+            }).join('');
+            out.innerHTML = head + body + '</tbody></table>';
+        }
+
+        function renderHomeHotStocks() {
+            const el = document.getElementById('home-hot-out');
+            if (!el) return;
+            if (!availableDatesDesc.length) {
+                el.innerHTML = '<p class="theme-text-dim text-sm">尚無本機交易日資料。</p>';
+                return;
+            }
+            const agg = aggregateData(FAMILY_TAB, 1);
+            const buy = agg.buy.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 5);
+            const sell = agg.sell.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 5);
+            function row(item, isBuy) {
+                const nm = escapeHtmlText(item.name || '—');
+                const cd = item.code ? '<span class="font-mono text-[10px] theme-text-dim ml-1">' + escapeHtmlText(String(item.code)) + '</span>' : '';
+                const v = formatAmount(item.amount || 0);
+                const cls = isBuy ? 'text-buy' : 'text-sell';
+                return '<tr class="border-b theme-border"><td class="py-1.5 pr-2">' + nm + cd + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
+            }
+            const head = '<table class="w-full text-sm min-w-[240px] table-fixed"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">買超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">賣超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const bHtml = buy.length ? buy.map(function(i) { return row(i, true); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
+            const sHtml = sell.length ? sell.map(function(i) { return row(i, false); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
+            el.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">' +
+                '<div class="min-w-0">' + head + bHtml + '</tbody></table></div>' +
+                '<div class="min-w-0">' + head2 + sHtml + '</tbody></table></div></div>' +
+                '<p class="text-[11px] theme-text-dim mt-2">依本機 JSON 資料庫「全家族共識」近 1 交易日彙總；與實際成交可能不同。</p>';
+        }
+
+        function renderHomeWatchlistSummary() {
+            const el = document.getElementById('home-watchlist-summary');
+            if (!el) return;
+            if (!watchlist.length) {
+                el.innerHTML = '<p class="theme-text-dim text-sm">尚未加入關注股；於上方輸入代號後按「加入」。</p>';
+                return;
+            }
+            const agg = aggregateData(FAMILY_TAB, 5);
+            const map = new Map();
+            agg.buy.forEach(function(i) { map.set(aggregateRowKey(i), { item: i, side: 'buy' }); });
+            agg.sell.forEach(function(i) { map.set(aggregateRowKey(i), { item: i, side: 'sell' }); });
+            const rows = watchlist.map(function(code) {
+                const c = String(code).trim();
+                let hit = null;
+                map.forEach(function(v, k) {
+                    if (hit) return;
+                    if (String(v.item.code || '').trim() === c) hit = v;
+                });
+                const name = findStockNameForCode(c) || '—';
+                if (!hit) {
+                    return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right theme-text-dim">區間內無共識列</td></tr>';
+                }
+                const it = hit.item;
+                const isBuy = hit.side === 'buy';
+                const cls = isBuy ? 'text-buy' : 'text-sell';
+                const val = formatAmount(it.amount || 0);
+                const sg = isBuy ? '+ ' : '− ';
+                return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + sg + val + '</td></tr>';
+            });
+            el.innerHTML = '<table class="w-full text-sm min-w-[280px]"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs">代號</th><th class="text-left py-2 px-1 font-mono text-xs">名稱</th><th class="text-right py-2 px-1 font-mono text-xs">淨額(萬)</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>' +
+                '<p class="text-[11px] theme-text-dim mt-2">點關注 chip 可開啟個股搜尋；此表為全家族共識近 5 交易日加總。</p>';
+        }
+
+        function renderHomeMarketsFromJson(j) {
+            const out = document.getElementById('home-markets-out');
+            const disc = document.getElementById('home-markets-disclaimer');
+            if (!out) return;
+            if (!j || !j.ok || !j.items || !j.items.length) {
+                out.innerHTML = '<p class="text-buy font-mono text-sm">' + escapeHtmlText((j && j.error) || '無指數資料（請先執行 fetch_digest.py 再 generate_web.py）。') + '</p>';
+                if (disc) { disc.classList.add('hidden'); disc.textContent = ''; }
+                return;
+            }
+            if (disc) {
+                disc.textContent = j.disclaimer || '';
+                disc.classList.toggle('hidden', !j.disclaimer);
+            }
+            const cards = j.items.map(function(it) {
+                const label = escapeHtmlText(it.label || it.symbol || '—');
+                const note = it.note ? '<div class="text-[10px] theme-text-dim mt-1">' + escapeHtmlText(it.note) + '</div>' : '';
+                let mid = '';
+                if (it.price == null || it.price === '') {
+                    mid = '<div class="text-lg font-mono theme-text-dim">—</div>';
+                } else if (it.source === 'twse') {
+                    mid = '<div class="text-lg font-bold theme-text tabular-nums">' + escapeHtmlText(String(it.price)) + '</div>' +
+                        '<div class="text-xs font-mono text-buy mt-0.5">Δ ' + escapeHtmlText(String(it.change || '')) + '　' + escapeHtmlText(String(it.changePercent || '')) + '</div>';
+                } else {
+                    const pct = parseFloat(String(it.changePercent).replace(',', '.'));
+                    const pctCls = !isNaN(pct) && pct > 0 ? 'text-buy' : (!isNaN(pct) && pct < 0 ? 'text-sell' : 'theme-text-dim');
+                    const cnote = it.changeNote ? '<span class="text-[10px] theme-text-dim ml-1">(' + escapeHtmlText(it.changeNote) + ')</span>' : '';
+                    mid = '<div class="text-lg font-bold theme-text tabular-nums">' + escapeHtmlText(String(it.price)) + ' <span class="text-xs font-mono theme-text-dim">' + escapeHtmlText(it.currency || '') + '</span></div>' +
+                        '<div class="text-xs font-mono ' + pctCls + ' mt-0.5">' + escapeHtmlText(String(it.change || '')) + '　' + escapeHtmlText(String(it.changePercent)) + '% ' + cnote + '</div>';
+                }
+                const asOf = it.asOf ? '<div class="text-[10px] theme-text-dim mt-1 font-mono">' + escapeHtmlText(String(it.asOf)) + '</div>' : '';
+                return '<div class="rounded-lg border theme-border theme-bg-input p-3 h-full min-h-[5.5rem]">' +
+                    '<div class="font-mono text-[11px] theme-text-dim mb-1">' + label + '</div>' + mid + note + asOf + '</div>';
+            });
+            out.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">' + cards.join('') + '</div>';
+        }
+
+        function treemapThemeFill(up) {
+            const v = getComputedStyle(document.documentElement).getPropertyValue(up ? '--color-buy' : '--color-sell').trim();
+            return v || (up ? '#dc2626' : '#059669');
+        }
+
+        function renderSectorTreemapFromDigest() {
+            const container = document.getElementById('home-sector-treemap');
+            const disc = document.getElementById('home-sector-disclaimer');
+            if (!container) return;
+            const sec = (typeof __DIGEST__ !== 'undefined' && __DIGEST__) ? __DIGEST__.sectors : null;
+            if (!sec || !sec.ok || !sec.items || !sec.items.length) {
+                container.innerHTML = '<p class="text-sm theme-text-dim p-4">' + escapeHtmlText((sec && sec.error) || '尚無產業類資料（請執行 fetch_digest.py 後再 generate_web.py）') + '</p>';
+                if (disc) { disc.classList.add('hidden'); disc.textContent = ''; }
+                return;
+            }
+            if (disc) {
+                disc.textContent = (sec.disclaimer || '') + (sec.asOf ? '　資料日：' + sec.asOf : '');
+                disc.classList.remove('hidden');
+            }
+            if (typeof d3 === 'undefined' || !d3.treemap) {
+                container.innerHTML = '<p class="text-sm text-buy p-4">d3 未載入，無法繪製方塊圖</p>';
+                return;
+            }
+            const items = sec.items;
+            const children = items.map(function(d) {
+                return { name: d.shortName || d.name, value: Math.max(d.absPct || 0.01, 0.01), raw: d };
+            });
+            const root = d3.hierarchy({ children: children }).sum(function(d) { return d.children ? 0 : d.value; });
+            const w = Math.max(280, container.clientWidth || 560);
+            const h = Math.min(380, Math.max(220, Math.round(w * 0.42)));
+            container.innerHTML = '';
+            const svg = d3.select(container).append('svg')
+                .attr('viewBox', '0 0 ' + w + ' ' + h)
+                .attr('width', '100%')
+                .attr('height', h)
+                .attr('class', 'block');
+            d3.treemap().size([w, h]).paddingOuter(2).paddingInner(2).round(true)(root);
+            const leaf = svg.selectAll('g').data(root.leaves()).enter().append('g')
+                .attr('transform', function(d) { return 'translate(' + d.x0 + ',' + d.y0 + ')'; });
+            leaf.append('rect')
+                .attr('width', function(d) { return Math.max(0, d.x1 - d.x0); })
+                .attr('height', function(d) { return Math.max(0, d.y1 - d.y0); })
+                .attr('fill', function(d) { return treemapThemeFill(!!d.data.raw.up); })
+                .attr('opacity', 0.88)
+                .attr('stroke', 'var(--border-dim)')
+                .attr('stroke-width', 1);
+            leaf.each(function(d) {
+                const rw = d.data.raw;
+                const cw = d.x1 - d.x0;
+                const ch = d.y1 - d.y0;
+                const g = d3.select(this);
+                if (cw < 36 || ch < 22) return;
+                const label = String(rw.shortName || rw.name || '').slice(0, 10);
+                const pct = (rw.changePct >= 0 ? '+' : '') + rw.changePct + '%';
+                const fs = Math.min(12, Math.max(9, cw / 7));
+                g.append('text')
+                    .attr('x', 4)
+                    .attr('y', fs + 1)
+                    .attr('fill', '#ffffff')
+                    .style('font-size', fs + 'px')
+                    .style('font-weight', '700')
+                    .style('text-shadow', '0 1px 2px rgba(0,0,0,0.55)')
+                    .text(label);
+                if (ch > 36) {
+                    g.append('text')
+                        .attr('x', 4)
+                        .attr('y', fs + 16)
+                        .attr('fill', '#ffffff')
+                        .style('font-size', Math.max(9, fs - 1) + 'px')
+                        .style('opacity', '0.95')
+                        .style('text-shadow', '0 1px 2px rgba(0,0,0,0.55)')
+                        .text(pct);
+                }
+            });
+        }
+
+        function renderHomeNewsFromJson(j) {
+            const out = document.getElementById('home-news-out');
+            const disc = document.getElementById('home-news-disclaimer');
+            if (!out) return;
+            if (!j || !j.ok || !j.items || !j.items.length) {
+                out.innerHTML = '<p class="text-sm theme-text-dim">' + escapeHtmlText((j && j.error) || '無新聞資料（請先執行 fetch_digest.py 再 generate_web.py）。') + '</p>';
+                if (disc) { disc.classList.add('hidden'); disc.textContent = ''; }
+                return;
+            }
+            if (disc) {
+                disc.textContent = j.disclaimer || '';
+                disc.classList.toggle('hidden', !j.disclaimer);
+            }
+            const lines = j.items.map(function(it) {
+                const t = escapeHtmlText(it.title || '');
+                const u = escapeHtmlText(it.link || '#');
+                const src = escapeHtmlText(it.source || '');
+                const pub = it.published ? '<span class="text-[10px] theme-text-dim font-mono ml-1">' + escapeHtmlText(it.published) + '</span>' : '';
+                return '<a href="' + u + '" target="_blank" rel="noopener noreferrer" class="block py-2.5 border-b theme-border last:border-0 row-hover rounded px-1 -mx-1">' +
+                    '<span class="theme-text font-medium leading-snug">' + t + '</span>' +
+                    '<div class="text-[11px] theme-text-dim mt-1 font-mono">' + src + pub + '</div></a>';
+            });
+            out.innerHTML = lines.join('');
+        }
+
+        function updateHomeDigestStamp() {
+            const el = document.getElementById('home-digest-meta');
+            if (!el || typeof __DIGEST__ === 'undefined') return;
+            const t = __DIGEST__.fetchedAt;
+            el.textContent = t
+                ? '快照時間（爬蟲）：' + t + '　（與頁面產生時間不同屬正常）'
+                : '尚未有快照：請於電腦執行 python3 fetch_digest.py 後再執行 generate_web.py';
+        }
+
+        function refreshHomeDashboard() {
+            renderHomeHotStocks();
+            renderHomeWatchlistSummary();
+            updateHomeDigestStamp();
+            const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
+            renderHomeMarketsFromJson(d.markets || { ok: false, items: [], error: '無 markets 資料' });
+            renderHomeNewsFromJson(d.news || { ok: false, items: [], error: '無 news 資料' });
+            requestAnimationFrame(function() { renderSectorTreemapFromDigest(); });
         }
 
         /** 該分點在可查區間內曾出現過的股票（跨所有交易日合併），避免僅基準日有列才掃得到 */
@@ -1757,12 +2404,41 @@
         }
 
         function refreshTable() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
             if (currentETF === AI_TAB) return;
             const { buy, sell } = aggregateData(currentETF, currentDays);
             const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
             buy.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
             sell.sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+
+            const dodEl = document.getElementById('dod-toggle');
+            const dodOn = !!(dodEl && dodEl.checked);
+            let buyPrevMap = new Map();
+            let sellPrevMap = new Map();
+            let prevWindowEnd = null;
+            if (dodOn) {
+                const idx = availableDatesDesc.indexOf(currentDate);
+                if (idx >= 0 && idx + 1 < availableDatesDesc.length) {
+                    prevWindowEnd = availableDatesDesc[idx + 1];
+                    const prevAgg = aggregateData(currentETF, currentDays, prevWindowEnd);
+                    prevAgg.buy.forEach(function(i) { buyPrevMap.set(aggregateRowKey(i), i); });
+                    prevAgg.sell.forEach(function(i) { sellPrevMap.set(aggregateRowKey(i), i); });
+                }
+            }
+            function deltaLineHtml(item, prevMap, isBuySide) {
+                if (!dodOn || !prevWindowEnd) return '';
+                const p = prevMap.get(aggregateRowKey(item));
+                if (!p) return '<div class="text-[10px] theme-text-dim mt-0.5 font-mono">較前區間：無同列</div>';
+                const curV = currentUnit === 'amount' ? (item.amount || 0) : (item.diff || 0);
+                const prevV = currentUnit === 'amount' ? (p.amount || 0) : (p.diff || 0);
+                const d = curV - prevV;
+                if (Math.abs(d) < 1e-9) return '<div class="text-[10px] theme-text-dim mt-0.5 font-mono">較前區間：相同</div>';
+                const cls = d > 0 ? 'text-buy' : 'text-sell';
+                const txt = currentUnit === 'amount'
+                    ? ((d > 0 ? '+' : '−') + formatAmount(Math.abs(d)))
+                    : ((d > 0 ? '+' : '') + d.toLocaleString() + ' 張');
+                return '<div class="text-[10px] ' + cls + ' mt-0.5 font-mono">Δ 較前區間 ' + txt + '</div>';
+            }
 
             const emptyState = document.getElementById('empty-state');
             const dataContainer = document.getElementById('data-table-container');
@@ -1792,17 +2468,17 @@
                         if (!dayData) return;
                         [...(dayData.increased || []), ...(dayData.new_buy || [])].forEach(i => {
                             if ((i.diff || 0) > 0) {
-                                const key = i.name;
+                                const key = aggregateRowKey(i);
                                 if (!stockBrokerCount[key]) stockBrokerCount[key] = new Set();
                                 stockBrokerCount[key].add(b);
                             }
                         });
                     });
                 });
-                const highConsensusNames = Object.entries(stockBrokerCount).filter(([, brokers]) => brokers.size >= 3).map(([n]) => n);
+                const highConsensusKeys = Object.entries(stockBrokerCount).filter(([, brokers]) => brokers.size >= 3).map(([k]) => k);
                 const buyMap = {};
-                buy.forEach(i => { buyMap[i.name] = i; });
-                const consensusItems = highConsensusNames.filter(n => buyMap[n]).map(n => buyMap[n]);
+                buy.forEach(i => { buyMap[aggregateRowKey(i)] = i; });
+                const consensusItems = highConsensusKeys.filter(k => buyMap[k]).map(k => buyMap[k]);
                 if (consensusItems.length > 0) {
                     consensusContainer.classList.remove('hidden');
                     consensusList.innerHTML = consensusItems.map(i => {
@@ -1850,14 +2526,16 @@
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const detail = formatBrokerBuySellDetailLine(item);
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${detail}</div></td></tr>`;
+                const dod = deltaLineHtml(item, buyPrevMap, true);
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
 
             const sellTbody = document.getElementById('sell-rank-tbody');
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const detail = formatBrokerBuySellDetailLine(item);
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${detail}</div></td></tr>`;
+                const dod = deltaLineHtml(item, sellPrevMap, false);
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
         }
 
@@ -1869,7 +2547,7 @@
         }
 
         function handleSearch() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
             const inp = document.getElementById('search-input');
             if (!inp) return;
             const val = inp.value.trim().toLowerCase();
