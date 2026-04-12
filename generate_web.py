@@ -3,7 +3,7 @@
 1. 前後端分離：HTML 模板抽離至 template.html
 2. Pandas 效能優化：set_index O(1) 查找、向量化運算
 3. AI Agent 錯誤處理強化：HTTP 401/429/500 友善提示
-4. Chart.js 圖表預留：見 template.html
+4. Chart.js：template.html 以 __HOLDINGS_TREND_JSON__ 嵌入持股／分點歷史序列
 """
 
 import os
@@ -20,6 +20,8 @@ from broker_config import BROKER_LIST
 HISTORY_DIR = "history"
 OUTPUT_FILE = "index.html"
 TEMPLATE_FILE = "template.html"
+# 每檔股票走勢序列最多保留筆數（依交易日），避免嵌入 HTML 過大
+MAX_TREND_POINTS = 252
 
 SECTOR_MAP = {
     "台積電": "半導體", "聯發科": "半導體", "京元電": "半導體", "日月光投控": "半導體", "瑞昱": "半導體", "聯電": "半導體", "世芯-KY": "半導體", "力旺": "半導體", "聯詠": "半導體", "南亞科": "半導體", "欣銓": "半導體", "精測": "半導體", "穎崴": "半導體", "旺矽": "半導體", "群聯": "半導體",
@@ -371,11 +373,9 @@ def process_etf_file(
             print(f"處理 {curr_file} 失敗: {e}")
 
 
-def process_all_data() -> dict:
+def collect_file_map() -> dict[str, list[tuple[str, str]]]:
+    """history 目錄下 CSV：{ 標的代碼: [(日期字串, 路徑), ...] }。"""
     all_files = glob.glob(os.path.join(HISTORY_DIR, "*.csv"))
-    if not all_files:
-        return {}
-
     file_map: dict[str, list[tuple[str, str]]] = {}
     for f in all_files:
         basename = Path(f).stem
@@ -385,6 +385,80 @@ def process_all_data() -> dict:
             if code not in file_map:
                 file_map[code] = []
             file_map[code].append((date_str, f))
+    return file_map
+
+
+def build_holdings_trend_series(file_map: dict[str, list[tuple[str, str]]]) -> dict:
+    """從原始 CSV 建立持股／分點淨張時間序列，供前端 Chart.js（與單日 diff 資料庫互補）。"""
+    out_etf: dict = {}
+    out_broker: dict = {}
+    for etf_code, files in file_map.items():
+        files_sorted = sorted(files, key=lambda x: x[0])
+        if etf_code in BROKER_LIST:
+            acc: dict[str, dict] = {}
+            for date_str, fpath in files_sorted:
+                try:
+                    df = pd.read_csv(fpath, dtype={"code": str})
+                    if "net_shares" not in df.columns:
+                        continue
+                    df["net_shares"] = pd.to_numeric(df["net_shares"], errors="coerce").fillna(0).astype(int)
+                    if "name" in df.columns:
+                        df["name"] = df["name"].apply(
+                            lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
+                        )
+                    for _, row in df.iterrows():
+                        code_val = str(row.get("code", "") or "").strip()
+                        if not code_val:
+                            continue
+                        c_name = clean_stock_name(row.get("name", ""))
+                        sec = SECTOR_MAP.get(c_name, "其他")
+                        net = _scalar_int(row.get("net_shares", 0), 0)
+                        if code_val not in acc:
+                            acc[code_val] = {"n": c_name, "sec": sec, "pts": []}
+                        acc[code_val]["pts"].append({"d": date_str, "n": net})
+                except Exception as e:
+                    print(f"趨勢序列 分點 {etf_code} {fpath}: {e}")
+            for _k, v in acc.items():
+                v["pts"] = v["pts"][-MAX_TREND_POINTS:]
+            out_broker[etf_code] = acc
+        else:
+            acc = {}
+            for date_str, fpath in files_sorted:
+                try:
+                    df = pd.read_csv(fpath, dtype={"code": str})
+                    if "code" not in df.columns or "shares" not in df.columns:
+                        continue
+                    df["shares"] = pd.to_numeric(df["shares"], errors="coerce").fillna(0)
+                    if "weight" not in df.columns:
+                        df["weight"] = 0.0
+                    df["weight"] = pd.to_numeric(df["weight"], errors="coerce").fillna(0.0)
+                    if "name" in df.columns:
+                        df["name"] = df["name"].apply(
+                            lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
+                        )
+                    for _, row in df.iterrows():
+                        c = str(row.get("code", "") or "").strip()
+                        if not c:
+                            continue
+                        c_name = clean_stock_name(row.get("name", ""))
+                        sec = SECTOR_MAP.get(c_name, "其他")
+                        sk = _shares_thousands(row.get("shares", 0))
+                        w = _scalar_numeric(row.get("weight", 0), 0.0)
+                        if c not in acc:
+                            acc[c] = {"n": c_name, "sec": sec, "pts": []}
+                        acc[c]["pts"].append({"d": date_str, "s": sk, "w": round(w, 4)})
+                except Exception as e:
+                    print(f"趨勢序列 ETF {etf_code} {fpath}: {e}")
+            for _k, v in acc.items():
+                v["pts"] = v["pts"][-MAX_TREND_POINTS:]
+            out_etf[etf_code] = acc
+    return {"etf": out_etf, "broker": out_broker}
+
+
+def process_all_data() -> dict:
+    file_map = collect_file_map()
+    if not file_map:
+        return {}
 
     daily_real_prices: dict[str, dict[str, float]] = collect_daily_real_prices(file_map)
     database: dict[str, dict] = {}
@@ -448,11 +522,14 @@ def load_digest(script_dir: Path) -> dict:
 def main() -> None:
     print("[INFO] 開始產出 Web Dashboard (v8.0 程式碼重構與優化)...")
     db = process_all_data()
+    file_map = collect_file_map()
+    trend_obj = build_holdings_trend_series(file_map) if file_map else {"etf": {}, "broker": {}}
     template = load_template()
     script_dir = Path(__file__).resolve().parent
 
     json_str = json.dumps(db, ensure_ascii=False)
     broker_str = json.dumps(BROKER_LIST, ensure_ascii=False)
+    trend_str = json.dumps(trend_obj, ensure_ascii=False)
     meta = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "data_through": max(db.keys()) if db else None,
@@ -464,11 +541,13 @@ def main() -> None:
     else:
         print("[INFO] 未偵測 digest.json 快照，總覽新聞／指數為占位（可執行 fetch_digest.py）")
     digest_str = json.dumps(digest, ensure_ascii=False)
+    print("[INFO] 已嵌入持股／分點走勢序列（Chart.js 用）")
     final_html = (
         template.replace("__DB_JSON__", json_str)
         .replace("__BROKER_JSON__", broker_str)
         .replace("__META_JSON__", meta_str)
         .replace("__DIGEST_JSON__", digest_str)
+        .replace("__HOLDINGS_TREND_JSON__", trend_str)
     )
 
     output_path = script_dir / OUTPUT_FILE
@@ -476,6 +555,8 @@ def main() -> None:
         f.write(final_html)
 
     print(f"[OK] 成功產出 {OUTPUT_FILE}")
+    print("[INFO] 若曾修改 template 的 Tailwind class，請先於專案目錄執行：npm run build:css")
+    print("[INFO] 上傳 GitHub Pages 前可執行：python3 check_deploy.py")
 
 
 if __name__ == "__main__":

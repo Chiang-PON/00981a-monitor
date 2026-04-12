@@ -1,4 +1,6 @@
-# 每日早上補跑凱基分點與籌碼後：先 fetch_digest（嵌入 index 的快照／RSS），再 generate_web。
+# 隔天早上補跑凱基：下載的 CSV 若帶「今天」日期，會改名成 TARGET（實際交易日）。
+# 週一執行 → TARGET=上週五（date -v-3d）；週二～週五 → TARGET=昨天（-1d）。
+# 若有安裝 node + package.json：自動 npm run build:css，再產頁（GitHub Pages 才會帶到 tailwind-built.css）。
 TODAY=$(date +%Y-%m-%d) && \
 DOW=$(date +%u) && \
 if [ "$DOW" -eq 1 ]; then TARGET=$(date -v-3d +%Y-%m-%d); else TARGET=$(date -v-1d +%Y-%m-%d); fi && \
@@ -6,7 +8,9 @@ git pull --rebase origin main && \
 python main.py --force && \
 for f in history/*_$TODAY.csv; do mv "$f" "${f/_$TODAY.csv/_$TARGET.csv}"; done && \
 python3 fetch_digest.py && \
+([ -f package.json ] && command -v npm >/dev/null 2>&1 && npm run build:css) || true && \
 python generate_web.py && \
+python3 check_deploy.py && \
 git add . && \
 git commit -m "chore: 補跑 $TARGET 凱基分點與籌碼資料" && \
 git push

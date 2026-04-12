@@ -252,6 +252,10 @@
         html.elder-mode .tab-btn {
             font-size: 1.02em;
         }
+        html.elder-mode #home-panel table { font-size: 1.05rem; }
+        html.elder-mode #home-panel .rounded-xl { font-size: 1.04rem; }
+        html.elder-mode #data-freshness-bar { font-size: 0.95rem; line-height: 1.65; }
+        html.elder-mode #watchlist-bar .pill-btn { min-height: 2.75rem; padding-left: 0.9rem; padding-right: 0.9rem; }
 
         .news-kw-highlight {
             background-color: rgba(250, 204, 21, 0.42);
@@ -260,6 +264,10 @@
         }
         [data-theme="dark"] .news-kw-highlight {
             background-color: rgba(250, 204, 21, 0.22);
+        }
+        /* 捲到走勢區時避開 fixed 導覽列（不依賴 tailwind rebuild） */
+        #trend-chart-panel {
+            scroll-margin-top: 6.5rem;
         }
     </style>
 </head>
@@ -284,6 +292,8 @@
         </div>
     </nav>
 
+    <button type="button" id="btn-scroll-top" class="fixed z-50 bottom-[4.25rem] right-4 sm:right-6 w-12 h-12 rounded-full border theme-border theme-bg-input theme-text shadow-lg opacity-0 pointer-events-none transition-opacity flex items-center justify-center text-xl font-bold hover:border-[var(--border-focus)]" aria-label="回到頂部" title="回到頂部">↑</button>
+
     <p class="fixed bottom-0 left-0 right-0 z-40 text-center text-[10px] sm:text-[11px] font-mono theme-text-dim bg-[var(--bg-base)]/95 backdrop-blur-sm border-t theme-border py-1.5 px-2 pointer-events-none" role="note">
         資料為批次快照、非即時行情；僅供研究參考，不構成投資建議。
     </p>
@@ -305,7 +315,11 @@
                 <div id="watchlist-bar" class="rounded-lg border theme-border theme-bg-input p-3 mb-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <span class="font-mono text-xs theme-text-dim uppercase tracking-wider">關注清單（僅存本機瀏覽器）</span>
-                        <button type="button" onclick="exportWatchlistCsv()" class="text-xs font-mono theme-text-dim hover:theme-text">匯出 CSV</button>
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <button type="button" onclick="exportWatchlistCsv()" class="text-xs font-mono theme-text-dim hover:theme-text min-h-[44px] px-1">匯出 CSV</button>
+                            <button type="button" onclick="restoreWatchlistBackup()" class="text-xs font-mono theme-text-dim hover:theme-text min-h-[44px] px-1">還原上次</button>
+                            <button type="button" onclick="clearWatchlist()" class="text-xs font-mono text-sell hover:opacity-90 min-h-[44px] px-1">清空</button>
+                        </div>
                     </div>
                     <div id="watchlist-chips" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
                     <div class="flex flex-wrap gap-2 mt-2">
@@ -526,7 +540,44 @@
                 </div>
             </div>
 
-            <div id="sector-flow-container" class="mb-8 flex gap-3 overflow-x-auto hide-scrollbar pb-2"></div>
+            <div id="sector-flow-container" class="mb-4 flex gap-3 overflow-x-auto hide-scrollbar pb-2"></div>
+            <details id="sector-rank-details" class="mb-6 rounded-xl border theme-border theme-bg-input p-4 hidden">
+                <summary class="font-mono text-sm font-bold theme-text cursor-pointer select-none hover:theme-text">產業／板塊彙總排行（依本表買／賣超列加總）</summary>
+                <div id="sector-rank-table-wrap" class="mt-4 overflow-x-auto text-sm"></div>
+            </details>
+
+            <details id="compare-diff-wrap" class="mb-6 rounded-xl border theme-border theme-bg-input p-4">
+                <summary class="font-mono text-sm font-bold theme-text cursor-pointer select-none hover:theme-text">跨日對照（雙區間 · 相同天數）</summary>
+                <p class="text-xs theme-text-dim mt-3 mb-3 leading-relaxed">基準結束日 <span class="font-mono theme-text">A</span>＝上方「結束日期」；對照結束日 <span class="font-mono theme-text">B</span>＝下方。兩邊皆取「天數」設定的連續 <span class="font-mono">N</span> 個交易日加總（與主表邏輯相同）。</p>
+                <div class="flex flex-wrap items-end gap-3">
+                    <div class="min-w-[10rem] sm:min-w-[11rem]">
+                        <label for="compare-date-picker" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">對照結束日（B）</label>
+                        <input type="text" id="compare-date-picker" readonly placeholder="選擇 B 日"
+                            class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full cursor-pointer transition-colors min-h-[2.75rem] min-w-0 focus:border-[var(--border-focus)]"
+                            autocomplete="off">
+                    </div>
+                    <button type="button" onclick="renderCompareDiff()" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border text-sm">重新整理對照表</button>
+                </div>
+                <div id="compare-diff-out" class="mt-4 overflow-x-auto text-sm min-h-[2rem]"></div>
+            </details>
+
+            <div id="trend-chart-panel" class="mb-8 rounded-xl border theme-border theme-bg-input p-4 sm:p-5">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="font-mono text-xs theme-text-dim uppercase tracking-wider">持股／分點走勢</span>
+                    <span class="text-xs theme-text-dim">（歷史 CSV · Chart.js）</span>
+                </div>
+                <p class="text-[11px] theme-text-dim mb-3 leading-relaxed">① 先選<strong class="theme-text">單一</strong> ETF 或單一分點（勿用全家族／大聯盟彙總）。② 此欄填<strong class="theme-text">個股／成分股代號</strong>（如 2330），不是 ETF 代號（如 00981A）。若仍停在全家族，可在下方<strong class="theme-text">直接輸入 00981A 或分點代號</strong>後按繪製，會自動切換到該標的並提示你改輸入個股代號。</p>
+                <p class="text-[11px] theme-text-dim mb-3 leading-relaxed border-t theme-border pt-2">買／賣超表右側的<strong class="theme-text">「走勢」</strong>：用該列<strong class="theme-text">個股代號</strong>在本區繪製歷史持股（千張）與權重（%）或分點淨買賣；圖表在<strong class="theme-text">表格上方</strong>，點擊後頁面會自動捲到此區。</p>
+                <div class="flex flex-wrap items-end gap-2 mb-3">
+                    <input type="text" id="trend-code-input" maxlength="12" placeholder="個股代號 2330（非 00981A）"
+                        class="theme-bg-input border theme-border rounded-lg px-3 py-2 text-sm font-mono theme-text w-[12.5rem] min-h-[44px]">
+                    <button type="button" id="btn-trend-draw" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm min-h-[44px]">繪製走勢</button>
+                </div>
+                <p id="trend-chart-hint" class="text-xs font-mono theme-text-dim mb-3 leading-relaxed"></p>
+                <div class="relative h-72 w-full min-w-0">
+                    <canvas id="holdings-trend-canvas"></canvas>
+                </div>
+            </div>
 
             <div id="normal-view">
                 <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
@@ -611,6 +662,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         const __META__ = __META_JSON__;
@@ -625,8 +677,11 @@
         let currentDays = 5;
         let etfList = [];
         let watchlist = [];
+        let holdingsTrendChartInstance = null;
+        let compareDatePickerInstance = null;
 
         const db = __DB_JSON__;
+        const holdingsTrend = __HOLDINGS_TREND_JSON__;
         const brokerLabels = __BROKER_JSON__ || {};
         const availableDatesDesc = Object.keys(db).sort().reverse();
         const availableDates = availableDatesDesc;
@@ -677,8 +732,14 @@
             if (datePickerInstance && typeof datePickerInstance.redraw === 'function') {
                 datePickerInstance.redraw();
             }
+            if (compareDatePickerInstance && typeof compareDatePickerInstance.redraw === 'function') {
+                compareDatePickerInstance.redraw();
+            }
             if (searchDatePickerInstance && typeof searchDatePickerInstance.redraw === 'function') {
                 searchDatePickerInstance.redraw();
+            }
+            if (holdingsTrendChartInstance) {
+                renderHoldingsTrendChart();
             }
         }
         function updateThemeIcons(theme) {
@@ -750,6 +811,467 @@
             return { buy, sell };
         }
 
+        /** 與 aggregateData 相同邏輯，但回傳每檔「帶正負號」的淨張／淨額（供跨日對照） */
+        function aggregateSignedNet(etf, days, endDateOverride) {
+            if (availableDatesDesc.length === 0) return new Map();
+            const endDate = endDateOverride != null && endDateOverride !== '' ? endDateOverride : currentDate;
+            let dateIndex = availableDatesDesc.indexOf(endDate);
+            if (dateIndex === -1) dateIndex = 0;
+            const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(days, availableDatesDesc.length - dateIndex));
+            const agg = {};
+            const etfListToUse = (etf === FAMILY_TAB)
+                ? etfList.filter(e => e !== FAMILY_TAB && e !== KAIJI_TAB && e !== AI_TAB && !brokerCodes.includes(e))
+                : (etf === KAIJI_TAB)
+                    ? brokerCodes.filter(b => allKeys.has(b))
+                    : [etf];
+
+            dateSlice.forEach(d => {
+                const dataOfDay = db[d] || {};
+                etfListToUse.forEach(e => {
+                    const dayData = dataOfDay[e];
+                    if (!dayData) return;
+                    [...(dayData.new_buy || []), ...(dayData.increased || [])].forEach(i => {
+                        const key = aggregateRowKey(i);
+                        if (!agg[key]) agg[key] = { name: String(i.name || '').trim() || key, code: String(i.code || '').trim(), sector: i.sector || '其他', diff: 0, amount: 0 };
+                        agg[key].diff += i.diff;
+                        agg[key].amount += (i.amount || 0);
+                    });
+                    [...(dayData.decreased || []), ...(dayData.sold_out || [])].forEach(i => {
+                        const key = aggregateRowKey(i);
+                        if (!agg[key]) agg[key] = { name: String(i.name || '').trim() || key, code: String(i.code || '').trim(), sector: i.sector || '其他', diff: 0, amount: 0 };
+                        agg[key].diff -= i.diff;
+                        agg[key].amount -= (i.amount || 0);
+                    });
+                });
+            });
+            return new Map(Object.entries(agg));
+        }
+
+        function findTrendSeriesEntry(mapByCode, rawCode) {
+            if (!mapByCode || !rawCode) return null;
+            const s = String(rawCode).trim();
+            if (mapByCode[s]) return mapByCode[s];
+            const sn = s.replace(/^0+/, '') || '0';
+            for (const k of Object.keys(mapByCode)) {
+                const kn = String(k).replace(/^0+/, '') || '0';
+                if (kn === sn) return mapByCode[k];
+            }
+            return null;
+        }
+
+        function getTrendMapForCurrentEtf() {
+            if (!holdingsTrend || typeof holdingsTrend !== 'object') return null;
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB || currentETF === AI_TAB) return null;
+            if (brokerCodes.indexOf(currentETF) >= 0) {
+                return holdingsTrend.broker && holdingsTrend.broker[currentETF] ? holdingsTrend.broker[currentETF] : null;
+            }
+            return holdingsTrend.etf && holdingsTrend.etf[currentETF] ? holdingsTrend.etf[currentETF] : null;
+        }
+
+        /** 輸入是否為資料裡的 ETF／分點「標的代號」（非個股） */
+        function findEtfOrBrokerKeyInTrendData(raw) {
+            const t = String(raw || '').trim();
+            if (!t || !holdingsTrend) return null;
+            const etfMap = holdingsTrend.etf || {};
+            const brMap = holdingsTrend.broker || {};
+            if (etfMap[t]) return { kind: 'etf', key: t };
+            if (brMap[t]) return { kind: 'broker', key: t };
+            const up = t.toUpperCase();
+            if (up !== t && etfMap[up]) return { kind: 'etf', key: up };
+            if (etfMap[up]) return { kind: 'etf', key: up };
+            if (brMap[up]) return { kind: 'broker', key: up };
+            return null;
+        }
+
+        /** 從「走勢」輸入框切換到對應 ETF 或分點（用於全家族／大聯盟時只輸入 00981A／9207） */
+        function navigateTrendToEtfOrBroker(targetKey, kind) {
+            const k = String(targetKey || '').trim();
+            if (!k || !etfList.includes(k)) return false;
+            if (kind === 'broker') {
+                if (currentMode !== 'BROKER') setMode('BROKER');
+            } else {
+                if (currentMode !== 'ETF') setMode('ETF');
+            }
+            selectTarget(k);
+            return true;
+        }
+
+        function destroyHoldingsTrendChart() {
+            if (holdingsTrendChartInstance) {
+                holdingsTrendChartInstance.destroy();
+                holdingsTrendChartInstance = null;
+            }
+        }
+
+        function renderHoldingsTrendChart() {
+            const hint = document.getElementById('trend-chart-hint');
+            const canvas = document.getElementById('holdings-trend-canvas');
+            if (!canvas) return;
+            if (typeof Chart === 'undefined') {
+                if (hint) hint.textContent = 'Chart.js 未載入（請檢查網路或 CDN）';
+                return;
+            }
+            destroyHoldingsTrendChart();
+            const inp = document.getElementById('trend-code-input');
+            let code = inp && inp.value ? String(inp.value).trim() : '';
+            if (!code) {
+                if (hint) hint.textContent = '請輸入個股／成分股代號（如 2330）。';
+                return;
+            }
+
+            const asTarget = findEtfOrBrokerKeyInTrendData(code);
+            if (asTarget) {
+                if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
+                    if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
+                        if (inp) inp.value = '';
+                        if (hint) {
+                            hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請改輸入<strong class="theme-text">個股代號</strong>（如 2330）後再按「繪製走勢」。';
+                        }
+                    } else {
+                        if (hint) hint.textContent = '無法切換至「' + code + '」（資料中無此標的）。';
+                    }
+                    return;
+                }
+                if (currentETF === asTarget.key) {
+                    if (hint) {
+                        hint.textContent = '您輸入的是 ETF／分點「標的代號」，不是個股。請改輸入成分股代號（例如 2330、2303）。';
+                    }
+                    return;
+                }
+                if (navigateTrendToEtfOrBroker(asTarget.key, asTarget.kind)) {
+                    if (inp) inp.value = '';
+                    if (hint) {
+                        hint.innerHTML = '已切換至「<span class="theme-text font-semibold">' + escapeHtmlText(asTarget.key) + '</span>」。請輸入<strong class="theme-text">個股代號</strong>後再按「繪製走勢」。';
+                    }
+                    return;
+                }
+            }
+
+            if (currentETF === FAMILY_TAB || currentETF === KAIJI_TAB) {
+                if (hint) {
+                    hint.textContent = '請先選單一 ETF 或單一凱基分點；或在此欄輸入 ETF／分點代號（如 00981A）讓系統自動切換。';
+                }
+                return;
+            }
+            if (currentETF === AI_TAB) {
+                if (hint) hint.textContent = 'AI 模式下無走勢。';
+                return;
+            }
+            const map = getTrendMapForCurrentEtf();
+            const entry = findTrendSeriesEntry(map, code);
+            if (!entry || !entry.pts || !entry.pts.length) {
+                if (hint) {
+                    hint.textContent = '此個股代號在「' + currentETF + '」歷史 CSV 中無資料。請確認代號正確（為成分股，不是 ETF 代號）。';
+                }
+                return;
+            }
+            const pts = entry.pts;
+            const isBroker = brokerCodes.indexOf(currentETF) >= 0;
+            const labels = pts.map(p => p.d);
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#2563eb';
+            const buyC = getComputedStyle(document.documentElement).getPropertyValue('--color-buy').trim() || '#dc2626';
+            const grey = getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim() || '#71717a';
+
+            try {
+            if (isBroker) {
+                const dataN = pts.map(p => p.n);
+                const ctx = canvas.getContext('2d');
+                holdingsTrendChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: '分點淨買賣（股）',
+                            data: dataN,
+                            borderColor: accent,
+                            backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: grey } },
+                            tooltip: { mode: 'index', intersect: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: grey, maxRotation: 45 }, grid: { color: 'rgba(128,128,128,0.15)' } },
+                            y: { ticks: { color: grey }, grid: { color: 'rgba(128,128,128,0.15)' } }
+                        }
+                    }
+                });
+                if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + '分點 CSV 之 net_shares（股）；非累積持倉。';
+                return;
+            }
+            const dataS = pts.map(p => p.s);
+            const dataW = pts.map(p => p.w);
+            const ctx = canvas.getContext('2d');
+            holdingsTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: '持股（千張）',
+                            data: dataS,
+                            yAxisID: 'y',
+                            borderColor: buyC,
+                            backgroundColor: 'rgba(220, 38, 38, 0.06)',
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0,
+                        },
+                        {
+                            label: '權重（%）',
+                            data: dataW,
+                            yAxisID: 'y1',
+                            borderColor: accent,
+                            backgroundColor: 'rgba(37, 99, 235, 0.04)',
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 0,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: grey } },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { ticks: { color: grey, maxRotation: 45 }, grid: { color: 'rgba(128,128,128,0.15)' } },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            ticks: { color: grey },
+                            grid: { color: 'rgba(128,128,128,0.15)' },
+                            title: { display: true, text: '千張', color: grey }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            ticks: { color: grey },
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: '%', color: grey }
+                        }
+                    }
+                }
+            });
+            if (hint) hint.textContent = (entry.n ? (entry.n + ' · ') : '') + 'ETF 持股千張與權重（各交易日 CSV 快照）。';
+            } catch (err) {
+                if (hint) hint.textContent = '繪圖失敗：' + (err && err.message ? err.message : String(err));
+            }
+        }
+
+        function scrollTrendPanelIntoView() {
+            const panel = document.getElementById('trend-chart-panel');
+            if (!panel) return;
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+        }
+
+        function setTrendCodeAndRender(code) {
+            const inp = document.getElementById('trend-code-input');
+            if (inp) inp.value = String(code || '').trim();
+            renderHoldingsTrendChart();
+            scrollTrendPanelIntoView();
+        }
+
+        /** 掛在 window 供除錯；表格內改為 data-trend-code + 委派，避免內聯 onclick 的 event 相容問題 */
+        window.setTrendCodeAndRender = setTrendCodeAndRender;
+        window.scrollTrendPanelIntoView = scrollTrendPanelIntoView;
+
+        function initTrendTableDelegation() {
+            const nv = document.getElementById('normal-view');
+            if (!nv || nv.dataset.trendDelegateBound === '1') return;
+            nv.dataset.trendDelegateBound = '1';
+            nv.addEventListener('click', function(e) {
+                const btn = e.target.closest('[data-trend-code]');
+                if (!btn) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const code = btn.getAttribute('data-trend-code');
+                if (code) setTrendCodeAndRender(code);
+            });
+        }
+
+        function renderSectorRankingTable(buy, sell) {
+            const wrap = document.getElementById('sector-rank-details');
+            const inner = document.getElementById('sector-rank-table-wrap');
+            if (!wrap || !inner) return;
+            const buyBySector = {};
+            const sellBySector = {};
+            buy.forEach(function(i) {
+                const s = i.sector || '其他';
+                const v = currentUnit === 'amount' ? (i.amount || 0) : (i.diff || 0);
+                buyBySector[s] = (buyBySector[s] || 0) + v;
+            });
+            sell.forEach(function(i) {
+                const s = i.sector || '其他';
+                const v = currentUnit === 'amount' ? (i.amount || 0) : (i.diff || 0);
+                sellBySector[s] = (sellBySector[s] || 0) + v;
+            });
+            const names = new Set([].concat(Object.keys(buyBySector), Object.keys(sellBySector)));
+            const rows = [];
+            names.forEach(function(name) {
+                const b = buyBySector[name] || 0;
+                const sl = sellBySector[name] || 0;
+                rows.push({ name: name, net: b - sl, buy: b, sell: sl });
+            });
+            rows.sort(function(a, b) { return Math.abs(b.net) - Math.abs(a.net); });
+            if (rows.length === 0) {
+                wrap.classList.add('hidden');
+                inner.innerHTML = '';
+                return;
+            }
+            wrap.classList.remove('hidden');
+            const fmtAbs = function(v) {
+                if (currentUnit === 'amount') return formatAmount(Math.abs(v));
+                return Math.abs(v).toLocaleString() + ' 張';
+            };
+            const fmtSigned = function(v) {
+                if (currentUnit === 'amount') return (v >= 0 ? '+ ' : '− ') + formatAmount(Math.abs(v));
+                return (v >= 0 ? '+' : '−') + Math.abs(v).toLocaleString() + ' 張';
+            };
+            const th = currentUnit === 'amount' ? '金額（萬）' : '張數';
+            inner.innerHTML = '<table class="w-full min-w-[520px] border-collapse"><thead><tr class="theme-bg-input border-b theme-border">' +
+                '<th class="text-left py-2 px-3 font-mono">產業</th>' +
+                '<th class="text-right py-2 px-3 font-mono">淨' + th + '</th>' +
+                '<th class="text-right py-2 px-3 font-mono">買超列加總</th>' +
+                '<th class="text-right py-2 px-3 font-mono">賣超列加總</th>' +
+                '</tr></thead><tbody>' +
+                rows.map(function(r) {
+                    const cls = r.net > 0 ? 'text-buy' : (r.net < 0 ? 'text-sell' : 'theme-text');
+                    return '<tr class="border-b theme-border row-hover"><td class="py-2 px-3 font-bold">' + escapeHtmlText(r.name) + '</td>' +
+                        '<td class="py-2 px-3 text-right font-mono font-bold ' + cls + '">' + fmtSigned(r.net) + '</td>' +
+                        '<td class="py-2 px-3 text-right font-mono text-buy">' + fmtAbs(r.buy) + '</td>' +
+                        '<td class="py-2 px-3 text-right font-mono text-sell">' + fmtAbs(r.sell) + '</td></tr>';
+                }).join('') + '</tbody></table>';
+        }
+
+        function renderCompareDiff() {
+            const out = document.getElementById('compare-diff-out');
+            if (!out) return;
+            const inp = document.getElementById('compare-date-picker');
+            if (!inp || !inp.value) {
+                out.innerHTML = '<div class="theme-text-dim font-mono text-xs">請選擇對照結束日（B）</div>';
+                return;
+            }
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentETF === AI_TAB) {
+                out.innerHTML = '';
+                return;
+            }
+            const endB = inp.value;
+            const endA = currentDate;
+            const mA = aggregateSignedNet(currentETF, currentDays, endA);
+            const mB = aggregateSignedNet(currentETF, currentDays, endB);
+            const allKeys = new Set([...mA.keys(), ...mB.keys()]);
+            const rows = [];
+            allKeys.forEach(function(k) {
+                const a = mA.get(k) || { diff: 0, amount: 0, name: '', code: '', sector: '其他' };
+                const b = mB.get(k) || { diff: 0, amount: 0, name: '', code: '', sector: '其他' };
+                const name = a.name || b.name || k;
+                const code = a.code || b.code || '';
+                const sector = a.sector || b.sector || '其他';
+                const va = currentUnit === 'amount' ? (a.amount || 0) : (a.diff || 0);
+                const vb = currentUnit === 'amount' ? (b.amount || 0) : (b.diff || 0);
+                rows.push({ name: name, code: code, sector: sector, va: va, vb: vb, d: vb - va });
+            });
+            rows.sort(function(a, b) { return Math.abs(b.d) - Math.abs(a.d); });
+            const fmt = function(v) {
+                if (currentUnit === 'amount') return (v >= 0 ? '+ ' : '− ') + formatAmount(Math.abs(v));
+                return (v >= 0 ? '+' : '−') + Math.abs(v).toLocaleString() + ' 張';
+            };
+            const th = currentUnit === 'amount' ? '金額（萬）' : '張數';
+            out.innerHTML = '<p class="text-xs font-mono theme-text-dim mb-2">A 結束 <span class="theme-text">' + escapeHtmlText(endA) + '</span> · B 結束 <span class="theme-text">' + escapeHtmlText(endB) + '</span> · N=' + currentDays + ' 交易日</p>' +
+                '<table class="w-full min-w-[640px] border-collapse"><thead><tr class="theme-bg-input border-b theme-border">' +
+                '<th class="text-left py-2 px-3 font-mono">股票</th>' +
+                '<th class="text-left py-2 px-3 font-mono">產業</th>' +
+                '<th class="text-right py-2 px-3 font-mono">A 淨' + th + '</th>' +
+                '<th class="text-right py-2 px-3 font-mono">B 淨' + th + '</th>' +
+                '<th class="text-right py-2 px-3 font-mono">B − A</th>' +
+                '</tr></thead><tbody>' +
+                rows.map(function(r) {
+                    const cls = r.d > 0 ? 'text-buy' : (r.d < 0 ? 'text-sell' : 'theme-text');
+                    return '<tr class="border-b theme-border row-hover"><td class="py-2 px-3"><span class="font-bold">' + escapeHtmlText(r.name) + '</span>' + (r.code ? '<span class="font-mono text-xs theme-text-dim ml-1">' + escapeHtmlText(r.code) + '</span>' : '') + '</td>' +
+                        '<td class="py-2 px-3 theme-text-dim text-xs">' + escapeHtmlText(r.sector) + '</td>' +
+                        '<td class="py-2 px-3 text-right font-mono">' + fmt(r.va) + '</td>' +
+                        '<td class="py-2 px-3 text-right font-mono">' + fmt(r.vb) + '</td>' +
+                        '<td class="py-2 px-3 text-right font-mono font-bold ' + cls + '">' + fmt(r.d) + '</td></tr>';
+                }).join('') + '</tbody></table>';
+        }
+
+        function initCompareDatePicker() {
+            const inp = document.getElementById('compare-date-picker');
+            if (!inp) return;
+            if (compareDatePickerInstance) {
+                compareDatePickerInstance.destroy();
+                compareDatePickerInstance = null;
+            }
+            if (typeof flatpickr === 'undefined') {
+                inp.disabled = true;
+                return;
+            }
+            const enableDates = availableDates.length ? availableDates.slice() : [];
+            if (!enableDates.length) {
+                inp.disabled = true;
+                return;
+            }
+            inp.disabled = false;
+            const defaultB = enableDates.length > 1 ? enableDates[1] : enableDates[0];
+            compareDatePickerInstance = flatpickr(inp, {
+                dateFormat: 'Y-m-d',
+                enable: enableDates,
+                defaultDate: defaultB,
+                onChange: function() {
+                    renderCompareDiff();
+                }
+            });
+        }
+
+        function dailyNetAmountForFamilyCode(code, endDate) {
+            const agg = aggregateData(FAMILY_TAB, 1, endDate);
+            const c = String(code).trim();
+            const findIn = function(list) {
+                for (let i = 0; i < list.length; i++) {
+                    if (String(list[i].code || '').trim() === c) return list[i].amount || 0;
+                }
+                return null;
+            };
+            const b = findIn(agg.buy);
+            const s = findIn(agg.sell);
+            if (b != null) return b;
+            if (s != null) return -Math.abs(s);
+            return 0;
+        }
+
+        function watchlistFiveDayAmounts(code) {
+            const dates = availableDatesDesc.slice(0, 5);
+            return dates.slice().reverse().map(function(d) {
+                return dailyNetAmountForFamilyCode(code, d);
+            });
+        }
+
+        function watchlistSparkBarsHtml(amounts) {
+            const abs = amounts.map(function(a) { return Math.abs(a) || 0; });
+            const mx = Math.max.apply(null, abs.concat([1]));
+            return '<div class="flex items-end justify-end gap-px h-7 w-[3.25rem] shrink-0" title="近 5 交易日淨額(萬)，左舊右新">' +
+                amounts.map(function(a) {
+                    const h = Math.max(3, Math.round((Math.abs(a) / mx) * 24));
+                    const bg = a >= 0 ? 'bg-buy' : 'bg-sell';
+                    return '<div class="flex-1 min-w-[3px] rounded-sm ' + bg + ' opacity-90" style="height:' + h + 'px"></div>';
+                }).join('') + '</div>';
+        }
+
         function getETFLabel(etf) {
             if (etf === FAMILY_TAB) return 'GLOBAL_CONSENSUS (全家族共識)';
             if (etf === KAIJI_TAB) return 'KAIJI_CONSENSUS (凱基大聯盟)';
@@ -803,6 +1325,44 @@
             if (momBtn) momBtn.className = base + ' ' + (currentMode === 'MOMENTUM' ? 'tab-active' : 'tab-inactive');
         }
 
+        function todayYmdLocal() {
+            const d = new Date();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + day;
+        }
+
+        function parseYmdFromString(s) {
+            if (!s) return null;
+            const m = String(s).match(/(\d{4}-\d{2}-\d{2})/);
+            return m ? m[1] : null;
+        }
+
+        function calendarDaysBehindToday(dataYmd) {
+            if (!dataYmd) return null;
+            const t = todayYmdLocal();
+            const a = new Date(dataYmd + 'T12:00:00');
+            const b = new Date(t + 'T12:00:00');
+            return Math.floor((b - a) / 864e5);
+        }
+
+        function freshnessChipHtml(daysBehind) {
+            if (daysBehind === null || isNaN(daysBehind)) {
+                return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded theme-bg-input theme-text-dim align-middle">—</span>';
+            }
+            if (daysBehind <= 0) {
+                return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 dark:bg-emerald-900/35 dark:text-emerald-200 align-middle">新</span>';
+            }
+            if (daysBehind === 1) {
+                return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-900/35 dark:text-amber-200 align-middle">昨</span>';
+            }
+            if (daysBehind <= 4) {
+                return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-900/35 dark:text-amber-200 align-middle">約' + daysBehind + '天</span>';
+            }
+            return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 align-middle">已' + daysBehind + '天</span>';
+        }
+
         function initDataFreshnessBar() {
             const el = document.getElementById('data-freshness-bar');
             if (!el) return;
@@ -810,12 +1370,19 @@
             const thru = __META__ && __META__.data_through ? String(__META__.data_through) : '';
             const dbLatest = availableDatesDesc.length ? String(availableDatesDesc[0]) : '';
             const digestAt = typeof __DIGEST__ !== 'undefined' && __DIGEST__ && __DIGEST__.fetchedAt ? String(__DIGEST__.fetchedAt) : '';
+            const chipYmd = parseYmdFromString(thru || dbLatest);
+            const dChip = calendarDaysBehindToday(chipYmd);
             const parts = [];
             if (thru || dbLatest) {
-                parts.push('籌碼最新交易日 <span class="theme-text">' + escapeHtmlText(thru || dbLatest) + '</span>');
+                parts.push('籌碼 <span class="theme-text font-medium">' + escapeHtmlText(thru || dbLatest) + '</span>' + freshnessChipHtml(dChip));
             }
-            if (gen) parts.push('頁面產生 ' + '<span class="theme-text">' + escapeHtmlText(gen) + '</span>');
-            if (digestAt) parts.push('RSS／指數快照 ' + '<span class="theme-text">' + escapeHtmlText(digestAt) + '</span>');
+            if (gen) {
+                parts.push('頁面產生 <span class="theme-text">' + escapeHtmlText(gen) + '</span>');
+            }
+            if (digestAt) {
+                const dDig = calendarDaysBehindToday(parseYmdFromString(digestAt));
+                parts.push('快照 <span class="theme-text">' + escapeHtmlText(digestAt) + '</span>' + freshnessChipHtml(dDig));
+            }
             el.innerHTML = parts.length ? parts.join('　｜　') : '<span class="theme-text-dim">（無元資料）</span>';
         }
 
@@ -826,11 +1393,14 @@
             const thru = __META__ && __META__.data_through ? String(__META__.data_through) : '';
             const dbLatest = availableDatesDesc.length ? String(availableDatesDesc[0]) : '';
             const digestAt = typeof __DIGEST__ !== 'undefined' && __DIGEST__ && __DIGEST__.fetchedAt ? String(__DIGEST__.fetchedAt) : '';
-            let html = '<p class="font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-2">資料狀態說明</p>';
+            const chipYmd = parseYmdFromString(thru || dbLatest);
+            const dChip = calendarDaysBehindToday(chipYmd);
+            const dDig = calendarDaysBehindToday(parseYmdFromString(digestAt));
+            let html = '<p class="font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-2">資料狀態（標籤：距今日曆日，僅供參考）</p>';
             html += '<ul class="space-y-1.5 text-xs sm:text-sm leading-relaxed list-disc list-inside theme-text">';
-            html += '<li><span class="theme-text-dim">籌碼資料最新交易日（嵌入 JSON）：</span><span class="font-mono font-semibold">' + escapeHtmlText(thru || dbLatest || '—') + '</span></li>';
+            html += '<li class="flex flex-wrap items-center gap-x-1"><span class="theme-text-dim">籌碼資料最新交易日：</span><span class="font-mono font-semibold">' + escapeHtmlText(thru || dbLatest || '—') + '</span>' + freshnessChipHtml(dChip) + '</li>';
             html += '<li><span class="theme-text-dim">本頁產生時間：</span><span class="font-mono font-semibold">' + escapeHtmlText(gen || '—') + '</span></li>';
-            html += '<li><span class="theme-text-dim">指數／RSS 快照（<span class="font-mono">fetch_digest</span>）：</span><span class="font-mono font-semibold">' + escapeHtmlText(digestAt || '尚未執行') + '</span></li>';
+            html += '<li class="flex flex-wrap items-center gap-x-1"><span class="theme-text-dim">指數／RSS 快照（<span class="font-mono">fetch_digest</span>）：</span><span class="font-mono font-semibold">' + escapeHtmlText(digestAt || '尚未執行') + '</span>' + freshnessChipHtml(digestAt ? dDig : null) + '</li>';
             if (thru && dbLatest && thru !== dbLatest) {
                 html += '<li class="text-buy">※ 元資料與陣列第一筆日期不一致時，以「籌碼資料最新交易日」為準。</li>';
             }
@@ -879,8 +1449,46 @@
 
         function saveWatchlist() {
             try {
+                const prev = localStorage.getItem('watchlistCodes');
+                if (prev) {
+                    try {
+                        const a = JSON.parse(prev);
+                        if (Array.isArray(a) && a.length) localStorage.setItem('watchlistCodes_backup', prev);
+                    } catch (e) {}
+                }
                 localStorage.setItem('watchlistCodes', JSON.stringify(watchlist));
             } catch (e) {}
+        }
+
+        function clearWatchlist() {
+            if (!watchlist.length) {
+                alert('關注清單目前是空的。');
+                return;
+            }
+            if (!confirm('確定要清空關注清單？（可先按「還原上次」救回上一份）')) return;
+            watchlist = [];
+            saveWatchlist();
+            renderWatchlist();
+            if (currentMode === 'HOME') renderHomeWatchlistSummary();
+        }
+
+        function restoreWatchlistBackup() {
+            const b = localStorage.getItem('watchlistCodes_backup');
+            if (!b) {
+                alert('尚無備份：變更過關注清單後會自動保留上一份。');
+                return;
+            }
+            if (!confirm('還原成上一次的關注清單？')) return;
+            try {
+                const a = JSON.parse(b);
+                if (!Array.isArray(a)) throw new Error('bad');
+                watchlist = a.map(function(x) { return String(x).trim(); }).filter(Boolean);
+                saveWatchlist();
+                renderWatchlist();
+                if (currentMode === 'HOME') renderHomeWatchlistSummary();
+            } catch (e) {
+                alert('備份資料異常，無法還原。');
+            }
         }
 
         function renderWatchlist() {
@@ -1022,6 +1630,7 @@
                 if (momentumPanel) momentumPanel.classList.add('hidden');
                 if (homePanel) homePanel.classList.remove('hidden');
                 refreshHomeDashboard();
+                renderCompareDiff();
                 return;
             }
             if (homePanel) homePanel.classList.add('hidden');
@@ -1035,6 +1644,7 @@
                 if (srt) srt.value = String(currentDays);
                 updateDashboardTitleDateRange();
                 runStockReverseSearch();
+                renderCompareDiff();
                 return;
             }
             if (mode === 'MOMENTUM') {
@@ -1043,6 +1653,7 @@
                 if (dashPanel) dashPanel.classList.add('hidden');
                 if (searchPanel) searchPanel.classList.add('hidden');
                 if (momentumPanel) momentumPanel.classList.remove('hidden');
+                renderCompareDiff();
                 return;
             }
             if (pillsSection) pillsSection.classList.remove('hidden');
@@ -1372,7 +1983,26 @@
             updateModeTabStyles();
             renderTargetPills();
             initDatePicker();
+            initCompareDatePicker();
             initSearchDatePicker();
+            initTrendTableDelegation();
+            const btnTrend = document.getElementById('btn-trend-draw');
+            if (btnTrend) {
+                btnTrend.addEventListener('click', function() {
+                    renderHoldingsTrendChart();
+                    scrollTrendPanelIntoView();
+                });
+            }
+            const trendInp = document.getElementById('trend-code-input');
+            if (trendInp) {
+                trendInp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        renderHoldingsTrendChart();
+                        scrollTrendPanelIntoView();
+                    }
+                });
+            }
             const tfSel = document.getElementById('timeframe-selector');
             if (tfSel) tfSel.value = String(currentDays);
             const srt = document.getElementById('stock-reverse-timeframe');
@@ -1427,6 +2057,17 @@
                     reader.readAsText(f);
                     e.target.value = '';
                 });
+            }
+            const btnTop = document.getElementById('btn-scroll-top');
+            if (btnTop) {
+                btnTop.addEventListener('click', function() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+                window.addEventListener('scroll', function() {
+                    const show = window.scrollY > 240;
+                    btnTop.classList.toggle('opacity-0', !show);
+                    btnTop.classList.toggle('pointer-events-none', !show);
+                }, { passive: true });
             }
 
             let lm = 'ETF';
@@ -1675,18 +2316,19 @@
                     if (String(v.item.code || '').trim() === c) hit = v;
                 });
                 const name = findStockNameForCode(c) || '—';
+                const spark = watchlistSparkBarsHtml(watchlistFiveDayAmounts(c));
                 if (!hit) {
-                    return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right theme-text-dim">區間內無共識列</td></tr>';
+                    return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5 min-w-[4rem]">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right theme-text-dim">無</td><td class="py-1.5 text-right align-bottom">' + spark + '</td></tr>';
                 }
                 const it = hit.item;
                 const isBuy = hit.side === 'buy';
                 const cls = isBuy ? 'text-buy' : 'text-sell';
                 const val = formatAmount(it.amount || 0);
                 const sg = isBuy ? '+ ' : '− ';
-                return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + sg + val + '</td></tr>';
+                return '<tr class="border-b theme-border"><td class="py-1.5 font-mono">' + escapeHtmlText(c) + '</td><td class="py-1.5 min-w-[4rem]">' + escapeHtmlText(name) + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + sg + val + '</td><td class="py-1.5 text-right align-bottom">' + spark + '</td></tr>';
             });
-            el.innerHTML = '<table class="w-full text-sm min-w-[280px]"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs">代號</th><th class="text-left py-2 px-1 font-mono text-xs">名稱</th><th class="text-right py-2 px-1 font-mono text-xs">淨額(萬)</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>' +
-                '<p class="text-[11px] theme-text-dim mt-2">點關注 chip 可開啟個股搜尋；此表為全家族共識近 5 交易日加總。</p>';
+            el.innerHTML = '<table class="w-full text-sm min-w-[340px]"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs">代號</th><th class="text-left py-2 px-1 font-mono text-xs">名稱</th><th class="text-right py-2 px-1 font-mono text-xs whitespace-nowrap">5日淨額</th><th class="text-right py-2 px-1 font-mono text-xs w-16">走勢</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>' +
+                '<p class="text-[11px] theme-text-dim mt-2">點關注 chip 可開啟個股搜尋；淨額為近 5 交易日加總。右欄小條為各日淨額(萬)，紅買綠賣、左舊右新。</p>';
         }
 
         function renderHomeMarketsFromJson(j) {
@@ -2446,26 +3088,46 @@
             if (topSectors.length === 0) sfContainer.classList.add('hidden');
             else sfContainer.classList.remove('hidden');
 
+            renderSectorRankingTable(buy, sell);
+            renderCompareDiff();
+
             const formatVal = (item, isBuy) => {
                 if (currentUnit === 'amount') return (isBuy ? '+ ' : '- ') + formatAmount(item.amount);
                 return (isBuy ? '+' : '-') + (item.diff || 0).toLocaleString() + ' 張';
             };
 
+            const showTrendBtn = currentETF !== FAMILY_TAB && currentETF !== KAIJI_TAB && currentETF !== AI_TAB;
+
             const buyTbody = document.getElementById('buy-rank-tbody');
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
+                const trendBtn = showTrendBtn && item.code
+                    ? ` <button type="button" class="trend-row-btn text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="在上方走勢區繪製此股歷史持股／權重（點擊後會捲到圖表）" aria-label="繪製走勢並捲到上方圖表">走勢</button>`
+                    : '';
                 const detail = formatBrokerBuySellDetailLine(item);
                 const dod = deltaLineHtml(item, buyPrevMap, true);
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${dod}${detail}</div></td></tr>`;
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}${trendBtn}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
 
             const sellTbody = document.getElementById('sell-rank-tbody');
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
+                const trendBtn = showTrendBtn && item.code
+                    ? ` <button type="button" class="trend-row-btn text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="在上方走勢區繪製此股歷史持股／權重（點擊後會捲到圖表）" aria-label="繪製走勢並捲到上方圖表">走勢</button>`
+                    : '';
                 const detail = formatBrokerBuySellDetailLine(item);
                 const dod = deltaLineHtml(item, sellPrevMap, false);
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${dod}${detail}</div></td></tr>`;
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}${trendBtn}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
+
+            const tInp = document.getElementById('trend-code-input');
+            if (tInp && tInp.value.trim()) {
+                renderHoldingsTrendChart();
+            } else {
+                destroyHoldingsTrendChart();
+                const th = document.getElementById('trend-chart-hint');
+                if (th) th.textContent = '';
+            }
         }
 
         function formatAmount(amount_10k) {

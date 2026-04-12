@@ -42,6 +42,8 @@ RSS_FEEDS: list[tuple[str, str]] = [
 
 # 嵌入 digest 的新聞則數：多 RSS 合併後依時間排序再截斷。若太小，畫面上「來源」chip 往往只剩 1～2 家媒體。
 NEWS_DIGEST_MAX_ITEMS = 72
+# 每個 RSS 先各自取最新 N 則再合併，避免單一媒體洗版、其他來源進不了 digest。
+NEWS_PER_FEED_MAX = 12
 
 STOOQ_MAP: dict[str, dict[str, str]] = {
     "^SPX": {"label": "S&P 500", "ccy": "USD"},
@@ -156,8 +158,10 @@ def fetch_news(max_items: int = NEWS_DIGEST_MAX_ITEMS) -> dict:
         body = http_get(url)
         if not body:
             continue
-        for it in parse_rss_items(body, src):
-            all_rows.append(it)
+        feed_items = parse_rss_items(body, src)
+        feed_items.sort(key=lambda x: x.get("ts") or 0.0, reverse=True)
+        feed_items = feed_items[:NEWS_PER_FEED_MAX]
+        all_rows.extend(feed_items)
     all_rows.sort(key=lambda x: x.get("ts") or 0.0, reverse=True)
     seen: set[str] = set()
     out: list[dict] = []
