@@ -324,6 +324,7 @@
                         <option value="10">近10日</option>
                         <option value="20">近20日</option>
                         <option value="30">近30日</option>
+                        <option value="60">近60日</option>
                     </select>
                 </div>
                 <div>
@@ -349,7 +350,20 @@
                 <div class="max-w-3xl mx-auto rounded-xl border theme-border bg-[var(--bg-panel)] p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.45)]">
                     <div class="text-center mb-6">
                         <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">個股主力追蹤</h2>
-                        <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依上方「天數」「結束日期」累計區間，掃描 ETF／分點持倉異動；排序依目前「單位」。</p>
+                        <p class="mt-2 text-sm theme-text-dim font-mono leading-relaxed">依下方「累計天數」與主畫面「結束日期」計算區間，掃描 ETF／分點持倉異動；排序依主畫面「單位」。</p>
+                    </div>
+                    <div class="flex flex-wrap items-end justify-center gap-4 mb-4">
+                        <div class="min-w-[10rem]">
+                            <label for="stock-reverse-timeframe" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">累計天數</label>
+                            <select id="stock-reverse-timeframe" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer transition-colors w-full min-h-[2.75rem] focus:border-[var(--border-focus)]">
+                                <option value="1">近1日</option>
+                                <option value="5" selected>近5日</option>
+                                <option value="10">近10日</option>
+                                <option value="20">近20日</option>
+                                <option value="30">近30日</option>
+                                <option value="60">近60日</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:items-end justify-center">
                         <div class="w-full sm:flex-1 sm:min-w-[14rem]">
@@ -823,6 +837,8 @@
                 if (dashPanel) dashPanel.classList.add('hidden');
                 if (searchPanel) searchPanel.classList.remove('hidden');
                 if (momentumPanel) momentumPanel.classList.add('hidden');
+                const srt = document.getElementById('stock-reverse-timeframe');
+                if (srt) srt.value = String(currentDays);
                 updateDashboardTitleDateRange();
                 runStockReverseSearch();
                 return;
@@ -924,8 +940,20 @@
         function onTimeframeChange() {
             const sel = document.getElementById('timeframe-selector');
             if (sel) currentDays = parseInt(sel.value, 10) || 5;
+            const srt = document.getElementById('stock-reverse-timeframe');
+            if (srt) srt.value = String(currentDays);
             updateDashboardTitleDateRange();
             refreshTable();
+            maybeRefreshStockReverseSearch();
+        }
+
+        function onStockReverseTimeframeChange() {
+            const srt = document.getElementById('stock-reverse-timeframe');
+            const v = srt ? parseInt(srt.value, 10) : NaN;
+            currentDays = !isNaN(v) && v > 0 ? v : 5;
+            const tfSel = document.getElementById('timeframe-selector');
+            if (tfSel) tfSel.value = String(currentDays);
+            updateDashboardTitleDateRange();
             maybeRefreshStockReverseSearch();
         }
 
@@ -941,16 +969,24 @@
             if (inp && inp.value.trim()) runStockReverseSearch();
         }
 
-        function dateRangeLabel() {
+        function dateRangeLabel(daysOpt) {
             if (!availableDatesDesc.length) return '—';
             const idx = Math.max(0, availableDatesDesc.indexOf(currentDate));
-            const slice = availableDatesDesc.slice(idx, idx + Math.min(currentDays, availableDatesDesc.length - idx));
+            const days = daysOpt != null ? daysOpt : currentDays;
+            const slice = availableDatesDesc.slice(idx, idx + Math.min(days, availableDatesDesc.length - idx));
             if (slice.length === 0) return currentDate || '—';
             return slice.length === 1 ? slice[0] : slice[slice.length - 1] + ' ~ ' + slice[0];
         }
 
-        function getDateRangeDisplayString() {
-            return dateRangeLabel();
+        function getDateRangeDisplayString(daysOpt) {
+            return dateRangeLabel(daysOpt);
+        }
+
+        function getStockReverseDays() {
+            const el = document.getElementById('stock-reverse-timeframe');
+            if (!el) return currentDays;
+            const v = parseInt(el.value, 10);
+            return !isNaN(v) && v > 0 ? v : currentDays;
         }
 
         function updateDashboardTitleDateRange() {
@@ -1055,6 +1091,9 @@
             initDatePicker();
             const tfSel = document.getElementById('timeframe-selector');
             if (tfSel) tfSel.value = String(currentDays);
+            const srt = document.getElementById('stock-reverse-timeframe');
+            if (srt) srt.value = String(currentDays);
+            if (srt) srt.addEventListener('change', onStockReverseTimeframeChange);
             setUnit(currentUnit);
             const titleEl = document.getElementById('current-etf-title');
             if (titleEl) titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
@@ -1089,7 +1128,8 @@
             if (availableDatesDesc.length === 0) return [];
             let dateIndex = availableDatesDesc.indexOf(currentDate);
             if (dateIndex === -1) dateIndex = 0;
-            return availableDatesDesc.slice(dateIndex, dateIndex + Math.min(currentDays, availableDatesDesc.length - dateIndex));
+            const days = getStockReverseDays();
+            return availableDatesDesc.slice(dateIndex, dateIndex + Math.min(days, availableDatesDesc.length - dateIndex));
         }
 
         function formatAmountNetDisplay(amount_10k) {
@@ -1117,6 +1157,15 @@
                 return sign + '約 <span class="tabular-nums">' + num + '</span><span class="' + unitClass + '">億</span>';
             }
             return sign + '約 <span class="tabular-nums">' + Math.round(abs).toLocaleString() + '</span><span class="' + unitClass + '">萬</span>';
+        }
+
+        /** 分點 CSV 有買／賣張數時，在淨額旁顯示真實買賣明細（ETF 無此欄位則不顯示） */
+        function formatBrokerBuySellDetailLine(item) {
+            if (!item || item.buy_shares === undefined) return '';
+            if (!(item.buy_shares > 0 || item.sell_shares > 0)) return '';
+            const b = Number(item.buy_shares).toLocaleString();
+            const s = Number(item.sell_shares != null ? item.sell_shares : 0).toLocaleString();
+            return '<div class="text-xs text-gray-400 mt-1 text-right font-normal">買進: ' + b + ' 張 | 賣出: ' + s + ' 張</div>';
         }
 
         let momentumSubMode = 'actor';
@@ -1554,9 +1603,10 @@
                 const diffStr = (nd >= 0 ? '+' : '') + nd.toLocaleString() + ' 張';
                 const amtHtml = formatAmountNetDisplayHtml(na);
                 const color = isBuySide ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
-                const nums = '<div class="flex flex-col items-end justify-start shrink-0 gap-1 pl-2 font-mono ' + color + '">' +
+                const nums = '<div class="flex flex-col items-end justify-start shrink-0 gap-0.5 pl-2 font-mono ' + color + '">' +
                     '<span class="text-lg sm:text-xl font-extrabold tabular-nums leading-none tracking-tight">' + diffStr + '</span>' +
-                    '<span class="text-lg sm:text-xl font-extrabold leading-tight text-right whitespace-nowrap">' + amtHtml + '</span></div>';
+                    '<span class="text-lg sm:text-xl font-extrabold leading-tight text-right whitespace-nowrap">' + amtHtml + '</span>' +
+                    formatBrokerBuySellDetailLine(it) + '</div>';
                 return '<div class="flex flex-row items-start justify-between gap-2 sm:gap-3 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
                     '<div class="min-w-0 flex-1 flex flex-col">' +
                     '<div class="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-snug break-words">' + actorLabel + '</div>' +
@@ -1580,7 +1630,7 @@
             }
 
             const titleExtra = stockTag ? (' ' + stockTag) : '';
-            const rangeStr = getDateRangeDisplayString();
+            const rangeStr = getDateRangeDisplayString(getStockReverseDays());
             const rangeSpanHtml = (rangeStr && rangeStr !== '—')
                 ? '<span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2 tracking-normal">' + rangeStr + '</span>'
                 : '';
@@ -1691,13 +1741,15 @@
             const buyTbody = document.getElementById('buy-rank-tbody');
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell whitespace-nowrap">${formatVal(item, true)}</td></tr>`;
+                const detail = formatBrokerBuySellDetailLine(item);
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${detail}</div></td></tr>`;
             }).join('');
 
             const sellTbody = document.getElementById('sell-rank-tbody');
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell whitespace-nowrap">${formatVal(item, false)}</td></tr>`;
+                const detail = formatBrokerBuySellDetailLine(item);
+                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${detail}</div></td></tr>`;
             }).join('');
         }
 
@@ -1747,7 +1799,8 @@
                 const colorClass = a.isBuy ? 'text-buy' : 'text-sell';
                 const valStr = currentUnit === 'amount' ? (a.sign + ' ' + formatAmount(a.amount)) : (a.sign + (a.diff || 0).toLocaleString());
                 const codeHtml = a.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${a.code}</span>` : '';
-                resultsContainer.innerHTML += `<div class="flex justify-between items-center gap-2 py-3.5 px-4 border-b theme-border row-hover transition-colors"><div class="flex items-center gap-2 min-w-0"><span class="theme-text text-[14px] font-bold break-words">${a.name}</span>${codeHtml}</div><span class="${colorClass} font-mono font-bold text-[14px] whitespace-nowrap flex-shrink-0">${valStr}</span></div>`;
+                const detail = formatBrokerBuySellDetailLine(a);
+                resultsContainer.innerHTML += `<div class="flex justify-between items-start gap-2 py-3.5 px-4 border-b theme-border row-hover transition-colors"><div class="flex items-center gap-2 min-w-0"><span class="theme-text text-[14px] font-bold break-words">${a.name}</span>${codeHtml}</div><div class="flex flex-col items-end gap-0.5 flex-shrink-0 font-mono"><span class="${colorClass} font-bold text-[14px] whitespace-nowrap">${valStr}</span>${detail}</div></div>`;
             });
         }
 
