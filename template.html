@@ -306,6 +306,7 @@
                     <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
                     <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
                     <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
+                    <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">動能雷達</button>
                 </div>
             </div>
 
@@ -361,6 +362,42 @@
                         </button>
                     </div>
                     <div id="stock-reverse-results" class="mt-6 rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[8rem]"></div>
+                </div>
+            </div>
+
+            <div id="view-momentum" class="hidden mb-6">
+                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+                    <h2 class="text-lg md:text-xl font-black theme-text tracking-wide mb-4">動能雷達 <span class="text-sm font-mono font-normal theme-text-dim">Momentum Scanner</span></h2>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-active">【 掃描特定主力 】</button>
+                        <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inactive">【 掃描特定個股 】</button>
+                    </div>
+                    <div class="flex flex-wrap items-end gap-4 mb-4">
+                        <div>
+                            <label for="momentum-min-days" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">最小連續天數</label>
+                            <select id="momentum-min-days" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer">
+                                <option value="2">連續 2 天以上</option>
+                                <option value="3" selected>連續 3 天以上</option>
+                                <option value="5">連續 5 天以上</option>
+                                <option value="10">連續 10 天以上</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="momentum-input-actor" class="flex flex-wrap gap-3 items-end mb-4">
+                        <div class="min-w-[12rem] flex-1">
+                            <label for="momentum-actor-select" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">選擇主力</label>
+                            <select id="momentum-actor-select" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full"></select>
+                        </div>
+                        <button type="button" id="momentum-scan-actor" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">掃描</button>
+                    </div>
+                    <div id="momentum-input-stock" class="hidden flex flex-wrap gap-3 items-end mb-4">
+                        <div class="min-w-[10rem] flex-1 sm:max-w-xs">
+                            <label for="momentum-stock-input" class="block font-mono text-xs theme-text-dim mb-1.5 uppercase tracking-wider">股票代號／名稱</label>
+                            <input type="text" id="momentum-stock-input" placeholder="例如 2330 或 台積電" autocomplete="off" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full">
+                        </div>
+                        <button type="button" id="momentum-scan-stock" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">搜尋</button>
+                    </div>
+                    <div id="momentum-results" class="rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[6rem]"></div>
                 </div>
             </div>
 
@@ -676,11 +713,13 @@
             const etfBtn = document.getElementById('mode-tab-etf');
             const brokerBtn = document.getElementById('mode-tab-broker');
             const searchBtn = document.getElementById('mode-tab-search');
+            const momBtn = document.getElementById('mode-tab-momentum');
             if (!etfBtn || !brokerBtn || !searchBtn) return;
             const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors';
             etfBtn.className = base + ' ' + (currentMode === 'ETF' ? 'tab-active' : 'tab-inactive');
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
             searchBtn.className = base + ' ' + (currentMode === 'SEARCH' ? 'tab-active' : 'tab-inactive');
+            if (momBtn) momBtn.className = base + ' ' + (currentMode === 'MOMENTUM' ? 'tab-active' : 'tab-inactive');
         }
 
         function updateBrokerMapThemeClass() {
@@ -769,24 +808,38 @@
         }
 
         function setMode(mode) {
-            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH') return;
+            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM') return;
             if (mode === currentMode) return;
             currentMode = mode;
             updateModeTabStyles();
             const dashPanel = document.getElementById('dashboard-mode-panel');
             const searchPanel = document.getElementById('search-mode-panel');
+            const momentumPanel = document.getElementById('view-momentum');
             const pillsSection = document.getElementById('section-pills');
+            const tfrRow = document.getElementById('timeframe-unit-row');
             if (mode === 'SEARCH') {
                 if (pillsSection) pillsSection.classList.add('hidden');
+                if (tfrRow) tfrRow.classList.add('hidden');
                 if (dashPanel) dashPanel.classList.add('hidden');
                 if (searchPanel) searchPanel.classList.remove('hidden');
+                if (momentumPanel) momentumPanel.classList.add('hidden');
                 updateDashboardTitleDateRange();
                 runStockReverseSearch();
                 return;
             }
+            if (mode === 'MOMENTUM') {
+                if (pillsSection) pillsSection.classList.add('hidden');
+                if (tfrRow) tfrRow.classList.add('hidden');
+                if (dashPanel) dashPanel.classList.add('hidden');
+                if (searchPanel) searchPanel.classList.add('hidden');
+                if (momentumPanel) momentumPanel.classList.remove('hidden');
+                return;
+            }
             if (pillsSection) pillsSection.classList.remove('hidden');
+            if (tfrRow) tfrRow.classList.remove('hidden');
             if (dashPanel) dashPanel.classList.remove('hidden');
             if (searchPanel) searchPanel.classList.add('hidden');
+            if (momentumPanel) momentumPanel.classList.add('hidden');
             if (mode === 'ETF') {
                 currentETF = FAMILY_TAB;
             } else {
@@ -842,7 +895,7 @@
         }
 
         function onETFChange() {
-            if (currentMode === 'SEARCH') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM') return;
             const searchInp = document.getElementById('search-input');
             if (searchInp) searchInp.value = '';
             const isAI = currentETF === AI_TAB;
@@ -1018,6 +1071,7 @@
                     }
                 });
             }
+            initMomentumUI();
         }
 
         function getActorLabelForReverseSearch(actorKey) {
@@ -1050,16 +1104,269 @@
 
         /** 個股搜尋列專用：數字本體放大，億／萬單位相對縮小 */
         function formatAmountNetDisplayHtml(amount_10k) {
-            if (amount_10k == null || amount_10k === 0) return '—';
+            if (amount_10k == null || (typeof amount_10k === 'number' && isNaN(amount_10k))) return '—';
             const neg = amount_10k < 0;
             const abs = Math.abs(amount_10k);
             const sign = neg ? '−' : '+';
             const unitClass = 'text-[0.62em] sm:text-[0.65em] font-bold opacity-85 ml-px align-baseline';
+            if (abs === 0) {
+                return sign + '約 <span class="tabular-nums">0</span><span class="' + unitClass + '">萬</span>';
+            }
             if (abs >= 10000) {
                 const num = (abs / 10000).toFixed(2);
                 return sign + '約 <span class="tabular-nums">' + num + '</span><span class="' + unitClass + '">億</span>';
             }
             return sign + '約 <span class="tabular-nums">' + Math.round(abs).toLocaleString() + '</span><span class="' + unitClass + '">萬</span>';
+        }
+
+        let momentumSubMode = 'actor';
+
+        function getMomentumActorKeys() {
+            const keys = [];
+            etfCodes.forEach(function(c) {
+                if (allKeys.has(c) && c !== AI_TAB) keys.push(c);
+            });
+            brokerCodes.forEach(function(b) {
+                if (allKeys.has(b)) keys.push(b);
+            });
+            return keys;
+        }
+
+        function populateMomentumActorSelect() {
+            const sel = document.getElementById('momentum-actor-select');
+            if (!sel) return;
+            const keys = getMomentumActorKeys();
+            sel.innerHTML = keys.map(function(k) {
+                return '<option value="' + String(k).replace(/"/g, '&quot;') + '">' + getActorLabelForReverseSearch(k) + '</option>';
+            }).join('');
+        }
+
+        function momentumSameStockItem(item, code, name) {
+            return String(item.code || '') === String(code || '') && String(item.name || '') === String(name || '');
+        }
+
+        function netFlowForStockInBucket(bucket, code, name) {
+            if (!bucket) return { netDiff: 0, netAmount: 0 };
+            const match = function(item) { return momentumSameStockItem(item, code, name); };
+            let netD = 0;
+            let netA = 0;
+            (bucket.new_buy || []).filter(match).forEach(function(i) {
+                netD += i.diff || 0;
+                netA += i.amount || 0;
+            });
+            (bucket.increased || []).filter(match).forEach(function(i) {
+                netD += i.diff || 0;
+                netA += i.amount || 0;
+            });
+            (bucket.decreased || []).filter(match).forEach(function(i) {
+                netD -= i.diff || 0;
+                netA -= i.amount || 0;
+            });
+            (bucket.sold_out || []).filter(match).forEach(function(i) {
+                netD -= i.diff || 0;
+                netA -= i.amount || 0;
+            });
+            return { netDiff: netD, netAmount: netA };
+        }
+
+        function collectStocksFromActorDay(bucket) {
+            const map = new Map();
+            const pools = [bucket.new_buy || [], bucket.increased || [], bucket.decreased || [], bucket.sold_out || []];
+            pools.forEach(function(arr) {
+                arr.forEach(function(item) {
+                    const k = String(item.code || '') + '\t' + String(item.name || '');
+                    if (!map.has(k)) map.set(k, { code: item.code || '', name: item.name || '' });
+                });
+            });
+            return Array.from(map.values());
+        }
+
+        function computeMomentumStreak(actorKey, code, name) {
+            const dates = availableDatesDesc;
+            if (dates.length === 0) return null;
+            const day0 = db[dates[0]];
+            if (!day0 || !day0[actorKey]) return null;
+            const f0 = netFlowForStockInBucket(day0[actorKey], code, name);
+            if (f0.netDiff === 0) return null;
+            const dir = f0.netDiff > 0 ? 1 : -1;
+            let streak = 1;
+            let totalDiff = f0.netDiff;
+            let totalAmt = f0.netAmount;
+            for (let i = 1; i < dates.length; i++) {
+                const dayData = db[dates[i]];
+                if (!dayData || !dayData[actorKey]) break;
+                const f = netFlowForStockInBucket(dayData[actorKey], code, name);
+                if (f.netDiff === 0) break;
+                const d = f.netDiff > 0 ? 1 : -1;
+                if (d !== dir) break;
+                streak++;
+                totalDiff += f.netDiff;
+                totalAmt += f.netAmount;
+            }
+            return { streak: streak, totalDiff: totalDiff, totalAmt: totalAmt, dir: dir, code: code, name: name };
+        }
+
+        function escapeHtmlText(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function renderMomentumResultRow(leftTitle, badgeHtml, totalDiff, totalAmt, isBuy, stockSubtitlePlain) {
+            const diffStr = (totalDiff >= 0 ? '+' : '') + Math.round(Number(totalDiff) || 0).toLocaleString() + ' 張';
+            const amtNum = Number(totalAmt);
+            const amtHtml = formatAmountNetDisplayHtml(isNaN(amtNum) ? null : amtNum);
+            const color = isBuy ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
+            const stockLine = stockSubtitlePlain
+                ? '<div class="text-xs text-gray-500 dark:text-gray-400 mb-1 font-mono tracking-tight">' + escapeHtmlText(stockSubtitlePlain) + '</div>'
+                : '';
+            const badgeWrap = stockSubtitlePlain
+                ? '<div>' + badgeHtml + '</div>'
+                : '<div class="mt-1.5">' + badgeHtml + '</div>';
+            return '<div class="flex flex-row items-start justify-between gap-2 sm:gap-3 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
+                '<div class="min-w-0 flex-1 flex flex-col">' +
+                '<div class="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-snug break-words">' + leftTitle + '</div>' +
+                stockLine + badgeWrap + '</div>' +
+                '<div class="flex flex-col items-end shrink-0 self-start pl-2">' +
+                '<div class="flex flex-col items-end gap-1 font-mono ' + color + '">' +
+                '<span class="text-lg font-extrabold tabular-nums leading-none tracking-tight">' + diffStr + '</span>' +
+                '<span class="text-lg font-extrabold leading-tight text-right whitespace-nowrap">' + amtHtml + '</span></div></div></div>';
+        }
+
+        function runMomentumScanActor() {
+            const sel = document.getElementById('momentum-actor-select');
+            const out = document.getElementById('momentum-results');
+            const minEl = document.getElementById('momentum-min-days');
+            if (!sel || !out || !minEl) return;
+            const actorKey = sel.value;
+            const minStreak = parseInt(minEl.value, 10) || 3;
+            if (!actorKey) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">請選擇主力</div>';
+                return;
+            }
+            const dates = availableDatesDesc;
+            if (dates.length === 0) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">無資料</div>';
+                return;
+            }
+            const day0 = db[dates[0]];
+            if (!day0 || !day0[actorKey]) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">該主力在最新日無資料</div>';
+                return;
+            }
+            const stocks = collectStocksFromActorDay(day0[actorKey]);
+            const results = [];
+            stocks.forEach(function(s) {
+                const r = computeMomentumStreak(actorKey, s.code, s.name);
+                if (r && r.streak >= minStreak) results.push(r);
+            });
+            results.sort(function(a, b) {
+                return b.streak - a.streak || Math.abs(b.totalDiff) - Math.abs(a.totalDiff);
+            });
+            if (results.length === 0) {
+                out.innerHTML = '<div class="text-center text-gray-400 py-8">無符合條件之動能紀錄</div>';
+                return;
+            }
+            out.innerHTML = '<div class="max-h-[min(50vh,28rem)] overflow-y-auto overflow-x-hidden">' +
+                results.map(function(r) {
+                    const title = ((r.name || '—') + (r.code ? ' ' + r.code : '')).trim();
+                    const badge = r.dir === 1
+                        ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
+                        : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
+                    return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, null);
+                }).join('') + '</div>';
+        }
+
+        function runMomentumScanStock() {
+            const inp = document.getElementById('momentum-stock-input');
+            const out = document.getElementById('momentum-results');
+            const minEl = document.getElementById('momentum-min-days');
+            if (!inp || !out || !minEl) return;
+            const raw = inp.value.trim();
+            const minStreak = parseInt(minEl.value, 10) || 3;
+            if (!raw) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">請輸入股票代號或名稱</div>';
+                return;
+            }
+            const qRaw = raw.trim();
+            const dates = availableDatesDesc;
+            if (dates.length === 0) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">無資料</div>';
+                return;
+            }
+            const results = [];
+            const seen = new Set();
+            getMomentumActorKeys().forEach(function(actorKey) {
+                const day0 = db[dates[0]];
+                if (!day0 || !day0[actorKey]) return;
+                const stocks = collectStocksFromActorDay(day0[actorKey]).filter(function(s) {
+                    const codeNorm = String(s.code || '').trim();
+                    const nameStr = String(s.name || '');
+                    const codeMatch = codeNorm === qRaw;
+                    const nameMatch = nameStr.toLowerCase().includes(qRaw.toLowerCase());
+                    return codeMatch || nameMatch;
+                });
+                stocks.forEach(function(s) {
+                    const dedupe = actorKey + '|' + String(s.code) + '|' + String(s.name);
+                    if (seen.has(dedupe)) return;
+                    seen.add(dedupe);
+                    const r = computeMomentumStreak(actorKey, s.code, s.name);
+                    if (r && r.streak >= minStreak) results.push({ r: r, actorKey: actorKey });
+                });
+            });
+            results.sort(function(a, b) {
+                return b.r.streak - a.r.streak || Math.abs(b.r.totalDiff) - Math.abs(a.r.totalDiff);
+            });
+            if (results.length === 0) {
+                out.innerHTML = '<div class="text-center text-gray-400 py-8">無符合條件之動能紀錄</div>';
+                return;
+            }
+            out.innerHTML = '<div class="max-h-[min(50vh,28rem)] overflow-y-auto overflow-x-hidden">' +
+                results.map(function(x) {
+                    const r = x.r;
+                    const title = getActorLabelForReverseSearch(x.actorKey);
+                    const stockSubtitle = [r.name, r.code].filter(function(p) { return p != null && String(p).trim() !== ''; }).map(function(p) { return String(p).trim(); }).join(' ');
+                    const badge = r.dir === 1
+                        ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
+                        : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
+                    return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, stockSubtitle || null);
+                }).join('') + '</div>';
+        }
+
+        function setMomentumSubMode(sub) {
+            momentumSubMode = sub;
+            const actorPanel = document.getElementById('momentum-input-actor');
+            const stockPanel = document.getElementById('momentum-input-stock');
+            const btnA = document.getElementById('momentum-mode-actor');
+            const btnS = document.getElementById('momentum-mode-stock');
+            const base = 'tab-btn px-4 py-2 font-mono rounded-lg border theme-border transition-colors';
+            if (actorPanel) actorPanel.classList.toggle('hidden', sub !== 'actor');
+            if (stockPanel) stockPanel.classList.toggle('hidden', sub !== 'stock');
+            if (btnA) btnA.className = base + ' ' + (sub === 'actor' ? 'tab-active' : 'tab-inactive');
+            if (btnS) btnS.className = base + ' ' + (sub === 'stock' ? 'tab-active' : 'tab-inactive');
+        }
+
+        function initMomentumUI() {
+            populateMomentumActorSelect();
+            const btnA = document.getElementById('momentum-mode-actor');
+            const btnS = document.getElementById('momentum-mode-stock');
+            const scanA = document.getElementById('momentum-scan-actor');
+            const scanS = document.getElementById('momentum-scan-stock');
+            const stockInp = document.getElementById('momentum-stock-input');
+            if (btnA) btnA.onclick = function() { setMomentumSubMode('actor'); };
+            if (btnS) btnS.onclick = function() { setMomentumSubMode('stock'); };
+            if (scanA) scanA.onclick = runMomentumScanActor;
+            if (scanS) scanS.onclick = runMomentumScanStock;
+            if (stockInp) stockInp.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') runMomentumScanStock();
+            });
+            const minDays = document.getElementById('momentum-min-days');
+            if (minDays) minDays.addEventListener('change', function() {
+                if (currentMode !== 'MOMENTUM') return;
+                if (momentumSubMode === 'actor') runMomentumScanActor();
+                else if (stockInp && stockInp.value.trim()) runMomentumScanStock();
+            });
+            setMomentumSubMode('actor');
+            const out = document.getElementById('momentum-results');
+            if (out) out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">選擇條件後按掃描／搜尋</div>';
         }
 
         function runStockReverseSearch() {
@@ -1213,7 +1520,7 @@
         }
 
         function refreshTable() {
-            if (currentMode === 'SEARCH') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM') return;
             if (currentETF === AI_TAB) return;
             const { buy, sell } = aggregateData(currentETF, currentDays);
             const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
@@ -1323,7 +1630,7 @@
         }
 
         function handleSearch() {
-            if (currentMode === 'SEARCH') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM') return;
             const inp = document.getElementById('search-input');
             if (!inp) return;
             const val = inp.value.trim().toLowerCase();
