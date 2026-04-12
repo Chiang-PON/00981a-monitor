@@ -101,8 +101,6 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
         :root {
             --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --bg-panel-hover: #fafafa; --bg-row-even: #ffffff; --bg-row-odd: #fafafa;
@@ -216,39 +214,6 @@
         [data-theme="dark"] .unit-btn-amount.unit-active { background-color: var(--color-buy); color: #fff; }
         [data-theme="dark"] .unit-btn-shares.unit-active { background-color: var(--color-accent); color: #fff; }
 
-        .consensus-panel { border-color: #ef4444; background-color: #fef2f2; }
-        [data-theme="dark"] .consensus-panel { border-color: #f97316; background-color: rgba(124, 45, 18, 0.4); }
-        .consensus-title { color: #dc2626; }
-        [data-theme="dark"] .consensus-title { color: #fb923c; }
-        .consensus-tag { background-color: #fecaca; color: #b91c1c; }
-        [data-theme="dark"] .consensus-tag { background-color: rgba(194, 65, 12, 0.5); color: #fdba74; }
-
-        #broker-map { position: relative; z-index: 10; background: var(--bg-panel); }
-        #broker-map .leaflet-container { font-family: "Noto Sans TC", sans-serif; border-radius: 0.75rem; }
-        .leaflet-tooltip.broker-pin-tooltip {
-            font-family: "Noto Sans TC", sans-serif !important;
-            font-weight: 800 !important;
-            font-size: 0.95rem !important;
-            padding: 8px 12px !important;
-            border-radius: 8px !important;
-            border: 1px solid var(--border-dim) !important;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
-            background: rgba(255, 255, 255, 0.96) !important;
-            color: var(--text-main) !important;
-        }
-        [data-theme="dark"] .leaflet-tooltip.broker-pin-tooltip {
-            background: rgba(23, 23, 23, 0.96) !important;
-            color: #fafafa !important;
-            border-color: #3f3f46 !important;
-        }
-        [data-theme="dark"] #broker-map.broker-map-dark .leaflet-control-attribution {
-            background: rgba(13, 13, 13, 0.85);
-            color: var(--text-dim);
-        }
-        [data-theme="dark"] #broker-map.broker-map-dark .leaflet-control-attribution a {
-            color: var(--color-accent);
-        }
-
         .flatpickr-calendar {
             z-index: 100 !important;
         }
@@ -360,24 +325,28 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
-                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">國際／台股指數</h3>
-                        <div id="home-markets-out" class="text-sm min-h-[4rem] theme-text-dim">載入中…</div>
-                        <p id="home-markets-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
-                    </div>
-                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
-                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
-                        <div id="home-news-out" class="text-sm min-h-[4rem] theme-text-dim max-h-[min(55vh,28rem)] overflow-y-auto pr-1">載入中…</div>
-                        <p id="home-news-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
-                    </div>
-                </div>
-
-                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-2">臺股產業／類股指數方塊圖</h3>
                     <p class="text-xs theme-text-dim mb-3 leading-relaxed">證交所各類指數：<span class="text-buy font-semibold">紅＝漲</span>、<span class="text-sell font-semibold">綠＝跌</span>（相對前一交易日）；方塊愈大表示 |漲跌幅| 愈大。</p>
                     <div id="home-sector-treemap" class="w-full min-h-[240px] md:min-h-[280px] rounded-lg border theme-border theme-bg-input overflow-hidden"></div>
                     <p id="home-sector-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-3 sm:p-5 md:p-6">
+                        <h3 class="font-mono text-xs sm:text-sm font-bold theme-text-dim uppercase tracking-wider mb-2 sm:mb-3">國際／台股指數</h3>
+                        <div id="home-markets-out" class="text-sm min-h-[4rem] theme-text-dim">載入中…</div>
+                        <p id="home-markets-disclaimer" class="text-[10px] sm:text-[11px] theme-text-dim mt-2 sm:mt-3 leading-relaxed hidden"></p>
+                    </div>
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                        <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
+                        <div id="home-news-filter-wrap" class="hidden mb-3">
+                            <label for="home-news-filter" class="block font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-1.5">篩選關鍵字</label>
+                            <input type="search" id="home-news-filter" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="搜尋標題、來源…" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full min-h-[44px] transition-colors focus:border-[var(--border-focus)]">
+                        </div>
+                        <div id="home-news-out" class="text-sm min-h-[4rem] theme-text-dim max-h-[min(55vh,28rem)] overflow-y-auto pr-1">載入中…</div>
+                        <p id="home-news-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -516,33 +485,12 @@
 
             <div id="dashboard-mode-panel">
 
-            <div id="broker-map" class="hidden h-64 md:h-80 w-full rounded-xl border theme-border z-10 mb-6 overflow-hidden" aria-hidden="true"></div>
-
-            <div id="kaiji-breakdown-panel" class="hidden mb-6 rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6">
-                <h3 class="text-lg font-bold theme-text mb-2">凱基大聯盟 · 單一股票分點拆解</h3>
-                <p class="text-xs theme-text-dim mb-3 leading-relaxed">區間與上方「天數」「結束日期」相同；列示各分點對該股之淨流加總。若該分點某日缺檔則該日不計。</p>
-                <div class="flex flex-wrap gap-2 mb-3 items-end">
-                    <div class="min-w-[10rem] flex-1 sm:max-w-xs">
-                        <label for="kaiji-breakdown-input" class="block font-mono text-xs theme-text-dim mb-1">股票代號</label>
-                        <input type="text" id="kaiji-breakdown-input" placeholder="例如 2330" maxlength="12" autocomplete="off" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full" onkeydown="if(event.key==='Enter')runKaijiBreakdown()">
-                    </div>
-                    <button type="button" onclick="runKaijiBreakdown()" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">拆解</button>
-                </div>
-                <div id="kaiji-breakdown-out" class="overflow-x-auto rounded-lg border theme-border theme-bg-base min-h-[3rem]"></div>
-            </div>
-
-            <div id="header-main" class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 pb-5 mb-6 theme-border border-b">
+            <div id="header-main" class="flex flex-col gap-4 pb-5 mb-6 theme-border border-b">
                 <div class="flex flex-col gap-1">
                     <span class="font-mono text-xs theme-text-dim tracking-widest uppercase">TARGET_ASSET</span>
                     <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                         <h2 id="current-etf-title" class="text-3xl md:text-4xl font-black theme-text tracking-wider">---</h2>
                         <span id="dashboard-title-date-range" class="hidden text-sm font-normal text-gray-500 dark:text-gray-400 ml-0 sm:ml-2 tracking-normal whitespace-nowrap" aria-label="資料日期區間"></span>
-                    </div>
-                </div>
-                <div id="header-controls" class="flex flex-wrap items-center gap-3">
-                    <div class="theme-bg-input border rounded-md flex items-center px-3 py-1.5 transition-colors">
-                        <span class="theme-text-dim font-mono mr-2">></span>
-                        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="SEARCH_TICKER..." class="bg-transparent text-sm w-full sm:w-36 font-mono placeholder-gray-400 theme-text border-none">
                     </div>
                 </div>
             </div>
@@ -552,12 +500,6 @@
             <div id="normal-view">
                 <div id="empty-state" class="text-center font-mono theme-text-dim py-12 theme-bg-base border border-dashed theme-border rounded-lg hidden">
                     > NO_DATA_DETECTED_
-                </div>
-                <div id="consensus-alert-container" class="consensus-panel hidden mb-6 rounded-xl border-2 p-4">
-                    <h4 class="font-mono font-bold text-sm mb-3 flex items-center gap-2 consensus-title">
-                        主力共識警報 (3+ 分點買進)
-                    </h4>
-                    <div id="consensus-alert-list" class="flex flex-wrap gap-2"></div>
                 </div>
                 <div id="data-table-container" class="hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -593,13 +535,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div id="search-view" class="hidden">
-                <h3 class="font-mono text-xs theme-text-dim tracking-[0.2em] mb-4 flex items-center border-b theme-border pb-2">
-                    <span class="theme-text-dim opacity-50 mr-2">///</span> RADAR_SCAN_RESULTS
-                </h3>
-                <div id="search-results-list" class="flex flex-col border-t theme-border mt-1"></div>
             </div>
 
             <div id="ai-agent-view" class="hidden">
@@ -650,9 +585,6 @@
         const __META__ = __META_JSON__;
         const __DIGEST__ = __DIGEST_JSON__;
         /* 全域狀態：須在任何 init / 主題回呼之前宣告，避免 let TDZ (Cannot access before initialization) */
-        let brokerMap = null;
-        let brokerMapBasemapLayer = null;
-        let brokerMapMarkers = {};
         let datePickerInstance = null;
         let searchDatePickerInstance = null;
         let currentMode = 'ETF';
@@ -674,43 +606,6 @@
         let allKeys = new Set();
         Object.values(db).forEach(dateData => { Object.keys(dateData).forEach(k => allKeys.add(k)); });
         const brokerCodes = Object.keys(brokerLabels);
-        const brokerCoords = {
-            "9207": { name: "凱基永和", lat: 25.0080, lng: 121.5150 },
-            "920A": { name: "凱基板橋", lat: 25.0118, lng: 121.4653 },
-            "920D": { name: "凱基市府", lat: 25.0392, lng: 121.5644 },
-            "920F": { name: "凱基站前", lat: 25.0460, lng: 121.5160 },
-            "9216": { name: "凱基信義", lat: 25.0320, lng: 121.5670 },
-            "9217": { name: "凱基松山", lat: 25.0500, lng: 121.5770 },
-            "9218": { name: "凱基大直", lat: 25.0800, lng: 121.5450 },
-            "921F": { name: "凱基天母", lat: 25.1140, lng: 121.5320 },
-            "921J": { name: "凱基土城", lat: 24.9820, lng: 121.4420 },
-            "921S": { name: "凱基新莊", lat: 25.0360, lng: 121.4320 },
-            "9229": { name: "凱基中山", lat: 25.0560, lng: 121.5240 },
-            "9234": { name: "凱基竹北", lat: 24.8252, lng: 121.0125 },
-            "9238": { name: "凱基士林", lat: 25.0898, lng: 121.5230 },
-            "9239": { name: "凱基市政", lat: 24.1620, lng: 120.6470 },
-            "9257": { name: "凱基林口", lat: 25.0760, lng: 121.3780 },
-            "9272": { name: "凱基竹科", lat: 24.7814, lng: 120.9876 },
-            "9285": { name: "凱基中壢", lat: 24.9576, lng: 121.2250 },
-            "9287": { name: "凱基內湖", lat: 25.0796, lng: 121.5796 }
-        };
-
-        function getCartoBasemapUrl() {
-            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-            return dark
-                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-        }
-
-        function getCartoAttribution() {
-            return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-        }
-
-        function shortBrokerMapLabel(fullName) {
-            if (!fullName || typeof fullName !== 'string') return '';
-            const t = fullName.replace(/凱基/g, '').trim();
-            return t || fullName;
-        }
 
         const etfCodes = Array.from(allKeys).filter(k => !brokerCodes.includes(k) && k !== AI_TAB).sort();
         etfList = [FAMILY_TAB];
@@ -740,7 +635,6 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcons(savedTheme);
-            updateBrokerMapThemeClass();
         }
         function toggleTheme() {
             const html = document.documentElement;
@@ -749,7 +643,6 @@
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcons(newTheme);
-            updateBrokerMapThemeClass();
             if (datePickerInstance && typeof datePickerInstance.redraw === 'function') {
                 datePickerInstance.redraw();
             }
@@ -877,98 +770,6 @@
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
             searchBtn.className = base + ' ' + (currentMode === 'SEARCH' ? 'tab-active' : 'tab-inactive');
             if (momBtn) momBtn.className = base + ' ' + (currentMode === 'MOMENTUM' ? 'tab-active' : 'tab-inactive');
-        }
-
-        function updateBrokerMapThemeClass() {
-            const el = document.getElementById('broker-map');
-            if (!el) return;
-            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-            el.classList.toggle('broker-map-dark', dark);
-            if (brokerMapBasemapLayer) {
-                brokerMapBasemapLayer.setUrl(getCartoBasemapUrl());
-            }
-        }
-
-        function initBrokerMap() {
-            if (brokerMap || typeof L === 'undefined') return;
-            const el = document.getElementById('broker-map');
-            if (!el) return;
-            brokerMap = L.map('broker-map', { scrollWheelZoom: true }).setView([25.03, 121.5], 11);
-            brokerMapBasemapLayer = L.tileLayer(getCartoBasemapUrl(), {
-                attribution: getCartoAttribution(),
-                subdomains: 'abcd',
-                maxZoom: 20
-            }).addTo(brokerMap);
-            brokerMapMarkers = {};
-            brokerCodes.forEach(code => {
-                const c = brokerCoords[code];
-                if (!c) return;
-                const marker = L.marker([c.lat, c.lng]).addTo(brokerMap);
-                marker.bindTooltip(shortBrokerMapLabel(c.name), {
-                    permanent: false,
-                    direction: 'top',
-                    offset: [0, -8],
-                    className: 'broker-pin-tooltip'
-                });
-                marker.on('click', () => {
-                    brokerMap.flyTo([c.lat, c.lng], 14, { duration: 0.85 });
-                    marker.openTooltip();
-                    currentETF = code;
-                    onETFChange();
-                });
-                brokerMapMarkers[code] = marker;
-            });
-            updateBrokerMapThemeClass();
-            setTimeout(function() {
-                if (brokerMap) {
-                    brokerMap.invalidateSize();
-                    syncBrokerMapToSelection(currentETF);
-                }
-            }, 200);
-        }
-
-        function syncBrokerMapToSelection(etf) {
-            if (!brokerMap) return;
-            if (etf === KAIJI_TAB) {
-                brokerMap.flyTo([25.03, 121.5], 11, { duration: 0.85 });
-                return;
-            }
-            const c = brokerCoords[etf];
-            if (!c) return;
-            brokerMap.flyTo([c.lat, c.lng], 14, { duration: 0.85 });
-            const m = brokerMapMarkers[etf];
-            if (m) {
-                setTimeout(function() { m.openTooltip(); }, 400);
-            }
-        }
-
-        function ensureBrokerMapVisibleAndSync() {
-            const mapEl = document.getElementById('broker-map');
-            if (!mapEl) return;
-            if (currentMode !== 'BROKER') {
-                mapEl.classList.add('hidden');
-                mapEl.setAttribute('aria-hidden', 'true');
-                return;
-            }
-            mapEl.classList.remove('hidden');
-            mapEl.setAttribute('aria-hidden', 'false');
-            if (!brokerMap) {
-                initBrokerMap();
-            } else {
-                setTimeout(function() {
-                    if (brokerMap) {
-                        brokerMap.invalidateSize();
-                        syncBrokerMapToSelection(currentETF);
-                    }
-                }, 50);
-            }
-        }
-
-        function updateKaijiBreakdownPanelVisibility() {
-            const el = document.getElementById('kaiji-breakdown-panel');
-            if (!el) return;
-            const show = currentMode === 'BROKER' && currentETF === KAIJI_TAB;
-            el.classList.toggle('hidden', !show);
         }
 
         function initDataFreshnessBar() {
@@ -1118,8 +919,6 @@
                 if (searchPanel) searchPanel.classList.add('hidden');
                 if (momentumPanel) momentumPanel.classList.add('hidden');
                 if (homePanel) homePanel.classList.remove('hidden');
-                ensureBrokerMapVisibleAndSync();
-                updateKaijiBreakdownPanelVisibility();
                 refreshHomeDashboard();
                 return;
             }
@@ -1134,7 +933,6 @@
                 if (srt) srt.value = String(currentDays);
                 updateDashboardTitleDateRange();
                 runStockReverseSearch();
-                updateKaijiBreakdownPanelVisibility();
                 return;
             }
             if (mode === 'MOMENTUM') {
@@ -1143,7 +941,6 @@
                 if (dashPanel) dashPanel.classList.add('hidden');
                 if (searchPanel) searchPanel.classList.add('hidden');
                 if (momentumPanel) momentumPanel.classList.remove('hidden');
-                updateKaijiBreakdownPanelVisibility();
                 return;
             }
             if (pillsSection) pillsSection.classList.remove('hidden');
@@ -1222,19 +1019,13 @@
 
         function onETFChange() {
             if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
-            const searchInp = document.getElementById('search-input');
-            if (searchInp) searchInp.value = '';
             const isAI = currentETF === AI_TAB;
             const tfr = document.getElementById('timeframe-unit-row');
             if (tfr) tfr.classList.toggle('hidden', isAI);
-            const hc = document.getElementById('header-controls');
-            if (hc) hc.classList.toggle('hidden', isAI);
             const sf = document.getElementById('sector-flow-container');
             if (sf) sf.classList.toggle('hidden', isAI);
             const nv = document.getElementById('normal-view');
             if (nv) nv.classList.toggle('hidden', isAI);
-            const sv = document.getElementById('search-view');
-            if (sv) sv.classList.add('hidden');
             const aiV = document.getElementById('ai-agent-view');
             if (aiV) aiV.classList.toggle('hidden', !isAI);
             const titleEl = document.getElementById('current-etf-title');
@@ -1244,8 +1035,6 @@
                 refreshTable();
             }
             updatePillActiveState();
-            ensureBrokerMapVisibleAndSync();
-            updateKaijiBreakdownPanelVisibility();
         }
 
         function onTimeframeChange() {
@@ -1508,6 +1297,11 @@
                     if (e.key === 'Enter') addWatchlistItem();
                 });
             }
+            const hnf = document.getElementById('home-news-filter');
+            if (hnf) {
+                hnf.addEventListener('input', applyHomeNewsFilter);
+                hnf.addEventListener('search', applyHomeNewsFilter);
+            }
 
             let lm = 'ETF';
             try {
@@ -1709,42 +1503,6 @@
             return '';
         }
 
-        function runKaijiBreakdown() {
-            const inp = document.getElementById('kaiji-breakdown-input');
-            const out = document.getElementById('kaiji-breakdown-out');
-            if (!inp || !out) return;
-            const raw = String(inp.value || '').trim();
-            if (!raw) {
-                out.innerHTML = '<div class="p-4 text-sm theme-text-dim">請輸入股票代號</div>';
-                return;
-            }
-            const code = raw.replace(/\s+/g, '');
-            const nameGuess = findStockNameForCode(code);
-            let dateIndex = availableDatesDesc.indexOf(currentDate);
-            if (dateIndex === -1) dateIndex = 0;
-            const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(currentDays, availableDatesDesc.length - dateIndex));
-            const rows = [];
-            brokerCodes.filter(function(b) { return allKeys.has(b); }).forEach(function(bid) {
-                let netD = 0;
-                let netA = 0;
-                dateSlice.forEach(function(d) {
-                    const dayData = db[d];
-                    if (!dayData || !dayData[bid]) return;
-                    const f = netFlowForStockInBucket(dayData[bid], code, nameGuess);
-                    netD += f.netDiff;
-                    netA += f.netAmount;
-                });
-                rows.push({ bid: bid, netD: netD, netA: netA });
-            });
-            rows.sort(function(a, b) { return Math.abs(b.netD) - Math.abs(a.netD); });
-            const head = '<table class="w-full text-sm min-w-[320px]"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-2 font-mono">分點</th><th class="text-right py-2 px-2 font-mono">淨張</th><th class="text-right py-2 px-2 font-mono">淨額(萬)</th></tr></thead><tbody>';
-            const body = rows.map(function(r) {
-                const label = brokerLabels[r.bid] ? (r.bid + ' ' + brokerLabels[r.bid]) : r.bid;
-                return '<tr class="border-b theme-border"><td class="py-2 px-2">' + escapeHtmlText(label) + '</td><td class="py-2 px-2 text-right font-mono">' + (r.netD >= 0 ? '+' : '') + r.netD.toLocaleString() + '</td><td class="py-2 px-2 text-right font-mono">' + formatAmountNetDisplayHtml(r.netA) + '</td></tr>';
-            }).join('');
-            out.innerHTML = head + body + '</tbody></table>';
-        }
-
         function renderHomeHotStocks() {
             const el = document.getElementById('home-hot-out');
             if (!el) return;
@@ -1823,22 +1581,22 @@
                 const note = it.note ? '<div class="text-[10px] theme-text-dim mt-1">' + escapeHtmlText(it.note) + '</div>' : '';
                 let mid = '';
                 if (it.price == null || it.price === '') {
-                    mid = '<div class="text-lg font-mono theme-text-dim">—</div>';
+                    mid = '<div class="text-base sm:text-lg font-mono theme-text-dim">—</div>';
                 } else if (it.source === 'twse') {
-                    mid = '<div class="text-lg font-bold theme-text tabular-nums">' + escapeHtmlText(String(it.price)) + '</div>' +
-                        '<div class="text-xs font-mono text-buy mt-0.5">Δ ' + escapeHtmlText(String(it.change || '')) + '　' + escapeHtmlText(String(it.changePercent || '')) + '</div>';
+                    mid = '<div class="text-base sm:text-lg font-bold theme-text tabular-nums leading-tight">' + escapeHtmlText(String(it.price)) + '</div>' +
+                        '<div class="text-[11px] sm:text-xs font-mono text-buy mt-0.5 leading-tight">Δ ' + escapeHtmlText(String(it.change || '')) + '　' + escapeHtmlText(String(it.changePercent || '')) + '</div>';
                 } else {
                     const pct = parseFloat(String(it.changePercent).replace(',', '.'));
                     const pctCls = !isNaN(pct) && pct > 0 ? 'text-buy' : (!isNaN(pct) && pct < 0 ? 'text-sell' : 'theme-text-dim');
-                    const cnote = it.changeNote ? '<span class="text-[10px] theme-text-dim ml-1">(' + escapeHtmlText(it.changeNote) + ')</span>' : '';
-                    mid = '<div class="text-lg font-bold theme-text tabular-nums">' + escapeHtmlText(String(it.price)) + ' <span class="text-xs font-mono theme-text-dim">' + escapeHtmlText(it.currency || '') + '</span></div>' +
-                        '<div class="text-xs font-mono ' + pctCls + ' mt-0.5">' + escapeHtmlText(String(it.change || '')) + '　' + escapeHtmlText(String(it.changePercent)) + '% ' + cnote + '</div>';
+                    const cnote = it.changeNote ? '<span class="text-[9px] sm:text-[10px] theme-text-dim ml-1">(' + escapeHtmlText(it.changeNote) + ')</span>' : '';
+                    mid = '<div class="text-base sm:text-lg font-bold theme-text tabular-nums leading-tight">' + escapeHtmlText(String(it.price)) + ' <span class="text-[10px] sm:text-xs font-mono theme-text-dim">' + escapeHtmlText(it.currency || '') + '</span></div>' +
+                        '<div class="text-[11px] sm:text-xs font-mono ' + pctCls + ' mt-0.5 leading-tight">' + escapeHtmlText(String(it.change || '')) + '　' + escapeHtmlText(String(it.changePercent)) + '% ' + cnote + '</div>';
                 }
-                const asOf = it.asOf ? '<div class="text-[10px] theme-text-dim mt-1 font-mono">' + escapeHtmlText(String(it.asOf)) + '</div>' : '';
-                return '<div class="rounded-lg border theme-border theme-bg-input p-3 h-full min-h-[5.5rem]">' +
-                    '<div class="font-mono text-[11px] theme-text-dim mb-1">' + label + '</div>' + mid + note + asOf + '</div>';
+                const asOf = it.asOf ? '<div class="text-[9px] sm:text-[10px] theme-text-dim mt-1 font-mono leading-tight">' + escapeHtmlText(String(it.asOf)) + '</div>' : '';
+                return '<div class="rounded-lg border theme-border theme-bg-input p-2 sm:p-3 h-full sm:min-h-[5.5rem]">' +
+                    '<div class="font-mono text-[10px] sm:text-[11px] theme-text-dim mb-0.5 sm:mb-1 leading-tight">' + label + '</div>' + mid + note + asOf + '</div>';
             });
-            out.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">' + cards.join('') + '</div>';
+            out.innerHTML = '<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">' + cards.join('') + '</div>';
         }
 
         function treemapThemeFill(up) {
@@ -1917,11 +1675,48 @@
             });
         }
 
+        let homeNewsItemsCache = null;
+
+        function homeNewsSingleItemHtml(it) {
+            const t = escapeHtmlText(it.title || '');
+            const u = escapeHtmlText(it.link || '#');
+            const src = escapeHtmlText(it.source || '');
+            const pub = it.published ? '<span class="text-[10px] theme-text-dim font-mono ml-1">' + escapeHtmlText(it.published) + '</span>' : '';
+            return '<a href="' + u + '" target="_blank" rel="noopener noreferrer" class="block py-2.5 border-b theme-border last:border-0 row-hover rounded px-1 -mx-1">' +
+                '<span class="theme-text font-medium leading-snug">' + t + '</span>' +
+                '<div class="text-[11px] theme-text-dim mt-1 font-mono">' + src + pub + '</div></a>';
+        }
+
+        function applyHomeNewsFilter() {
+            const out = document.getElementById('home-news-out');
+            if (!out || !homeNewsItemsCache || !homeNewsItemsCache.length) return;
+            const inp = document.getElementById('home-news-filter');
+            const raw = inp ? String(inp.value || '').trim() : '';
+            const q = raw.toLowerCase();
+            let list = homeNewsItemsCache;
+            if (q) {
+                list = homeNewsItemsCache.filter(function(it) {
+                    const blob = [it.title, it.source, it.published, it.link].map(function(x) { return String(x || ''); }).join('\n').toLowerCase();
+                    return blob.indexOf(q) !== -1;
+                });
+            }
+            if (!list.length) {
+                out.innerHTML = '<p class="text-sm theme-text-dim py-3">' + (raw ? '無符合「' + escapeHtmlText(raw) + '」的項目，請換關鍵字試試。' : '（無項目）') + '</p>';
+                return;
+            }
+            out.innerHTML = list.map(homeNewsSingleItemHtml).join('');
+        }
+
         function renderHomeNewsFromJson(j) {
             const out = document.getElementById('home-news-out');
             const disc = document.getElementById('home-news-disclaimer');
+            const wrap = document.getElementById('home-news-filter-wrap');
+            homeNewsItemsCache = null;
             if (!out) return;
             if (!j || !j.ok || !j.items || !j.items.length) {
+                if (wrap) wrap.classList.add('hidden');
+                const inp = document.getElementById('home-news-filter');
+                if (inp) inp.value = '';
                 out.innerHTML = '<p class="text-sm theme-text-dim">' + escapeHtmlText((j && j.error) || '無新聞資料（請先執行 fetch_digest.py 再 generate_web.py）。') + '</p>';
                 if (disc) { disc.classList.add('hidden'); disc.textContent = ''; }
                 return;
@@ -1930,16 +1725,9 @@
                 disc.textContent = j.disclaimer || '';
                 disc.classList.toggle('hidden', !j.disclaimer);
             }
-            const lines = j.items.map(function(it) {
-                const t = escapeHtmlText(it.title || '');
-                const u = escapeHtmlText(it.link || '#');
-                const src = escapeHtmlText(it.source || '');
-                const pub = it.published ? '<span class="text-[10px] theme-text-dim font-mono ml-1">' + escapeHtmlText(it.published) + '</span>' : '';
-                return '<a href="' + u + '" target="_blank" rel="noopener noreferrer" class="block py-2.5 border-b theme-border last:border-0 row-hover rounded px-1 -mx-1">' +
-                    '<span class="theme-text font-medium leading-snug">' + t + '</span>' +
-                    '<div class="text-[11px] theme-text-dim mt-1 font-mono">' + src + pub + '</div></a>';
-            });
-            out.innerHTML = lines.join('');
+            homeNewsItemsCache = j.items.slice();
+            if (wrap) wrap.classList.remove('hidden');
+            applyHomeNewsFilter();
         }
 
         function updateHomeDigestStamp() {
@@ -2446,51 +2234,10 @@
             if (buy.length === 0 && sell.length === 0) {
                 emptyState.classList.remove('hidden');
                 dataContainer.classList.add('hidden');
-                const ca = document.getElementById('consensus-alert-container');
-                if (ca) ca.classList.add('hidden');
                 return;
             }
             emptyState.classList.add('hidden');
             dataContainer.classList.remove('hidden');
-
-            const consensusContainer = document.getElementById('consensus-alert-container');
-            const consensusList = document.getElementById('consensus-alert-list');
-            if (currentETF === KAIJI_TAB) {
-                let dateIndex = availableDatesDesc.indexOf(currentDate);
-                if (dateIndex === -1) dateIndex = 0;
-                const dateSlice = availableDatesDesc.slice(dateIndex, dateIndex + Math.min(currentDays, availableDatesDesc.length - dateIndex));
-                const brokerList = brokerCodes.filter(b => allKeys.has(b));
-                const stockBrokerCount = {};
-                dateSlice.forEach(d => {
-                    const dataOfDay = db[d] || {};
-                    brokerList.forEach(b => {
-                        const dayData = dataOfDay[b];
-                        if (!dayData) return;
-                        [...(dayData.increased || []), ...(dayData.new_buy || [])].forEach(i => {
-                            if ((i.diff || 0) > 0) {
-                                const key = aggregateRowKey(i);
-                                if (!stockBrokerCount[key]) stockBrokerCount[key] = new Set();
-                                stockBrokerCount[key].add(b);
-                            }
-                        });
-                    });
-                });
-                const highConsensusKeys = Object.entries(stockBrokerCount).filter(([, brokers]) => brokers.size >= 3).map(([k]) => k);
-                const buyMap = {};
-                buy.forEach(i => { buyMap[aggregateRowKey(i)] = i; });
-                const consensusItems = highConsensusKeys.filter(k => buyMap[k]).map(k => buyMap[k]);
-                if (consensusItems.length > 0) {
-                    consensusContainer.classList.remove('hidden');
-                    consensusList.innerHTML = consensusItems.map(i => {
-                        const valStr = currentUnit === 'amount' ? formatAmount(i.amount) : '+' + (i.diff || 0).toLocaleString() + ' 張';
-                        return `<span class="consensus-tag inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-mono text-sm font-bold">${i.name} ${i.code ? '(' + i.code + ')' : ''} ${valStr}</span>`;
-                    }).join('');
-                } else {
-                    consensusContainer.classList.add('hidden');
-                }
-            } else {
-                consensusContainer.classList.add('hidden');
-            }
 
             const sfContainer = document.getElementById('sector-flow-container');
             const sectorTotals = {};
@@ -2544,50 +2291,6 @@
             let val = Math.abs(amount_10k);
             if (val >= 10000) return `約 ${(val/10000).toFixed(2)} 億`;
             return `約 ${Math.round(val).toLocaleString()} 萬`;
-        }
-
-        function handleSearch() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME') return;
-            const inp = document.getElementById('search-input');
-            if (!inp) return;
-            const val = inp.value.trim().toLowerCase();
-            const normalView = document.getElementById('normal-view');
-            const searchView = document.getElementById('search-view');
-            const sfContainer = document.getElementById('sector-flow-container');
-
-            if (currentETF === AI_TAB) return;
-            if (!val) {
-                normalView.classList.remove('hidden');
-                searchView.classList.add('hidden');
-                sfContainer.classList.remove('hidden');
-                refreshTable();
-                return;
-            }
-
-            normalView.classList.add('hidden');
-            sfContainer.classList.add('hidden');
-            searchView.classList.remove('hidden');
-
-            const resultsContainer = document.getElementById('search-results-list');
-            resultsContainer.innerHTML = '';
-
-            const { buy, sell } = aggregateData(currentETF, currentDays);
-            const allMatches = [...buy.filter(i => (i.name + (i.code || '')).toLowerCase().includes(val)).map(i => ({ ...i, sign: '+', isBuy: true })),
-                ...sell.filter(i => (i.name + (i.code || '')).toLowerCase().includes(val)).map(i => ({ ...i, sign: '-', isBuy: false }))];
-            allMatches.sort((a, b) => (b.diff || 0) - (a.diff || 0));
-
-            if (allMatches.length === 0) {
-                resultsContainer.innerHTML = '<div class="py-12 text-center theme-text-dim font-mono text-sm">> RADAR_EMPTY</div>';
-                return;
-            }
-
-            allMatches.forEach(a => {
-                const colorClass = a.isBuy ? 'text-buy' : 'text-sell';
-                const valStr = currentUnit === 'amount' ? (a.sign + ' ' + formatAmount(a.amount)) : (a.sign + (a.diff || 0).toLocaleString());
-                const codeHtml = a.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${a.code}</span>` : '';
-                const detail = formatBrokerBuySellDetailLine(a);
-                resultsContainer.innerHTML += `<div class="flex justify-between items-start gap-2 py-3.5 px-4 border-b theme-border row-hover transition-colors"><div class="flex items-center gap-2 min-w-0"><span class="theme-text text-[14px] font-bold break-words">${a.name}</span>${codeHtml}</div><div class="flex flex-col items-end gap-0.5 flex-shrink-0 font-mono"><span class="${colorClass} font-bold text-[14px] whitespace-nowrap">${valStr}</span>${detail}</div></div>`;
-            });
         }
 
         function getAIErrorMessage(status, data) {
