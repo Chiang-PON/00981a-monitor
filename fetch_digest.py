@@ -32,8 +32,16 @@ RSS_FEEDS: list[tuple[str, str]] = [
     ("https://money.udn.com/rssfeed/news/1001", "經濟日報"),
     ("https://news.ltn.com.tw/rss/business.xml", "自由時報財經"),
     ("https://www.cna.com.tw/rss/aall.aspx", "中央社"),
-    ("https://technews.tw/feed/", "TechNews"),
+    ("https://technews.tw/feed/", "科技新報"),
+    ("https://www.gvm.com.tw/rss", "遠見"),
+    ("https://feeds.feedburner.com/techorange", "科技報橘"),
+    ("https://www.ithome.com.tw/rss/finance", "iThome 財經"),
+    ("https://tw.news.yahoo.com/rss/finance", "Yahoo 財經"),
+    ("https://tw.stock.yahoo.com/rss?category=news", "Yahoo 股市"),
 ]
+
+# 嵌入 digest 的新聞則數：多 RSS 合併後依時間排序再截斷。若太小，畫面上「來源」chip 往往只剩 1～2 家媒體。
+NEWS_DIGEST_MAX_ITEMS = 72
 
 STOOQ_MAP: dict[str, dict[str, str]] = {
     "^SPX": {"label": "S&P 500", "ccy": "USD"},
@@ -142,7 +150,7 @@ def parse_rss_items(xml_str: str, source: str) -> list[dict]:
     return items
 
 
-def fetch_news(max_items: int = 24) -> dict:
+def fetch_news(max_items: int = NEWS_DIGEST_MAX_ITEMS) -> dict:
     all_rows: list[dict] = []
     for url, src in RSS_FEEDS:
         body = http_get(url)
@@ -368,7 +376,7 @@ def build_markets_from_tw_and_stooq(tw: dict | None) -> dict:
 
 def main() -> None:
     print("[INFO] 抓取財經快訊 RSS …")
-    news = fetch_news(24)
+    news = fetch_news(NEWS_DIGEST_MAX_ITEMS)
     print("[INFO] 抓取指數與產業類指數（證交所 MI_INDEX 單次請求）…")
     d, mi_data = fetch_twse_mi_table()
     tw = weighted_from_data(mi_data, d) if mi_data else None
