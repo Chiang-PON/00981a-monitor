@@ -306,7 +306,7 @@
                     <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
                     <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
                     <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
-                    <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">動能雷達</button>
+                    <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">連續買賣</button>
                 </div>
             </div>
 
@@ -367,7 +367,7 @@
 
             <div id="view-momentum" class="hidden mb-6">
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
-                    <h2 class="text-lg md:text-xl font-black theme-text tracking-wide mb-4">動能雷達 <span class="text-sm font-mono font-normal theme-text-dim">Momentum Scanner</span></h2>
+                    <h2 class="text-lg md:text-xl font-black theme-text tracking-wide mb-4">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
                     <div class="flex flex-wrap gap-2 mb-4">
                         <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-active">【 掃描特定主力 】</button>
                         <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inactive">【 掃描特定個股 】</button>
@@ -1277,6 +1277,23 @@
                 '<span class="text-lg font-extrabold leading-tight text-right whitespace-nowrap">' + amtHtml + '</span></div></div></div>';
         }
 
+        /** 左：連續買進、右：連續賣出（與個股搜尋類似的雙欄分割） */
+        function buildMomentumResultsGrid(buyRowsHtml, sellRowsHtml) {
+            const left = buyRowsHtml
+                ? buyRowsHtml
+                : '<div class="px-4 py-6 text-center text-sm theme-text-dim">無</div>';
+            const right = sellRowsHtml
+                ? sellRowsHtml
+                : '<div class="px-4 py-6 text-center text-sm theme-text-dim">無</div>';
+            return '<div class="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-zinc-200 dark:md:divide-zinc-700">' +
+                '<div class="flex flex-col min-w-0 border-b theme-border md:border-b-0">' +
+                '<div class="px-2 sm:px-3 py-2 font-mono text-[10px] sm:text-xs font-bold tracking-wider bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-b theme-border">連續買進</div>' +
+                '<div class="max-h-[min(50vh,28rem)] overflow-y-auto overflow-x-hidden">' + left + '</div></div>' +
+                '<div class="flex flex-col min-w-0">' +
+                '<div class="px-2 sm:px-3 py-2 font-mono text-[10px] sm:text-xs font-bold tracking-wider bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-b theme-border">連續賣出</div>' +
+                '<div class="max-h-[min(50vh,28rem)] overflow-y-auto overflow-x-hidden">' + right + '</div></div></div>';
+        }
+
         function runMomentumScanActor() {
             const sel = document.getElementById('momentum-actor-select');
             const out = document.getElementById('momentum-results');
@@ -1304,21 +1321,28 @@
                 const r = computeMomentumStreak(actorKey, s.code, s.name);
                 if (r && r.streak >= minStreak) results.push(r);
             });
-            results.sort(function(a, b) {
+            const sortMomentum = function(a, b) {
                 return b.streak - a.streak || Math.abs(b.totalDiff) - Math.abs(a.totalDiff);
-            });
+            };
             if (results.length === 0) {
                 out.innerHTML = '<div class="text-center text-gray-400 py-8">無符合條件之動能紀錄</div>';
                 return;
             }
-            out.innerHTML = '<div class="max-h-[min(50vh,28rem)] overflow-y-auto overflow-x-hidden">' +
-                results.map(function(r) {
-                    const title = ((r.name || '—') + (r.code ? ' ' + r.code : '')).trim();
-                    const badge = r.dir === 1
-                        ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
-                        : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
-                    return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, null);
-                }).join('') + '</div>';
+            const buys = results.filter(function(r) { return r.dir === 1; });
+            const sells = results.filter(function(r) { return r.dir === -1; });
+            buys.sort(sortMomentum);
+            sells.sort(sortMomentum);
+            function rowActor(r) {
+                const title = ((r.name || '—') + (r.code ? ' ' + r.code : '')).trim();
+                const badge = r.dir === 1
+                    ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
+                    : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
+                return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, null);
+            }
+            out.innerHTML = buildMomentumResultsGrid(
+                buys.map(rowActor).join(''),
+                sells.map(rowActor).join('')
+            );
         }
 
         function runMomentumScanStock() {
@@ -1360,23 +1384,30 @@
                     if (r && r.streak >= minStreak) results.push({ r: r, actorKey: actorKey });
                 });
             });
-            results.sort(function(a, b) {
+            const sortMomentumStock = function(a, b) {
                 return b.r.streak - a.r.streak || Math.abs(b.r.totalDiff) - Math.abs(a.r.totalDiff);
-            });
+            };
             if (results.length === 0) {
                 out.innerHTML = '<div class="text-center text-gray-400 py-8">無符合條件之動能紀錄</div>';
                 return;
             }
-            out.innerHTML = '<div class="max-h-[min(50vh,28rem)] overflow-y-auto overflow-x-hidden">' +
-                results.map(function(x) {
-                    const r = x.r;
-                    const title = getActorLabelForReverseSearch(x.actorKey);
-                    const stockSubtitle = [r.name, r.code].filter(function(p) { return p != null && String(p).trim() !== ''; }).map(function(p) { return String(p).trim(); }).join(' ');
-                    const badge = r.dir === 1
-                        ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
-                        : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
-                    return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, stockSubtitle || null);
-                }).join('') + '</div>';
+            const buys = results.filter(function(x) { return x.r.dir === 1; });
+            const sells = results.filter(function(x) { return x.r.dir === -1; });
+            buys.sort(sortMomentumStock);
+            sells.sort(sortMomentumStock);
+            function rowStock(x) {
+                const r = x.r;
+                const title = getActorLabelForReverseSearch(x.actorKey);
+                const stockSubtitle = [r.name, r.code].filter(function(p) { return p != null && String(p).trim() !== ''; }).map(function(p) { return String(p).trim(); }).join(' ');
+                const badge = r.dir === 1
+                    ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
+                    : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
+                return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, stockSubtitle || null);
+            }
+            out.innerHTML = buildMomentumResultsGrid(
+                buys.map(rowStock).join(''),
+                sells.map(rowStock).join('')
+            );
         }
 
         function setMomentumSubMode(sub) {
