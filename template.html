@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="tailwind-built.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         /* Flatpickr 標題列：Tailwind Preflight 置中、年份欄寬度與箭頭 */
@@ -252,6 +252,15 @@
         html.elder-mode .tab-btn {
             font-size: 1.02em;
         }
+
+        .news-kw-highlight {
+            background-color: rgba(250, 204, 21, 0.42);
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+        [data-theme="dark"] .news-kw-highlight {
+            background-color: rgba(250, 204, 21, 0.22);
+        }
     </style>
 </head>
 <body class="pb-[max(6rem,env(safe-area-inset-bottom,0px))] pt-6">
@@ -275,7 +284,11 @@
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 mt-20 min-w-0">
+    <p class="fixed bottom-0 left-0 right-0 z-40 text-center text-[10px] sm:text-[11px] font-mono theme-text-dim bg-[var(--bg-base)]/95 backdrop-blur-sm border-t theme-border py-1.5 px-2 pointer-events-none" role="note">
+        資料為批次快照、非即時行情；僅供研究參考，不構成投資建議。
+    </p>
+
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 mt-20 min-w-0 pb-10">
 
         <div class="theme-panel border rounded-xl p-4 sm:p-5 md:p-8 transition-colors min-w-0">
 
@@ -300,6 +313,20 @@
                         <button type="button" onclick="addWatchlistItem()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm">加入</button>
                         <span class="hidden sm:inline text-[11px] theme-text-dim self-center">點擊關注可開啟個股搜尋</span>
                     </div>
+                    <details class="mt-3 border-t theme-border pt-3">
+                        <summary class="text-xs font-mono theme-text-dim cursor-pointer select-none hover:theme-text">批次貼上／匯入代號</summary>
+                        <div class="mt-2 space-y-2">
+                            <textarea id="watchlist-batch" rows="3" placeholder="可貼多個代號：逗號、空白、換行、分號皆可，例如：&#10;2330,2317 2454&#10;3008" class="theme-bg-input border theme-border rounded-lg px-3 py-2 text-sm font-mono theme-text w-full min-h-[5rem] resize-y"></textarea>
+                            <div class="flex flex-wrap gap-2 items-center">
+                                <button type="button" onclick="addWatchlistBatchFromText()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm min-h-[44px]">解析並加入</button>
+                                <label class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm cursor-pointer min-h-[44px] inline-flex items-center">
+                                    <input type="file" id="watchlist-file-import" class="hidden" accept=".csv,.txt,text/csv">
+                                    選擇檔案（CSV／純文字）
+                                </label>
+                            </div>
+                            <p class="text-[10px] theme-text-dim leading-relaxed">CSV 會讀取<strong class="theme-text">第一欄</strong>為代號；與單筆加入相同，重複代號會略過。</p>
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -309,7 +336,6 @@
                         <div>
                             <h2 class="text-xl md:text-2xl font-black theme-text tracking-wide">快速總覽</h2>
                             <p class="text-sm theme-text-dim mt-1 leading-relaxed">整合：本機籌碼摘要、嵌入的快照指數與財經 RSS（由 <span class="font-mono">fetch_digest.py</span> 每日批次爬取，非即時）。手機開 <span class="font-mono">index.html</span> 或上傳靜態空間皆可，無需 PHP。</p>
-                            <p id="home-digest-meta" class="text-[11px] font-mono theme-text-dim mt-2"></p>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <button type="button" onclick="refreshHomeDashboard()" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-sm">重新整理儀表</button>
@@ -324,6 +350,8 @@
                         <a href="https://www.spglobal.com/spdji/zh/indices/equity/sp-500" target="_blank" rel="noopener noreferrer" class="underline hover:theme-text">S&amp;P DJI</a>
                     </div>
                 </div>
+
+                <div id="home-data-health" class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 text-sm"></div>
 
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-2">臺股產業／類股指數方塊圖</h3>
@@ -340,9 +368,12 @@
                     </div>
                     <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
                         <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
-                        <div id="home-news-filter-wrap" class="hidden mb-3">
-                            <label for="home-news-filter" class="block font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-1.5">篩選關鍵字</label>
-                            <input type="search" id="home-news-filter" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="搜尋標題、來源…" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full min-h-[44px] transition-colors focus:border-[var(--border-focus)]">
+                        <div id="home-news-filter-wrap" class="hidden mb-3 space-y-2">
+                            <div>
+                                <label for="home-news-filter" class="block font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-1.5">篩選關鍵字（標題內會高亮）</label>
+                                <input type="search" id="home-news-filter" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="搜尋標題、來源…" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full min-h-[44px] transition-colors focus:border-[var(--border-focus)]">
+                            </div>
+                            <div id="home-news-source-chips" class="hidden flex flex-wrap gap-1.5 items-center"></div>
                         </div>
                         <div id="home-news-out" class="text-sm min-h-[4rem] theme-text-dim max-h-[min(55vh,28rem)] overflow-y-auto pr-1">載入中…</div>
                         <p id="home-news-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
@@ -777,10 +808,44 @@
             if (!el) return;
             const gen = __META__ && __META__.generated_at ? String(__META__.generated_at) : '';
             const thru = __META__ && __META__.data_through ? String(__META__.data_through) : '';
+            const dbLatest = availableDatesDesc.length ? String(availableDatesDesc[0]) : '';
+            const digestAt = typeof __DIGEST__ !== 'undefined' && __DIGEST__ && __DIGEST__.fetchedAt ? String(__DIGEST__.fetchedAt) : '';
             const parts = [];
-            if (thru) parts.push('資料最新交易日：<span class="theme-text">' + escapeHtmlText(thru) + '</span>');
-            if (gen) parts.push('頁面產生時間：<span class="theme-text">' + escapeHtmlText(gen) + '</span>');
-            el.innerHTML = parts.length ? parts.join('　') : '<span class="theme-text-dim">（無 metadata）</span>';
+            if (thru || dbLatest) {
+                parts.push('籌碼最新交易日 <span class="theme-text">' + escapeHtmlText(thru || dbLatest) + '</span>');
+            }
+            if (gen) parts.push('頁面產生 ' + '<span class="theme-text">' + escapeHtmlText(gen) + '</span>');
+            if (digestAt) parts.push('RSS／指數快照 ' + '<span class="theme-text">' + escapeHtmlText(digestAt) + '</span>');
+            el.innerHTML = parts.length ? parts.join('　｜　') : '<span class="theme-text-dim">（無元資料）</span>';
+        }
+
+        function renderHomeDataHealth() {
+            const el = document.getElementById('home-data-health');
+            if (!el) return;
+            const gen = __META__ && __META__.generated_at ? String(__META__.generated_at) : '';
+            const thru = __META__ && __META__.data_through ? String(__META__.data_through) : '';
+            const dbLatest = availableDatesDesc.length ? String(availableDatesDesc[0]) : '';
+            const digestAt = typeof __DIGEST__ !== 'undefined' && __DIGEST__ && __DIGEST__.fetchedAt ? String(__DIGEST__.fetchedAt) : '';
+            let html = '<p class="font-mono text-[10px] theme-text-dim uppercase tracking-wider mb-2">資料狀態說明</p>';
+            html += '<ul class="space-y-1.5 text-xs sm:text-sm leading-relaxed list-disc list-inside theme-text">';
+            html += '<li><span class="theme-text-dim">籌碼資料最新交易日（嵌入 JSON）：</span><span class="font-mono font-semibold">' + escapeHtmlText(thru || dbLatest || '—') + '</span></li>';
+            html += '<li><span class="theme-text-dim">本頁產生時間：</span><span class="font-mono font-semibold">' + escapeHtmlText(gen || '—') + '</span></li>';
+            html += '<li><span class="theme-text-dim">指數／RSS 快照（<span class="font-mono">fetch_digest</span>）：</span><span class="font-mono font-semibold">' + escapeHtmlText(digestAt || '尚未執行') + '</span></li>';
+            if (thru && dbLatest && thru !== dbLatest) {
+                html += '<li class="text-buy">※ 元資料與陣列第一筆日期不一致時，以「籌碼資料最新交易日」為準。</li>';
+            }
+            try {
+                const agg = aggregateData(FAMILY_TAB, 1);
+                const hotEmpty = (!agg.buy || !agg.buy.length) && (!agg.sell || !agg.sell.length);
+                if (hotEmpty && availableDatesDesc.length) {
+                    html += '<li class="theme-text-dim">「近 1 日全家族買／賣超」為空：常見原因是該交易日合併後無有效列，或尚未重新執行 <span class="font-mono">generate_web.py</span> 嵌入最新 CSV。</li>';
+                }
+            } catch (e) {}
+            if (!availableDatesDesc.length) {
+                html += '<li class="text-sell font-medium">本機尚無任何交易日資料，請先跑資料流程後再產生網頁。</li>';
+            }
+            html += '</ul>';
+            el.innerHTML = html;
         }
 
         function toggleElderMode() {
@@ -869,6 +934,43 @@
             a.download = 'watchlist.csv';
             a.click();
             URL.revokeObjectURL(a.href);
+        }
+
+        function parseWatchlistCodesFromText(text) {
+            return String(text || '').split(/[\s,;，、\n\r\t]+/).map(function(s) { return s.trim(); }).filter(Boolean);
+        }
+
+        function mergeWatchlistCodes(newCodes) {
+            let added = 0;
+            newCodes.forEach(function(c) {
+                const code = String(c || '').trim();
+                if (!code) return;
+                if (watchlist.indexOf(code) === -1) {
+                    watchlist.push(code);
+                    added++;
+                }
+            });
+            if (added) {
+                saveWatchlist();
+                renderWatchlist();
+                if (currentMode === 'HOME') renderHomeWatchlistSummary();
+            }
+            return added;
+        }
+
+        function addWatchlistBatchFromText() {
+            const ta = document.getElementById('watchlist-batch');
+            if (!ta) return;
+            const codes = parseWatchlistCodesFromText(ta.value);
+            const n = mergeWatchlistCodes(codes);
+            if (n) ta.value = '';
+            alert(n ? ('已加入 ' + n + ' 筆代號（重複已略過）') : '沒有新增：請確認代號格式，或皆已存在於關注清單。');
+        }
+
+        function importWatchlistFromFileText(text) {
+            const codes = parseWatchlistCodesFromText(text);
+            const n = mergeWatchlistCodes(codes);
+            alert(n ? ('已從檔案加入 ' + n + ' 筆代號') : '沒有新增：檔案內無有效代號或皆重複。');
         }
 
         function exportCurrentRankCsv() {
@@ -1302,6 +1404,30 @@
                 hnf.addEventListener('input', applyHomeNewsFilter);
                 hnf.addEventListener('search', applyHomeNewsFilter);
             }
+            const nsc = document.getElementById('home-news-source-chips');
+            if (nsc) {
+                nsc.addEventListener('click', function(e) {
+                    const btn = e.target.closest('[data-news-src]');
+                    if (!btn) return;
+                    const v = btn.getAttribute('data-news-src');
+                    homeNewsSourceFilter = v === '' || v === null ? null : v;
+                    renderHomeNewsSourceChips();
+                    applyHomeNewsFilter();
+                });
+            }
+            const wf = document.getElementById('watchlist-file-import');
+            if (wf) {
+                wf.addEventListener('change', function(e) {
+                    const f = e.target.files && e.target.files[0];
+                    if (!f) return;
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        importWatchlistFromFileText(String(reader.result || ''));
+                    };
+                    reader.readAsText(f);
+                    e.target.value = '';
+                });
+            }
 
             let lm = 'ETF';
             try {
@@ -1676,15 +1802,52 @@
         }
 
         let homeNewsItemsCache = null;
+        let homeNewsSourceFilter = null;
 
-        function homeNewsSingleItemHtml(it) {
-            const t = escapeHtmlText(it.title || '');
+        function homeNewsSingleItemHtml(it, highlightRaw) {
+            const hq = highlightRaw ? String(highlightRaw).trim() : '';
+            const titleHtml = hq ? escapeHtmlWithHighlight(it.title || '', hq) : escapeHtmlText(it.title || '');
             const u = escapeHtmlText(it.link || '#');
             const src = escapeHtmlText(it.source || '');
             const pub = it.published ? '<span class="text-[10px] theme-text-dim font-mono ml-1">' + escapeHtmlText(it.published) + '</span>' : '';
             return '<a href="' + u + '" target="_blank" rel="noopener noreferrer" class="block py-2.5 border-b theme-border last:border-0 row-hover rounded px-1 -mx-1">' +
-                '<span class="theme-text font-medium leading-snug">' + t + '</span>' +
+                '<span class="theme-text font-medium leading-snug">' + titleHtml + '</span>' +
                 '<div class="text-[11px] theme-text-dim mt-1 font-mono">' + src + pub + '</div></a>';
+        }
+
+        function renderHomeNewsSourceChips() {
+            const box = document.getElementById('home-news-source-chips');
+            if (!box || !homeNewsItemsCache || !homeNewsItemsCache.length) {
+                if (box) box.classList.add('hidden');
+                return;
+            }
+            const sources = [];
+            const seen = {};
+            homeNewsItemsCache.forEach(function(it) {
+                const s = String(it.source || '').trim();
+                if (s && !seen[s]) {
+                    seen[s] = true;
+                    sources.push(s);
+                }
+            });
+            sources.sort(function(a, b) { return a.localeCompare(b, 'zh-Hant'); });
+            if (!sources.length) {
+                box.innerHTML = '';
+                box.classList.add('hidden');
+                return;
+            }
+            const mkBtn = function(label, value, active) {
+                const esc = escapeHtmlText(label);
+                const vattr = value === null ? '' : escapeHtmlText(value);
+                return '<button type="button" data-news-src="' + (value === null ? '' : vattr) + '" class="pill-btn text-xs py-1 px-2 ' + (active ? 'pill-btn-active' : 'pill-btn-idle') + '">' + esc + '</button>';
+            };
+            let html = '<span class="text-[10px] theme-text-dim font-mono w-full sm:w-auto">來源</span>';
+            html += mkBtn('全部', null, homeNewsSourceFilter === null);
+            sources.forEach(function(s) {
+                html += mkBtn(s, s, homeNewsSourceFilter === s);
+            });
+            box.innerHTML = html;
+            box.classList.remove('hidden');
         }
 
         function applyHomeNewsFilter() {
@@ -1693,18 +1856,21 @@
             const inp = document.getElementById('home-news-filter');
             const raw = inp ? String(inp.value || '').trim() : '';
             const q = raw.toLowerCase();
-            let list = homeNewsItemsCache;
+            let list = homeNewsItemsCache.slice();
+            if (homeNewsSourceFilter) {
+                list = list.filter(function(it) { return String(it.source || '').trim() === homeNewsSourceFilter; });
+            }
             if (q) {
-                list = homeNewsItemsCache.filter(function(it) {
+                list = list.filter(function(it) {
                     const blob = [it.title, it.source, it.published, it.link].map(function(x) { return String(x || ''); }).join('\n').toLowerCase();
                     return blob.indexOf(q) !== -1;
                 });
             }
             if (!list.length) {
-                out.innerHTML = '<p class="text-sm theme-text-dim py-3">' + (raw ? '無符合「' + escapeHtmlText(raw) + '」的項目，請換關鍵字試試。' : '（無項目）') + '</p>';
+                out.innerHTML = '<p class="text-sm theme-text-dim py-3">' + (raw || homeNewsSourceFilter ? '無符合條件的項目，請調整來源或關鍵字。' : '（無項目）') + '</p>';
                 return;
             }
-            out.innerHTML = list.map(homeNewsSingleItemHtml).join('');
+            out.innerHTML = list.map(function(it) { return homeNewsSingleItemHtml(it, raw); }).join('');
         }
 
         function renderHomeNewsFromJson(j) {
@@ -1712,11 +1878,14 @@
             const disc = document.getElementById('home-news-disclaimer');
             const wrap = document.getElementById('home-news-filter-wrap');
             homeNewsItemsCache = null;
+            homeNewsSourceFilter = null;
             if (!out) return;
             if (!j || !j.ok || !j.items || !j.items.length) {
                 if (wrap) wrap.classList.add('hidden');
                 const inp = document.getElementById('home-news-filter');
                 if (inp) inp.value = '';
+                const sch = document.getElementById('home-news-source-chips');
+                if (sch) { sch.innerHTML = ''; sch.classList.add('hidden'); }
                 out.innerHTML = '<p class="text-sm theme-text-dim">' + escapeHtmlText((j && j.error) || '無新聞資料（請先執行 fetch_digest.py 再 generate_web.py）。') + '</p>';
                 if (disc) { disc.classList.add('hidden'); disc.textContent = ''; }
                 return;
@@ -1727,22 +1896,14 @@
             }
             homeNewsItemsCache = j.items.slice();
             if (wrap) wrap.classList.remove('hidden');
+            renderHomeNewsSourceChips();
             applyHomeNewsFilter();
-        }
-
-        function updateHomeDigestStamp() {
-            const el = document.getElementById('home-digest-meta');
-            if (!el || typeof __DIGEST__ === 'undefined') return;
-            const t = __DIGEST__.fetchedAt;
-            el.textContent = t
-                ? '快照時間（爬蟲）：' + t + '　（與頁面產生時間不同屬正常）'
-                : '尚未有快照：請於電腦執行 python3 fetch_digest.py 後再執行 generate_web.py';
         }
 
         function refreshHomeDashboard() {
             renderHomeHotStocks();
             renderHomeWatchlistSummary();
-            updateHomeDigestStamp();
+            renderHomeDataHealth();
             const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
             renderHomeMarketsFromJson(d.markets || { ok: false, items: [], error: '無 markets 資料' });
             renderHomeNewsFromJson(d.news || { ok: false, items: [], error: '無 news 資料' });
@@ -1846,6 +2007,27 @@
 
         function escapeHtmlText(s) {
             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function escapeRegexForKw(q) {
+            return String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function escapeHtmlWithHighlight(raw, query) {
+            const q = String(query || '').trim();
+            if (!q) return escapeHtmlText(raw);
+            const s = String(raw);
+            const re = new RegExp('(' + escapeRegexForKw(q) + ')', 'gi');
+            const parts = s.split(re);
+            let out = '';
+            for (let i = 0; i < parts.length; i++) {
+                if (i % 2 === 1) {
+                    out += '<mark class="news-kw-highlight rounded px-0.5">' + escapeHtmlText(parts[i]) + '</mark>';
+                } else {
+                    out += escapeHtmlText(parts[i]);
+                }
+            }
+            return out;
         }
 
         function renderMomentumResultRow(leftTitle, badgeHtml, totalDiff, totalAmt, isBuy, stockSubtitlePlain) {
