@@ -284,6 +284,18 @@
                 padding: 0.5rem 1rem;
             }
         }
+        /* 連續買賣：主力丸略放大間距與觸控區（手機不擠） */
+        #view-momentum .momentum-actor-pill {
+            min-height: 2.75rem;
+            padding: 0.5rem 0.875rem;
+            line-height: 1.35;
+        }
+        @media (min-width: 640px) {
+            #view-momentum .momentum-actor-pill {
+                min-height: 2.5rem;
+                padding: 0.375rem 0.75rem;
+            }
+        }
         #trend-chart-canvas-wrap { min-height: min(78vh, 36rem); }
         @media (min-width: 768px) {
             #trend-chart-canvas-wrap { min-height: min(72vh, 40rem); }
@@ -541,17 +553,17 @@
             </div>
 
             <div id="view-momentum" class="hidden mb-6">
-                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 md:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
-                    <h2 class="panel-section-title mb-2">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
-                    <p class="text-xs theme-text-dim mb-4 leading-relaxed">※ 以「交易日」連續計算；休市日不會出現在資料中。若某交易日該分點缺 CSV，連續會中斷。金額計價方式與主表相同。</p>
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inner-active">【 掃描特定主力 】</button>
-                        <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border tab-inner-inactive">【 掃描特定個股 】</button>
+                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] px-4 py-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+                    <h2 class="panel-section-title mb-2 sm:mb-3">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
+                    <p class="text-xs theme-text-dim mb-5 sm:mb-4 leading-relaxed">※ 以「交易日」連續計算；休市日不會出現在資料中。若某交易日該分點缺 CSV，連續會中斷。金額計價方式與主表相同。</p>
+                    <div class="flex flex-wrap gap-2.5 sm:gap-2 mb-5 sm:mb-4">
+                        <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-active">【 掃描特定主力 】</button>
+                        <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-inactive">【 掃描特定個股 】</button>
                     </div>
-                    <div class="flex flex-wrap items-end gap-4 mb-4">
+                    <div class="flex flex-wrap items-end gap-4 mb-5 sm:mb-4">
                         <div>
                             <label for="momentum-min-days" class="ui-label">最小連續天數</label>
-                            <select id="momentum-min-days" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer">
+                            <select id="momentum-min-days" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text cursor-pointer min-h-[44px]">
                                 <option value="2">連續 2 天以上</option>
                                 <option value="3" selected>連續 3 天以上</option>
                                 <option value="5">連續 5 天以上</option>
@@ -559,21 +571,27 @@
                             </select>
                         </div>
                     </div>
-                    <div id="momentum-input-actor" class="flex flex-wrap gap-3 items-end mb-4">
-                        <div class="min-w-[12rem] flex-1">
-                            <label for="momentum-actor-select" class="ui-label">選擇主力</label>
-                            <select id="momentum-actor-select" class="theme-bg-input border theme-border rounded-lg px-3 py-2.5 text-sm font-mono theme-text w-full"></select>
+                    <div id="momentum-input-actor" class="mb-5 space-y-5 sm:space-y-4 sm:mb-4">
+                        <div class="w-full min-w-0">
+                            <p class="ui-label mb-2.5">主力 ETF</p>
+                            <div id="momentum-actor-etf-buttons" class="flex flex-wrap gap-2.5 sm:gap-2 max-h-[min(40vh,14rem)] sm:max-h-[min(44vh,16rem)] md:max-h-none overflow-y-auto overflow-x-hidden pr-1 -mr-1 scroll-smooth" role="group" aria-label="主力 ETF"></div>
                         </div>
-                        <button type="button" id="momentum-scan-actor" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">掃描</button>
+                        <div class="w-full min-w-0 border-t theme-border pt-5 sm:pt-0 sm:border-t-0">
+                            <p class="ui-label mb-2.5">主力 凱基</p>
+                            <div id="momentum-actor-broker-buttons" class="flex flex-wrap gap-2.5 sm:gap-2 max-h-[min(40vh,14rem)] sm:max-h-[min(44vh,16rem)] md:max-h-none overflow-y-auto overflow-x-hidden pr-1 -mr-1 scroll-smooth" role="group" aria-label="主力凱基分點"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-3 items-end pt-1">
+                            <button type="button" id="momentum-scan-actor" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors min-h-[44px]">掃描</button>
+                        </div>
                     </div>
-                    <div id="momentum-input-stock" class="hidden flex flex-wrap gap-3 items-end mb-4">
-                        <div class="min-w-[10rem] flex-1 sm:max-w-xs">
+                    <div id="momentum-input-stock" class="hidden flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-3 sm:items-end mb-5 sm:mb-4">
+                        <div class="min-w-0 w-full sm:flex-1 sm:max-w-xs">
                             <label for="momentum-stock-input" class="ui-label">股票代號或名稱</label>
-                            <input type="text" id="momentum-stock-input" placeholder="代號或名稱，如 2330、台積電" autocomplete="off" class="theme-bg-input border theme-border ui-input-stock px-3 py-2.5 text-sm theme-text w-full">
+                            <input type="search" id="momentum-stock-input" placeholder="代號或名稱，如 2330、台積電" autocomplete="off" enterkeyhint="search" inputmode="search" class="theme-bg-input border theme-border ui-input-stock px-3 py-2.5 text-sm theme-text w-full min-h-[44px]">
                         </div>
-                        <button type="button" id="momentum-scan-stock" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors">搜尋</button>
+                        <button type="button" id="momentum-scan-stock" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors w-full sm:w-auto min-h-[44px] shrink-0">搜尋</button>
                     </div>
-                    <div id="momentum-results" class="rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[6rem]"></div>
+                    <div id="momentum-results" class="mt-1 rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[6rem]"></div>
                 </div>
             </div>
 
@@ -1078,8 +1096,15 @@
             return etf;
         }
 
+        /** 凱基分點顯示名稱：與主畫面標的丸一致「代號 + 空格 + 簡稱（略凱基前綴）」，例 9207 永和 */
+        function getBrokerDisplayLabel(code) {
+            if (!brokerLabels[code]) return code;
+            return (String(code) + ' ' + brokerLabels[code]).replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
+        }
+
         /** 按鈕顯示用：分點模式下略去「凱基」以節省版面（標的代碼與邏輯仍用 etf / data-etf） */
         function getPillButtonLabel(etf) {
+            if (currentMode === 'BROKER' && brokerLabels[etf]) return getBrokerDisplayLabel(etf);
             const full = getETFLabel(etf);
             if (currentMode !== 'BROKER') return full;
             return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
@@ -1446,6 +1471,7 @@
         }
 
         function getTrendPillButtonLabel(etf) {
+            if (trendViewMode === 'BROKER' && brokerLabels[etf]) return getBrokerDisplayLabel(etf);
             const full = getETFLabel(etf);
             if (trendViewMode !== 'BROKER') return full;
             return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
@@ -1525,7 +1551,7 @@
         function onTrendETFChange() {
             const titleEl = document.getElementById('trend-etf-title');
             if (titleEl) {
-                titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (currentETF === AI_TAB ? 'AI_AGENT' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
+                titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (currentETF === AI_TAB ? 'AI_AGENT' : (brokerLabels[currentETF] ? getBrokerDisplayLabel(currentETF) : currentETF)));
             }
             updateTrendPillActiveState();
             const inp = document.getElementById('trend-code-input');
@@ -1787,7 +1813,7 @@
             const aiV = document.getElementById('ai-agent-view');
             if (aiV) aiV.classList.toggle('hidden', !isAI);
             const titleEl = document.getElementById('current-etf-title');
-            if (titleEl) titleEl.textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? currentETF + ' ' + brokerLabels[currentETF] : currentETF)));
+            if (titleEl) titleEl.textContent = isAI ? 'AI_AGENT' : (currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === KAIJI_TAB ? 'KAIJI_CONSENSUS (凱基大聯盟)' : (brokerLabels[currentETF] ? getBrokerDisplayLabel(currentETF) : currentETF)));
             updateDashboardTitleDateRange();
             if (!isAI) {
                 refreshTable();
@@ -2145,7 +2171,7 @@
         }
 
         function getActorLabelForReverseSearch(actorKey) {
-            if (brokerLabels[actorKey]) return brokerLabels[actorKey] + ' (' + actorKey + ')';
+            if (brokerLabels[actorKey]) return getBrokerDisplayLabel(actorKey);
             return getETFLabel(actorKey);
         }
 
@@ -2216,24 +2242,66 @@
 
         let momentumSubMode = 'actor';
 
-        function getMomentumActorKeys() {
+        function getMomentumEtfKeys() {
             const keys = [];
             etfCodes.forEach(function(c) {
                 if (allKeys.has(c) && c !== AI_TAB) keys.push(c);
             });
+            return keys;
+        }
+
+        function getMomentumBrokerKeys() {
+            const keys = [];
             brokerCodes.forEach(function(b) {
                 if (allKeys.has(b)) keys.push(b);
             });
             return keys;
         }
 
-        function populateMomentumActorSelect() {
-            const sel = document.getElementById('momentum-actor-select');
-            if (!sel) return;
-            const keys = getMomentumActorKeys();
-            sel.innerHTML = keys.map(function(k) {
-                return '<option value="' + String(k).replace(/"/g, '&quot;') + '">' + getActorLabelForReverseSearch(k) + '</option>';
-            }).join('');
+        function getMomentumActorKeys() {
+            return getMomentumEtfKeys().concat(getMomentumBrokerKeys());
+        }
+
+        function getMomentumSelectedActorKey() {
+            const el = document.querySelector('.momentum-actor-pill.pill-btn-active');
+            return el ? el.getAttribute('data-actor-key') : null;
+        }
+
+        function selectMomentumActorKey(key) {
+            if (!key) return;
+            document.querySelectorAll('.momentum-actor-pill').forEach(function(btn) {
+                const on = btn.getAttribute('data-actor-key') === key;
+                btn.classList.toggle('pill-btn-active', on);
+                btn.classList.toggle('pill-btn-idle', !on);
+                btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+        }
+
+        function renderMomentumActorButtons() {
+            const etfWrap = document.getElementById('momentum-actor-etf-buttons');
+            const brWrap = document.getElementById('momentum-actor-broker-buttons');
+            if (!etfWrap || !brWrap) return;
+            const etfKeys = getMomentumEtfKeys();
+            const brokerKeys = getMomentumBrokerKeys();
+            function appendPills(container, keys) {
+                container.innerHTML = '';
+                keys.forEach(function(k) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'momentum-actor-pill pill-btn pill-btn-idle text-sm max-w-full';
+                    btn.setAttribute('data-actor-key', k);
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.textContent = getActorLabelForReverseSearch(k);
+                    btn.addEventListener('click', function() {
+                        selectMomentumActorKey(k);
+                    });
+                    container.appendChild(btn);
+                });
+            }
+            appendPills(etfWrap, etfKeys);
+            appendPills(brWrap, brokerKeys);
+            const firstKey = etfKeys.length ? etfKeys[0] : (brokerKeys.length ? brokerKeys[0] : null);
+            if (firstKey) selectMomentumActorKey(firstKey);
         }
 
         function momentumSameStockItem(item, code, name) {
@@ -2688,14 +2756,17 @@
         }
 
         function runMomentumScanActor() {
-            const sel = document.getElementById('momentum-actor-select');
             const out = document.getElementById('momentum-results');
             const minEl = document.getElementById('momentum-min-days');
-            if (!sel || !out || !minEl) return;
-            const actorKey = sel.value;
+            if (!out || !minEl) return;
+            let actorKey = getMomentumSelectedActorKey();
+            if (!actorKey) {
+                const fb = getMomentumActorKeys();
+                actorKey = fb.length ? fb[0] : null;
+            }
             const minStreak = parseInt(minEl.value, 10) || 3;
             if (!actorKey) {
-                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">請選擇主力</div>';
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">尚無可選主力（無 ETF／分點資料）</div>';
                 return;
             }
             const dates = availableDatesDesc;
@@ -2812,7 +2883,7 @@
         }
 
         function initMomentumUI() {
-            populateMomentumActorSelect();
+            renderMomentumActorButtons();
             const btnA = document.getElementById('momentum-mode-actor');
             const btnS = document.getElementById('momentum-mode-stock');
             const scanA = document.getElementById('momentum-scan-actor');
@@ -2823,7 +2894,10 @@
             if (scanA) scanA.onclick = runMomentumScanActor;
             if (scanS) scanS.onclick = runMomentumScanStock;
             if (stockInp) stockInp.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') runMomentumScanStock();
+                if (e.key !== 'Enter' && e.keyCode !== 13) return;
+                if (e.isComposing || e.keyCode === 229) return;
+                e.preventDefault();
+                runMomentumScanStock();
             });
             const minDays = document.getElementById('momentum-min-days');
             if (minDays) minDays.addEventListener('change', function() {
@@ -2833,7 +2907,7 @@
             });
             setMomentumSubMode('actor');
             const out = document.getElementById('momentum-results');
-            if (out) out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">選擇條件後按掃描／搜尋</div>';
+            if (out) out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">選主力後按掃描；個股模式輸入代號或名稱後按 Enter 或搜尋</div>';
         }
 
         function runStockReverseSearch() {
