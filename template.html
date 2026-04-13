@@ -580,9 +580,6 @@
                             <p class="ui-label mb-2.5">主力 凱基</p>
                             <div id="momentum-actor-broker-buttons" class="flex flex-wrap gap-2.5 sm:gap-2 max-h-[min(40vh,14rem)] sm:max-h-[min(44vh,16rem)] md:max-h-none overflow-y-auto overflow-x-hidden pr-1 -mr-1 scroll-smooth" role="group" aria-label="主力凱基分點"></div>
                         </div>
-                        <div class="flex flex-wrap gap-3 items-end pt-1">
-                            <button type="button" id="momentum-scan-actor" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors min-h-[44px]">掃描</button>
-                        </div>
                     </div>
                     <div id="momentum-input-stock" class="hidden flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-3 sm:items-end mb-5 sm:mb-4">
                         <div class="min-w-0 w-full sm:flex-1 sm:max-w-xs">
@@ -2272,7 +2269,7 @@
             return el ? el.getAttribute('data-actor-key') : null;
         }
 
-        function selectMomentumActorKey(key, silent) {
+        function selectMomentumActorKey(key) {
             if (!key) return;
             document.querySelectorAll('.momentum-actor-pill').forEach(function(btn) {
                 const on = btn.getAttribute('data-actor-key') === key;
@@ -2280,9 +2277,6 @@
                 btn.classList.toggle('pill-btn-idle', !on);
                 btn.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
-            if (!silent && currentMode === 'MOMENTUM' && momentumSubMode === 'actor') {
-                runMomentumScanActor();
-            }
         }
 
         function renderMomentumActorButtons() {
@@ -2301,7 +2295,8 @@
                     btn.setAttribute('aria-pressed', 'false');
                     btn.textContent = getActorLabelForReverseSearch(k);
                     btn.addEventListener('click', function() {
-                        selectMomentumActorKey(k, false);
+                        selectMomentumActorKey(k);
+                        runMomentumScanActor();
                     });
                     container.appendChild(btn);
                 });
@@ -2309,7 +2304,7 @@
             appendPills(etfWrap, etfKeys);
             appendPills(brWrap, brokerKeys);
             const firstKey = etfKeys.length ? etfKeys[0] : (brokerKeys.length ? brokerKeys[0] : null);
-            if (firstKey) selectMomentumActorKey(firstKey, true);
+            if (firstKey) selectMomentumActorKey(firstKey);
         }
 
         function momentumSameStockItem(item, code, name) {
@@ -2894,7 +2889,6 @@
             renderMomentumActorButtons();
             const btnA = document.getElementById('momentum-mode-actor');
             const btnS = document.getElementById('momentum-mode-stock');
-            const scanA = document.getElementById('momentum-scan-actor');
             const scanS = document.getElementById('momentum-scan-stock');
             const stockInp = document.getElementById('momentum-stock-input');
             if (btnA) btnA.onclick = function() {
@@ -2902,7 +2896,6 @@
                 if (currentMode === 'MOMENTUM') runMomentumScanActor();
             };
             if (btnS) btnS.onclick = function() { setMomentumSubMode('stock'); };
-            if (scanA) scanA.onclick = runMomentumScanActor;
             if (scanS) scanS.onclick = runMomentumScanStock;
             if (stockInp) stockInp.addEventListener('keydown', function(e) {
                 if (e.key !== 'Enter' && e.keyCode !== 13) return;
