@@ -1380,6 +1380,11 @@
                 if (searchPanel) searchPanel.classList.add('hidden');
                 if (momentumPanel) momentumPanel.classList.remove('hidden');
                 renderCompareDiff();
+                setTimeout(function() {
+                    if (currentMode === 'MOMENTUM' && typeof momentumSubMode !== 'undefined' && momentumSubMode === 'actor' && typeof runMomentumScanActor === 'function') {
+                        runMomentumScanActor();
+                    }
+                }, 0);
                 return;
             }
             if (pillsSection) pillsSection.classList.remove('hidden');
@@ -2267,7 +2272,7 @@
             return el ? el.getAttribute('data-actor-key') : null;
         }
 
-        function selectMomentumActorKey(key) {
+        function selectMomentumActorKey(key, silent) {
             if (!key) return;
             document.querySelectorAll('.momentum-actor-pill').forEach(function(btn) {
                 const on = btn.getAttribute('data-actor-key') === key;
@@ -2275,6 +2280,9 @@
                 btn.classList.toggle('pill-btn-idle', !on);
                 btn.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
+            if (!silent && currentMode === 'MOMENTUM' && momentumSubMode === 'actor') {
+                runMomentumScanActor();
+            }
         }
 
         function renderMomentumActorButtons() {
@@ -2293,7 +2301,7 @@
                     btn.setAttribute('aria-pressed', 'false');
                     btn.textContent = getActorLabelForReverseSearch(k);
                     btn.addEventListener('click', function() {
-                        selectMomentumActorKey(k);
+                        selectMomentumActorKey(k, false);
                     });
                     container.appendChild(btn);
                 });
@@ -2301,7 +2309,7 @@
             appendPills(etfWrap, etfKeys);
             appendPills(brWrap, brokerKeys);
             const firstKey = etfKeys.length ? etfKeys[0] : (brokerKeys.length ? brokerKeys[0] : null);
-            if (firstKey) selectMomentumActorKey(firstKey);
+            if (firstKey) selectMomentumActorKey(firstKey, true);
         }
 
         function momentumSameStockItem(item, code, name) {
@@ -2889,7 +2897,10 @@
             const scanA = document.getElementById('momentum-scan-actor');
             const scanS = document.getElementById('momentum-scan-stock');
             const stockInp = document.getElementById('momentum-stock-input');
-            if (btnA) btnA.onclick = function() { setMomentumSubMode('actor'); };
+            if (btnA) btnA.onclick = function() {
+                setMomentumSubMode('actor');
+                if (currentMode === 'MOMENTUM') runMomentumScanActor();
+            };
             if (btnS) btnS.onclick = function() { setMomentumSubMode('stock'); };
             if (scanA) scanA.onclick = runMomentumScanActor;
             if (scanS) scanS.onclick = runMomentumScanStock;
@@ -2907,7 +2918,9 @@
             });
             setMomentumSubMode('actor');
             const out = document.getElementById('momentum-results');
-            if (out) out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">選主力後按掃描；個股模式輸入代號或名稱後按 Enter 或搜尋</div>';
+            if (out && !(currentMode === 'MOMENTUM' && momentumSubMode === 'actor')) {
+                out.innerHTML = '<div class="px-4 py-8 text-center font-mono text-sm theme-text-dim">切換至本頁後將依選定主力顯示；個股模式請輸入代號或名稱後按 Enter 或搜尋</div>';
+            }
         }
 
         function runStockReverseSearch() {
