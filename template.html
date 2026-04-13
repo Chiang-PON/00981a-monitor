@@ -349,6 +349,7 @@
 
         html.elder-mode {
             font-size: 1.125rem;
+            -webkit-text-size-adjust: 100%;
         }
         html.elder-mode .theme-panel,
         html.elder-mode .tab-btn {
@@ -357,6 +358,137 @@
         html.elder-mode #home-panel table { font-size: 1.05rem; }
         html.elder-mode #home-panel .rounded-xl { font-size: 1.04rem; }
         html.elder-mode #data-freshness-bar { font-size: 0.95rem; line-height: 1.65; }
+        /* 大字：主表／個股／走勢／連續買賣（長輩手機可讀性） */
+        html.elder-mode .ui-label,
+        html.elder-mode .ui-caption {
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+        }
+        html.elder-mode .panel-section-title {
+            font-size: 1.35rem;
+            line-height: 1.35;
+        }
+        html.elder-mode #normal-view table,
+        html.elder-mode #dashboard-mode-panel table,
+        html.elder-mode #stock-reverse-results table,
+        html.elder-mode #compare-diff-out table {
+            font-size: 1.05rem;
+        }
+        html.elder-mode .pill-btn {
+            min-height: 3rem;
+            font-size: 0.95rem;
+            padding: 0.5rem 0.875rem;
+        }
+        html.elder-mode #view-momentum .momentum-actor-pill {
+            min-height: 3rem;
+            font-size: 0.95rem;
+            padding: 0.55rem 0.9rem;
+        }
+        html.elder-mode #control-panel .tab-btn {
+            min-height: 48px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        html.elder-mode input[type="text"],
+        html.elder-mode input[type="search"],
+        html.elder-mode select,
+        html.elder-mode .ui-input-stock {
+            font-size: 1rem !important;
+            min-height: 48px;
+        }
+        html.elder-mode p[role="note"] {
+            font-size: 0.8125rem !important;
+            line-height: 1.55;
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+        }
+        html.elder-mode #btn-scroll-top {
+            width: 3.5rem;
+            height: 3.5rem;
+            font-size: 1.35rem;
+        }
+
+        /* 橫向捲動時固定左側欄（排名＋名稱／產業／股票名） */
+        .table-sticky-cols-1,
+        .table-sticky-cols-2 {
+            border-collapse: separate;
+            border-spacing: 0;
+            --sticky-bg: var(--bg-base);
+            --sticky-edge: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="dark"] .table-sticky-cols-1,
+        [data-theme="dark"] .table-sticky-cols-2 {
+            --sticky-edge: 3px 0 12px rgba(0, 0, 0, 0.55);
+        }
+        .table-sticky-cols-1 thead th:first-child,
+        .table-sticky-cols-1 tbody td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: var(--sticky-bg);
+            background-clip: padding-box;
+            box-shadow: var(--sticky-edge);
+        }
+        .table-sticky-cols-1 thead th:first-child {
+            z-index: 3;
+        }
+        .table-sticky-cols-2 {
+            --sticky-rank-w: 3.5rem;
+        }
+        @media (min-width: 640px) {
+            .table-sticky-cols-2 { --sticky-rank-w: 4rem; }
+        }
+        html.elder-mode .table-sticky-cols-2 {
+            --sticky-rank-w: 4rem;
+        }
+        @media (min-width: 640px) {
+            html.elder-mode .table-sticky-cols-2 { --sticky-rank-w: 4.5rem; }
+        }
+        .table-sticky-cols-2 thead th:nth-child(1),
+        .table-sticky-cols-2 tbody td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background-color: var(--sticky-bg);
+            background-clip: padding-box;
+            border-right: 1px solid var(--border-dim);
+        }
+        .table-sticky-cols-2 thead th:nth-child(2),
+        .table-sticky-cols-2 tbody td:nth-child(2) {
+            position: sticky;
+            left: var(--sticky-rank-w);
+            z-index: 2;
+            background-color: var(--sticky-bg);
+            background-clip: padding-box;
+            box-shadow: var(--sticky-edge);
+        }
+        .table-sticky-cols-2 thead th:nth-child(1) {
+            z-index: 4;
+        }
+        .table-sticky-cols-2 thead th:nth-child(2) {
+            z-index: 3;
+        }
+        .table-sticky-cols-1 tbody tr.row-hover:hover td:first-child,
+        .table-sticky-cols-2 tbody tr.row-hover:hover td:nth-child(1),
+        .table-sticky-cols-2 tbody tr.row-hover:hover td:nth-child(2) {
+            background-color: var(--bg-panel-hover);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto !important;
+            }
+            .scroll-smooth {
+                scroll-behavior: auto !important;
+            }
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
         .news-kw-highlight {
             background-color: rgba(250, 204, 21, 0.42);
             box-decoration-break: clone;
@@ -378,12 +510,12 @@
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
-            <button type="button" onclick="toggleElderMode()" class="p-1.5 rounded-md theme-border border hover:theme-text transition-colors" title="大字模式（較易閱讀）" id="btn-elder-mode">
-                <span class="text-xs font-mono theme-text-dim">大字</span>
+            <button type="button" onclick="toggleElderMode()" class="min-h-[44px] min-w-[44px] px-3 rounded-lg theme-border border hover:theme-text transition-colors flex items-center justify-center shrink-0" title="大字模式（較易閱讀）" id="btn-elder-mode" aria-pressed="false">
+                <span class="text-sm font-mono font-medium theme-text">大字</span>
             </button>
-            <button onclick="toggleTheme()" class="p-1.5 rounded-md theme-border border hover:theme-text transition-colors" title="切換深淺模式">
-                <svg id="icon-sun" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <svg id="icon-moon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <button type="button" onclick="toggleTheme()" class="min-h-[44px] min-w-[44px] rounded-lg theme-border border hover:theme-text transition-colors flex items-center justify-center shrink-0" title="切換深淺模式">
+                <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             </button>
         </div>
     </nav>
@@ -555,7 +687,7 @@
             <div id="view-momentum" class="hidden mb-6">
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] px-4 py-5 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
                     <h2 class="panel-section-title mb-2 sm:mb-3">連續買賣 <span class="text-sm font-mono font-normal theme-text-dim">連續買／賣超追蹤</span></h2>
-                    <p class="text-xs theme-text-dim mb-5 sm:mb-4 leading-relaxed">※ 以「交易日」連續計算；休市日不會出現在資料中。若某交易日該分點缺 CSV，連續會中斷。金額計價方式與主表相同。</p>
+                    <p class="text-xs theme-text-dim mb-5 sm:mb-4 leading-relaxed">※ 以「交易日」連續計算；休市日不會出現在資料中。若某交易日該分點缺 CSV，連續會中斷。金額計價方式與主表相同（凱基分點：優先當日收盤參考價×張數，與玩股 CSV 欄位一致）。連續區間的「金額」為<strong class="theme-text font-medium">各日淨額加總</strong>，股價波動大時，用金額÷總張數反推的「均價」未必等於即時股價；不同分點／不同連續天數也不宜直接比較該比值。</p>
                     <div class="flex flex-wrap gap-2.5 sm:gap-2 mb-5 sm:mb-4">
                         <button type="button" id="momentum-mode-actor" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-active">【 掃描特定主力 】</button>
                         <button type="button" id="momentum-mode-stock" class="tab-btn px-4 py-2.5 font-mono rounded-lg border theme-border tab-inner-inactive">【 掃描特定個股 】</button>
@@ -659,7 +791,7 @@
                         <div class="min-w-0">
                             <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-4 border-buy pl-3 py-1">買超排行</h4>
                             <div class="theme-bg-base border theme-border rounded-lg overflow-x-auto overflow-y-hidden">
-                                <table class="w-full text-sm min-w-[280px]">
+                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2">
                                     <thead>
                                         <tr class="theme-bg-input border-b theme-border">
                                             <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim w-14 sm:w-16">排名</th>
@@ -674,7 +806,7 @@
                         <div class="min-w-0">
                             <h4 class="font-mono text-sell text-sm font-bold tracking-widest mb-3 border-l-4 border-sell pl-3 py-1">賣超排行</h4>
                             <div class="theme-bg-base border theme-border rounded-lg overflow-x-auto overflow-y-hidden">
-                                <table class="w-full text-sm min-w-[280px]">
+                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2">
                                     <thead>
                                         <tr class="theme-bg-input border-b theme-border">
                                             <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim w-14 sm:w-16">排名</th>
@@ -990,7 +1122,7 @@
                 return (v >= 0 ? '+' : '−') + Math.abs(v).toLocaleString() + ' 張';
             };
             const th = currentUnit === 'amount' ? '金額（萬）' : '張數';
-            inner.innerHTML = '<table class="w-full min-w-[520px] border-collapse"><thead><tr class="theme-bg-input border-b theme-border">' +
+            inner.innerHTML = '<table class="w-full min-w-[520px] border-collapse table-sticky-cols-1"><thead><tr class="theme-bg-input border-b theme-border">' +
                 '<th class="text-left py-2 px-3 font-mono">產業</th>' +
                 '<th class="text-right py-2 px-3 font-mono">淨' + th + '</th>' +
                 '<th class="text-right py-2 px-3 font-mono">買超列加總</th>' +
@@ -1040,7 +1172,7 @@
             };
             const th = currentUnit === 'amount' ? '金額（萬）' : '張數';
             out.innerHTML = '<p class="text-xs font-mono theme-text-dim mb-2">A 結束 <span class="theme-text">' + escapeHtmlText(endA) + '</span> · B 結束 <span class="theme-text">' + escapeHtmlText(endB) + '</span> · N=' + currentDays + ' 交易日</p>' +
-                '<table class="w-full min-w-[640px] border-collapse"><thead><tr class="theme-bg-input border-b theme-border">' +
+                '<table class="w-full min-w-[640px] border-collapse table-sticky-cols-1"><thead><tr class="theme-bg-input border-b theme-border">' +
                 '<th class="text-left py-2 px-3 font-mono">股票</th>' +
                 '<th class="text-left py-2 px-3 font-mono">產業</th>' +
                 '<th class="text-right py-2 px-3 font-mono">A 淨' + th + '</th>' +
@@ -1240,12 +1372,20 @@
             el.innerHTML = html;
         }
 
+        function syncElderModeUi() {
+            const btn = document.getElementById('btn-elder-mode');
+            if (btn) {
+                btn.setAttribute('aria-pressed', document.documentElement.classList.contains('elder-mode') ? 'true' : 'false');
+            }
+        }
+
         function toggleElderMode() {
             document.documentElement.classList.toggle('elder-mode');
             const on = document.documentElement.classList.contains('elder-mode');
             try {
                 localStorage.setItem('elderMode', on ? '1' : '0');
             } catch (e) {}
+            syncElderModeUi();
         }
 
         function onDodToggleChange() {
@@ -1654,6 +1794,14 @@
             }
         }
 
+        function chartPrefersReducedMotion() {
+            try {
+                return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {
+                return false;
+            }
+        }
+
         function renderHoldingsTrendChart() {
             const hint = document.getElementById('trend-chart-hint');
             const canvas = document.getElementById('holdings-trend-canvas');
@@ -1734,6 +1882,7 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            animation: chartPrefersReducedMotion() ? false : undefined,
                             plugins: {
                                 legend: { labels: { color: grey, font: chartFont } },
                                 tooltip: { mode: 'index', intersect: false }
@@ -1761,6 +1910,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: chartPrefersReducedMotion() ? false : undefined,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { labels: { color: grey, font: chartFont } },
@@ -2031,6 +2181,7 @@
                     document.documentElement.classList.add('elder-mode');
                 }
             } catch (e) {}
+            syncElderModeUi();
 
             const dodEl = document.getElementById('dod-toggle');
             if (dodEl) {
@@ -2368,10 +2519,10 @@
                 const cd = item.code ? '<span class="font-mono text-[10px] theme-text-dim ml-1">' + escapeHtmlText(String(item.code)) + '</span>' : '';
                 const v = formatAmount(item.amount || 0);
                 const cls = isBuy ? 'text-buy' : 'text-sell';
-                return '<tr class="border-b theme-border"><td class="py-1.5 pr-2">' + nm + cd + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
+                return '<tr class="border-b theme-border row-hover"><td class="py-1.5 pr-2">' + nm + cd + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
             }
-            const head = '<table class="w-full text-sm min-w-[240px] table-fixed"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">買超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">賣超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const head = '<table class="w-full text-sm min-w-[240px] table-fixed table-sticky-cols-1"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">買超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed table-sticky-cols-1"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">賣超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
             const bHtml = buy.length ? buy.map(function(i) { return row(i, true); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
             const sHtml = sell.length ? sell.map(function(i) { return row(i, false); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
             el.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">' +

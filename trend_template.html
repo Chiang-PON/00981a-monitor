@@ -72,6 +72,46 @@
         @media (min-width: 768px) {
             #trend-chart-canvas-wrap { min-height: min(72vh, 40rem); }
         }
+        html.elder-mode {
+            font-size: 1.125rem;
+            -webkit-text-size-adjust: 100%;
+        }
+        html.elder-mode .ui-label,
+        html.elder-mode .ui-caption {
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+        }
+        html.elder-mode .section-group-heading { font-size: 1.125rem; }
+        html.elder-mode .page-asset-title { font-size: clamp(1.5rem, 4.5vw, 2rem); }
+        html.elder-mode .pill-btn {
+            min-height: 3rem;
+            font-size: 0.95rem;
+            padding: 0.5rem 0.875rem;
+        }
+        html.elder-mode .tab-btn {
+            min-height: 48px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        html.elder-mode input[type="text"],
+        html.elder-mode .ui-input-stock {
+            font-size: 1rem !important;
+            min-height: 48px;
+        }
+        html.elder-mode #trend-meta-bar { font-size: 0.8125rem; line-height: 1.55; }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto !important;
+            }
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
     </style>
 </head>
 <body class="pb-8 pt-6">
@@ -82,10 +122,12 @@
             <h1 class="text-base sm:text-lg font-black theme-text tracking-wide truncate">走勢圖</h1>
         </div>
         <div class="flex items-center gap-2">
-            <button type="button" onclick="toggleElderTrend()" class="p-1.5 rounded-md theme-border border text-xs font-mono theme-text-dim" id="btn-elder-trend" title="大字">大字</button>
-            <button type="button" onclick="toggleTheme()" class="p-1.5 rounded-md theme-border border" title="深淺色">
-                <svg id="icon-sun-t" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <svg id="icon-moon-t" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <button type="button" onclick="toggleElderTrend()" class="min-h-[44px] min-w-[44px] px-3 rounded-lg theme-border border flex items-center justify-center shrink-0" id="btn-elder-trend" title="大字模式（較易閱讀）" aria-pressed="false">
+                <span class="text-sm font-mono font-medium theme-text">大字</span>
+            </button>
+            <button type="button" onclick="toggleTheme()" class="min-h-[44px] min-w-[44px] rounded-lg theme-border border flex items-center justify-center shrink-0" title="深淺色">
+                <svg id="icon-sun-t" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg id="icon-moon-t" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             </button>
         </div>
     </nav>
@@ -365,6 +407,14 @@
             }
         }
 
+        function chartPrefersReducedMotion() {
+            try {
+                return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            } catch (e) {
+                return false;
+            }
+        }
+
         function renderHoldingsTrendChart() {
             var hint = document.getElementById('trend-chart-hint');
             var canvas = document.getElementById('holdings-trend-canvas');
@@ -445,6 +495,7 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            animation: chartPrefersReducedMotion() ? false : undefined,
                             plugins: {
                                 legend: { labels: { color: grey, font: chartFont } },
                                 tooltip: { mode: 'index', intersect: false }
@@ -472,6 +523,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: chartPrefersReducedMotion() ? false : undefined,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { labels: { color: grey, font: chartFont } },
@@ -512,10 +564,18 @@
             else { sun.classList.add('hidden'); moon.classList.remove('hidden'); }
         }
 
+        function syncElderTrendUi() {
+            var btn = document.getElementById('btn-elder-trend');
+            if (btn) {
+                btn.setAttribute('aria-pressed', document.documentElement.classList.contains('elder-mode') ? 'true' : 'false');
+            }
+        }
+
         function toggleElderTrend() {
             document.documentElement.classList.toggle('elder-mode');
             var on = document.documentElement.classList.contains('elder-mode');
             try { localStorage.setItem('elderMode', on ? '1' : '0'); } catch (e) {}
+            syncElderTrendUi();
         }
 
         function initTrendMetaBar() {
@@ -533,6 +593,7 @@
             try {
                 if (localStorage.getItem('elderMode') === '1') document.documentElement.classList.add('elder-mode');
             } catch (e) {}
+            syncElderTrendUi();
             initTheme();
             initTrendMetaBar();
 
