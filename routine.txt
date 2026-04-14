@@ -1,6 +1,7 @@
 # 隔天早上補跑凱基：下載的 CSV 若帶「今天」日期，會改名成 TARGET（實際交易日）。
 # 週一執行 → TARGET=上週五（date -v-3d）；週二～週五 → TARGET=昨天（-1d）。
 # 若有安裝 node + package.json：自動 npm run build:css，再產頁（GitHub Pages 才會帶到 tailwind-built.css）。
+# 可選：執行前 export OPENAI_API_KEY，fetch_digest 會寫入各國 AI 總結（globalWarAi）。
 TODAY=$(date +%Y-%m-%d) && \
 DOW=$(date +%u) && \
 if [ "$DOW" -eq 1 ]; then TARGET=$(date -v-3d +%Y-%m-%d); else TARGET=$(date -v-1d +%Y-%m-%d); fi && \

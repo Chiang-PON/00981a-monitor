@@ -8,6 +8,14 @@
   0 8 * * * cd /path/to/00981a-monitor && /usr/bin/python3 fetch_digest.py >> /tmp/fetch_digest.log 2>&1
 
 產出 digest.json 後，再執行 generate_web.py 即可把快照嵌入單一 HTML（手機用檔案或靜態網址皆可）。
+
+新聞來源說明：
+  - 本腳本以 **RSS（公開網址、免 API Key）** 為主；每則可選附 `country`（TW/US/…）供「全球戰情」直接歸類。
+  - 若需 **REST 新聞 API**（NewsAPI、GNews、Bing News、Finnhub 等），通常要註冊金鑰與遵守用量，可另寫函式將回傳併入 `news["items"]` 並同樣帶上 `country`。
+
+全球戰情 AI 總結（可選，每日與 digest 同批一次）：
+  - 設定環境變數 **OPENAI_API_KEY** 後，會呼叫 OpenAI 產生各國繁中總結，寫入 digest["globalWarAi"]。
+  - **OPENAI_MODEL** 可選，預設 gpt-4o-mini。未設金鑰則略過，網頁仍用規則摘要。
 """
 
 from __future__ import annotations
@@ -25,32 +33,76 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
+from openai_global_war import enrich_digest_with_global_war_ai
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_FILE = SCRIPT_DIR / "digest.json"
 
-RSS_FEEDS: list[tuple[str, str]] = [
-    ("https://money.udn.com/rssfeed/news/1001", "經濟日報"),
-    ("https://news.ltn.com.tw/rss/business.xml", "自由時報財經"),
-    ("https://www.cna.com.tw/rss/aall.aspx", "中央社"),
-    ("https://technews.tw/feed/", "科技新報"),
-    ("https://www.gvm.com.tw/rss", "遠見"),
-    ("https://feeds.feedburner.com/techorange", "科技報橘"),
-    ("https://www.ithome.com.tw/rss/finance", "iThome 財經"),
-    ("https://tw.news.yahoo.com/rss/finance", "Yahoo 財經"),
-    ("https://tw.stock.yahoo.com/rss?category=news", "Yahoo 股市"),
+# (url, 來源顯示名, country) — country 為 ISO 風格二字母國別鍵，與前端全球戰情卡一致；None 表示不標（仍可用標題關鍵字猜）。
+RSS_FEEDS: list[tuple[str, str, str | None]] = [
+    # 台灣／中文為主
+    ("https://money.udn.com/rssfeed/news/1001", "經濟日報", "TW"),
+    ("https://news.ltn.com.tw/rss/business.xml", "自由時報財經", "TW"),
+    ("https://www.cna.com.tw/rss/aall.aspx", "中央社", "TW"),
+    ("https://technews.tw/feed/", "科技新報", "TW"),
+    ("https://www.gvm.com.tw/rss", "遠見", "TW"),
+    ("https://feeds.feedburner.com/techorange", "科技報橘", "TW"),
+    ("https://www.ithome.com.tw/rss/finance", "iThome 財經", "TW"),
+    ("https://tw.news.yahoo.com/rss/finance", "Yahoo 財經", "TW"),
+    ("https://tw.stock.yahoo.com/rss?category=news", "Yahoo 股市", "TW"),
+    # 國際（英文 RSS，免 Key；連結若失效請自行更換同站 RSS）
+    ("https://feeds.content.dowjones.io/public/rss/mw_topstories", "MarketWatch", "US"),
+    ("https://feeds.a.dj.com/rss/RSSMarketsMain.xml", "WSJ Markets", "US"),
+    ("https://www.cnbc.com/id/100003114/device/rss/rss.html", "CNBC", "US"),
+    ("https://finance.yahoo.com/news/rssindex", "Yahoo Finance US", "US"),
+    ("http://feeds.bbci.co.uk/news/business/rss.xml", "BBC Business", "GB"),
+    ("https://rss.dw.com/xml/rss-en-all.xml", "DW (English)", "DE"),
+    ("https://www.france24.com/en/rss", "France 24", "FR"),
+    ("https://www.japantimes.co.jp/feed/", "Japan Times", "JP"),
+    ("https://www.investing.com/rss/news_285.rss", "Investing.com (KR)", "KR"),
+    ("https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=631144", "CNA Singapore", "SG"),
+    ("https://www.scmp.com/rss/2/feed", "SCMP", "HK"),
 ]
 
 # 嵌入 digest 的新聞則數：多 RSS 合併後依時間排序再截斷。若太小，畫面上「來源」chip 往往只剩 1～2 家媒體。
-NEWS_DIGEST_MAX_ITEMS = 72
+NEWS_DIGEST_MAX_ITEMS = 96
 # 每個 RSS 先各自取最新 N 則再合併，避免單一媒體洗版、其他來源進不了 digest。
-NEWS_PER_FEED_MAX = 12
+NEWS_PER_FEED_MAX = 10
 
+# 全球主要大盤指數（Stooq 延遲、開→收漲跌）；順序即畫面排序（橫向跑馬燈）
 STOOQ_MAP: dict[str, dict[str, str]] = {
-    "^SPX": {"label": "S&P 500", "ccy": "USD"},
-    "^NDX": {"label": "Nasdaq 100", "ccy": "USD"},
-    "^DJI": {"label": "道瓊", "ccy": "USD"},
-    "^HSI": {"label": "恆生指數", "ccy": "HKD"},
+    "^SPX": {"label": "S&P 500", "ccy": "USD", "region": "美洲"},
+    "^NDX": {"label": "Nasdaq 100", "ccy": "USD", "region": "美洲"},
+    "^DJI": {"label": "道瓊", "ccy": "USD", "region": "美洲"},
+    "^GSPTSE": {"label": "S&P/TSX 綜合", "ccy": "CAD", "region": "美洲"},
+    "^HSI": {"label": "恆生指數", "ccy": "HKD", "region": "亞洲"},
+    "^STI": {"label": "新加坡 STI", "ccy": "SGD", "region": "亞洲"},
+    "^KOSPI": {"label": "韓國 KOSPI", "ccy": "KRW", "region": "亞洲"},
+    "^N225": {"label": "日經 225", "ccy": "JPY", "region": "亞洲"},
+    "^AXJO": {"label": "S&P/ASX 200", "ccy": "AUD", "region": "亞洲"},
+    "^BSESN": {"label": "BSE Sensex", "ccy": "INR", "region": "亞洲"},
+    "^SSEC": {"label": "上證綜指", "ccy": "CNY", "region": "亞洲"},
+    "^DAX": {"label": "德國 DAX", "ccy": "EUR", "region": "歐洲"},
+    "^UKX": {"label": "英國富時 100", "ccy": "GBP", "region": "歐洲"},
+    "^CAC": {"label": "法國 CAC 40", "ccy": "EUR", "region": "歐洲"},
 }
+
+STOOQ_FETCH_ORDER: tuple[str, ...] = (
+    "^SPX",
+    "^NDX",
+    "^DJI",
+    "^GSPTSE",
+    "^HSI",
+    "^STI",
+    "^KOSPI",
+    "^N225",
+    "^AXJO",
+    "^BSESN",
+    "^SSEC",
+    "^DAX",
+    "^UKX",
+    "^CAC",
+)
 
 USER_AGENT = "Mozilla/5.0 (compatible; 00981a-monitor-digest/1.0; +local)"
 _SSL_WARNED = False
@@ -96,7 +148,7 @@ def parse_pub_ts(pub_raw: str) -> float:
         return 0.0
 
 
-def parse_rss_items(xml_str: str, source: str) -> list[dict]:
+def parse_rss_items(xml_str: str, source: str, country: str | None = None) -> list[dict]:
     items: list[dict] = []
     try:
         root = ET.fromstring(xml_str)
@@ -114,15 +166,16 @@ def parse_rss_items(xml_str: str, source: str) -> list[dict]:
             if ts > 0:
                 pub_iso = datetime.fromtimestamp(ts, tz=timezone.utc).astimezone().isoformat(timespec="seconds")
             if title and link:
-                items.append(
-                    {
-                        "title": title,
-                        "link": link,
-                        "source": source,
-                        "published": pub_iso,
-                        "ts": ts,
-                    }
-                )
+                row = {
+                    "title": title,
+                    "link": link,
+                    "source": source,
+                    "published": pub_iso,
+                    "ts": ts,
+                }
+                if country:
+                    row["country"] = country
+                items.append(row)
         return items
 
     atom = "{http://www.w3.org/2005/Atom}"
@@ -147,18 +200,21 @@ def parse_rss_items(xml_str: str, source: str) -> list[dict]:
             except ValueError:
                 pass
         if title and link:
-            items.append({"title": title, "link": link, "source": source, "published": pub_iso, "ts": ts})
+            row = {"title": title, "link": link, "source": source, "published": pub_iso, "ts": ts}
+            if country:
+                row["country"] = country
+            items.append(row)
 
     return items
 
 
 def fetch_news(max_items: int = NEWS_DIGEST_MAX_ITEMS) -> dict:
     all_rows: list[dict] = []
-    for url, src in RSS_FEEDS:
+    for url, src, ctry in RSS_FEEDS:
         body = http_get(url)
         if not body:
             continue
-        feed_items = parse_rss_items(body, src)
+        feed_items = parse_rss_items(body, src, ctry)
         feed_items.sort(key=lambda x: x.get("ts") or 0.0, reverse=True)
         feed_items = feed_items[:NEWS_PER_FEED_MAX]
         all_rows.extend(feed_items)
@@ -177,7 +233,7 @@ def fetch_news(max_items: int = NEWS_DIGEST_MAX_ITEMS) -> dict:
     return {
         "ok": True,
         "items": out,
-        "disclaimer": "新聞標題與連結來自公開 RSS，版權歸各媒體；僅供參考。",
+        "disclaimer": "新聞標題與連結來自公開 RSS，版權歸各媒體；僅供參考。部分稿件含 country 欄位（依訂閱來源標註國別），未標者於全球戰情仍以標題關鍵字歸類。",
     }
 
 
@@ -225,11 +281,12 @@ def weighted_from_data(data: list, d: str) -> dict | None:
         pct = chg_pct if "%" in chg_pct else f"{chg_pct}%"
         return {
             "symbol": "TWSE",
-            "label": "加權指數（TWSE）",
+            "label": "加權指數",
             "price": close,
             "change": chg_pts,
             "changePercent": pct,
             "currency": "TWD",
+            "region": "台灣",
             "source": "twse",
             "asOf": d,
         }
@@ -314,7 +371,7 @@ def sector_indices_from_data(data: list, d: str) -> dict:
 
 
 def fetch_stooq_batch() -> list[dict]:
-    syms = "+".join(STOOQ_MAP.keys())
+    syms = "+".join(STOOQ_FETCH_ORDER)
     url = f"https://stooq.com/q/l/?s={syms}&f=sd2t2ohlcv&h"
     body = http_get(url, 22)
     if not body:
@@ -328,7 +385,7 @@ def fetch_stooq_batch() -> list[dict]:
         if len(row) < 8:
             continue
         sym = row[0]
-        meta = STOOQ_MAP.get(sym, {"label": sym, "ccy": ""})
+        meta = STOOQ_MAP.get(sym, {"label": sym, "ccy": "", "region": "其他"})
         if row[1] == "N/D":
             out.append(
                 {
@@ -338,6 +395,7 @@ def fetch_stooq_batch() -> list[dict]:
                     "change": None,
                     "changePercent": None,
                     "currency": meta["ccy"],
+                    "region": meta.get("region", "其他"),
                     "source": "stooq",
                     "asOf": None,
                     "note": "暫無報價（休市或延遲）",
@@ -359,14 +417,18 @@ def fetch_stooq_batch() -> list[dict]:
                 "changePercent": f"{d_pct:.2f}",
                 "changeNote": "開→收",
                 "currency": meta["ccy"],
+                "region": meta.get("region", "其他"),
                 "source": "stooq",
                 "asOf": dt,
             }
         )
+    order_idx = {s: i for i, s in enumerate(STOOQ_FETCH_ORDER)}
+    out.sort(key=lambda r: order_idx.get(r.get("symbol", ""), 999))
     return out
 
 
 def build_markets_from_tw_and_stooq(tw: dict | None) -> dict:
+    """台股加權 + 美／港主要大盤指數（Stooq）。"""
     items: list[dict] = []
     if tw:
         items.append(tw)
@@ -374,7 +436,7 @@ def build_markets_from_tw_and_stooq(tw: dict | None) -> dict:
     return {
         "ok": bool(items),
         "items": items,
-        "disclaimer": "國際指數為 Stooq 延遲資料；漲跌為該交易日開→收。台股加權為證交所公開資料。僅供參考。",
+        "disclaimer": "加權指數為證交所；其餘為 Stooq 延遲資料（多為開盤→收盤），與即時撮合不同。",
     }
 
 
@@ -402,6 +464,16 @@ def main() -> None:
         "markets": markets,
         "sectors": sectors,
     }
+    print("[INFO] 全球戰情 AI 總結（可選，需 OPENAI_API_KEY）…")
+    digest = enrich_digest_with_global_war_ai(digest)
+    gw = digest.get("globalWarAi") or {}
+    if gw.get("ok") and gw.get("summaries"):
+        print(f"[OK] globalWarAi 已生成（{len(gw['summaries'])} 國）model={gw.get('model', '')}")
+    elif gw.get("skipped"):
+        print(f"[INFO] globalWarAi 略過：{gw.get('reason', '')}")
+    elif gw.get("error"):
+        print(f"[WARN] globalWarAi 失敗：{gw['error']}")
+
     OUTPUT_FILE.write_text(json.dumps(digest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(
         f"[OK] 已寫入 {OUTPUT_FILE.name}（新聞 {len(news['items'])} 則，指數 {len(markets['items'])} 筆，產業類 {len(sectors.get('items') or [])} 筆）"
