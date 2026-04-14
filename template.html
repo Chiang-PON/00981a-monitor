@@ -899,6 +899,16 @@
         </div>
     </nav>
 
+    <!-- 產業方塊圖 · 放大檢視（全螢幕，支援系統返回鍵關閉） -->
+    <div id="home-sector-treemap-overlay" class="fixed inset-0 z-[100] hidden flex flex-col bg-[var(--bg-base)] pt-[max(0px,env(safe-area-inset-top,0px))] pb-[max(0px,env(safe-area-inset-bottom,0px))]" role="dialog" aria-modal="true" aria-labelledby="sector-treemap-overlay-title" aria-hidden="true">
+        <div class="flex items-center gap-2 px-3 sm:px-4 py-3 border-b theme-border shrink-0 bg-[var(--bg-panel)] shadow-sm">
+            <button type="button" id="btn-sector-treemap-back" class="tab-btn px-3 py-2 font-mono rounded-lg border theme-border text-sm whitespace-nowrap shrink-0 min-h-[44px]">← 返回</button>
+            <h2 id="sector-treemap-overlay-title" class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider truncate min-w-0">臺股產業／類股指數方塊圖</h2>
+        </div>
+        <div id="home-sector-treemap-expanded" class="flex-1 min-h-0 overflow-auto p-3 sm:p-4"></div>
+        <p id="home-sector-disclaimer-overlay" class="text-[11px] theme-text-dim px-4 py-2.5 border-t theme-border bg-[var(--bg-panel)] shrink-0 leading-relaxed hidden"></p>
+    </div>
+
     <button type="button" id="btn-scroll-top" class="fixed z-50 bottom-[4.25rem] right-4 sm:right-6 w-12 h-12 rounded-full border theme-border theme-bg-input theme-text shadow-lg opacity-0 pointer-events-none transition-opacity flex items-center justify-center text-xl font-bold hover:border-[var(--border-focus)]" aria-label="回到頂部" title="回到頂部">↑</button>
 
     <p class="fixed bottom-0 left-0 right-0 z-40 text-center text-[10px] sm:text-[11px] font-mono theme-text-dim bg-[var(--bg-base)]/95 backdrop-blur-sm border-t theme-border py-1.5 px-2 pointer-events-none" role="note">
@@ -932,8 +942,12 @@
 
                 <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-2">臺股產業／類股指數方塊圖</h3>
-                    <p class="text-xs theme-text-dim mb-3 leading-relaxed">證交所各類指數：<span class="text-buy font-semibold">紅＝漲</span>、<span class="text-sell font-semibold">綠＝跌</span>（相對前一交易日）；方塊愈大表示 |漲跌幅| 愈大。</p>
-                    <div id="home-sector-treemap" class="w-full min-h-[min(52vh,22rem)] sm:min-h-[26rem] md:min-h-[28rem] rounded-xl border theme-border theme-bg-input overflow-hidden"></div>
+                    <p class="text-xs theme-text-dim mb-2 leading-relaxed">證交所各類指數：<span class="text-buy font-semibold">紅＝漲</span>、<span class="text-sell font-semibold">綠＝跌</span>（相對前一交易日）；方塊愈大表示 |漲跌幅| 愈大。</p>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <button type="button" id="btn-sector-treemap-expand" class="tab-btn px-3 py-2 font-mono rounded-lg border theme-border text-xs shrink-0">放大檢視完整方塊圖</button>
+                        <span class="text-[10px] theme-text-dim font-mono">小螢幕可點此以較大版面閱讀；返回鍵或「← 返回」可關閉。</span>
+                    </div>
+                    <div id="home-sector-treemap" class="w-full min-h-[min(52vh,22rem)] sm:min-h-[26rem] md:min-h-[28rem] rounded-xl border theme-border theme-bg-input overflow-hidden cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]" title="點一下放大檢視" role="button" tabindex="0" aria-label="產業類股指數方塊圖，點一下可放大檢視"></div>
                     <p id="home-sector-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
                 </div>
 
@@ -1791,6 +1805,9 @@
                 return;
             }
             if (homePanel) homePanel.classList.add('hidden');
+            if (prevMode === 'HOME' && mode !== 'HOME') {
+                dismissSectorTreemapOverlayIfOpen();
+            }
             syncMarketsTickerVisibility();
             if (mode === 'TREND') {
                 if (pillsSection) pillsSection.classList.add('hidden');
@@ -2576,6 +2593,52 @@
                 }, { passive: true });
             }
 
+            window.addEventListener('popstate', function() {
+                hideSectorTreemapOverlayUi();
+            });
+            const btnSectorExpand = document.getElementById('btn-sector-treemap-expand');
+            if (btnSectorExpand) {
+                btnSectorExpand.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openSectorTreemapExpanded();
+                });
+            }
+            const btnSectorBack = document.getElementById('btn-sector-treemap-back');
+            if (btnSectorBack) {
+                btnSectorBack.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (history.state && history.state.sectorTreemap) {
+                        history.back();
+                    } else {
+                        hideSectorTreemapOverlayUi();
+                    }
+                });
+            }
+            const treemapHost = document.getElementById('home-sector-treemap');
+            if (treemapHost) {
+                treemapHost.addEventListener('click', function() {
+                    openSectorTreemapExpanded();
+                });
+                treemapHost.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openSectorTreemapExpanded();
+                    }
+                });
+            }
+            window.addEventListener('resize', onSectorTreemapOverlayResize);
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') return;
+                const overlay = document.getElementById('home-sector-treemap-overlay');
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                e.preventDefault();
+                if (history.state && history.state.sectorTreemap) {
+                    history.back();
+                } else {
+                    hideSectorTreemapOverlayUi();
+                }
+            });
+
             let lm = 'ETF';
             try {
                 const x = localStorage.getItem('lastMode');
@@ -3172,17 +3235,18 @@
             return v || (up ? '#dc2626' : '#059669');
         }
 
-        function renderSectorTreemapFromDigest() {
-            const container = document.getElementById('home-sector-treemap');
+        function renderSectorTreemapInto(container, opts) {
+            opts = opts || {};
+            const expanded = !!opts.expanded;
             const disc = document.getElementById('home-sector-disclaimer');
             if (!container) return;
             const sec = (typeof __DIGEST__ !== 'undefined' && __DIGEST__) ? __DIGEST__.sectors : null;
             if (!sec || !sec.ok || !sec.items || !sec.items.length) {
                 container.innerHTML = '<p class="text-sm theme-text-dim p-4">' + escapeHtmlText((sec && sec.error) || '尚無產業類資料（請執行 fetch_digest.py 後再 generate_web.py）') + '</p>';
-                if (disc) { disc.classList.add('hidden'); disc.textContent = ''; }
+                if (!expanded && disc) { disc.classList.add('hidden'); disc.textContent = ''; }
                 return;
             }
-            if (disc) {
+            if (!expanded && disc) {
                 disc.textContent = (sec.disclaimer || '') + (sec.asOf ? '　資料日：' + sec.asOf : '');
                 disc.classList.remove('hidden');
             }
@@ -3195,10 +3259,19 @@
                 return { name: d.shortName || d.name, value: Math.max(d.absPct || 0.01, 0.01), raw: d };
             });
             const root = d3.hierarchy({ children: children }).sum(function(d) { return d.children ? 0 : d.value; });
-            const w = Math.max(280, container.clientWidth || 560);
+            const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
             const vh = typeof window !== 'undefined' && window.innerHeight ? window.innerHeight : 700;
-            const hTarget = Math.round(Math.min(vh * 0.42, w * 0.72));
-            const h = Math.min(520, Math.max(260, hTarget));
+            let w;
+            let h;
+            if (expanded) {
+                w = Math.max(300, Math.min(vw - 24, 1400));
+                const availH = Math.max(320, vh - 130);
+                h = Math.min(Math.max(420, Math.round(availH * 0.96)), availH);
+            } else {
+                w = Math.max(280, container.clientWidth || 560);
+                const hTarget = Math.round(Math.min(vh * 0.42, w * 0.72));
+                h = Math.min(520, Math.max(260, hTarget));
+            }
             container.innerHTML = '';
             const svg = d3.select(container).append('svg')
                 .attr('viewBox', '0 0 ' + w + ' ' + h)
@@ -3289,6 +3362,74 @@
                         .text(show);
                 }
             });
+        }
+
+        function renderSectorTreemapFromDigest() {
+            const container = document.getElementById('home-sector-treemap');
+            renderSectorTreemapInto(container, { expanded: false });
+        }
+
+        let sectorTreemapResizeTimer = null;
+        function onSectorTreemapOverlayResize() {
+            const overlay = document.getElementById('home-sector-treemap-overlay');
+            const expandedEl = document.getElementById('home-sector-treemap-expanded');
+            if (!overlay || overlay.classList.contains('hidden') || !expandedEl) return;
+            clearTimeout(sectorTreemapResizeTimer);
+            sectorTreemapResizeTimer = setTimeout(function() {
+                renderSectorTreemapInto(expandedEl, { expanded: true });
+            }, 180);
+        }
+
+        function openSectorTreemapExpanded() {
+            const overlay = document.getElementById('home-sector-treemap-overlay');
+            const expandedEl = document.getElementById('home-sector-treemap-expanded');
+            const foot = document.getElementById('home-sector-disclaimer-overlay');
+            const srcFoot = document.getElementById('home-sector-disclaimer');
+            if (!overlay || !expandedEl) return;
+            if (!overlay.classList.contains('hidden')) return;
+            const sec = (typeof __DIGEST__ !== 'undefined' && __DIGEST__) ? __DIGEST__.sectors : null;
+            if (!sec || !sec.ok || !sec.items || !sec.items.length) return;
+            if (foot) {
+                if (srcFoot && String(srcFoot.textContent || '').trim()) {
+                    foot.textContent = srcFoot.textContent;
+                    foot.classList.remove('hidden');
+                } else {
+                    foot.textContent = (sec.disclaimer || '') + (sec.asOf ? '　資料日：' + sec.asOf : '');
+                    foot.classList.toggle('hidden', !String(foot.textContent || '').trim());
+                }
+            }
+            try {
+                history.pushState({ sectorTreemap: 1 }, '');
+            } catch (e) {}
+            overlay.classList.remove('hidden');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(function() {
+                expandedEl.scrollTop = 0;
+                renderSectorTreemapInto(expandedEl, { expanded: true });
+                const backBtn = document.getElementById('btn-sector-treemap-back');
+                if (backBtn) {
+                    try { backBtn.focus(); } catch (e) {}
+                }
+            });
+        }
+
+        function hideSectorTreemapOverlayUi() {
+            const overlay = document.getElementById('home-sector-treemap-overlay');
+            if (!overlay || overlay.classList.contains('hidden')) return;
+            overlay.classList.add('hidden');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            const treemapHost = document.getElementById('home-sector-treemap');
+            if (treemapHost && document.activeElement && overlay.contains(document.activeElement)) {
+                try { treemapHost.focus(); } catch (e) {}
+            }
+        }
+
+        function dismissSectorTreemapOverlayIfOpen() {
+            if (history.state && history.state.sectorTreemap) {
+                history.back();
+            }
         }
 
         let homeNewsItemsCache = null;
