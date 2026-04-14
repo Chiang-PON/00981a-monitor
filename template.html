@@ -782,24 +782,37 @@
             background-color: var(--bg-panel) !important;
         }
 
-        /* 首頁「近 1 日買／賣超」小表：斑馬紋與買賣排行一致（蓋過 sticky 欄底色） */
+        /* 首頁「近 1 日買／賣超」：對齊主排行 rank-table；不加 sticky（雙欄小表避免首欄底色與斑馬紋錯位） */
+        #home-hot-out .home-hot-wrap {
+            --home-hot-stripe-even: var(--bg-panel);
+            --home-hot-stripe-odd: color-mix(in srgb, var(--bg-base) 58%, var(--border-dim) 42%);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-dim);
+            background: var(--bg-base);
+            box-shadow: 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+            overflow: hidden;
+        }
+        [data-theme="dark"] #home-hot-out .home-hot-wrap {
+            --home-hot-stripe-odd: color-mix(in srgb, var(--bg-panel) 52%, #27272a 48%);
+            box-shadow: 0 1px 0 color-mix(in srgb, #fff 3%, transparent);
+        }
+        #home-hot-out .home-hot-table {
+            border-collapse: collapse;
+        }
         #home-hot-out .home-hot-table tbody tr.row-even td {
-            background-color: var(--bg-row-even) !important;
+            background-color: var(--home-hot-stripe-even) !important;
         }
         #home-hot-out .home-hot-table tbody tr.row-odd td {
-            background-color: var(--bg-row-odd) !important;
+            background-color: var(--home-hot-stripe-odd) !important;
         }
         #home-hot-out .home-hot-table tbody tr.row-hover:hover td {
             background-color: var(--bg-panel-hover) !important;
         }
-        #home-hot-out .home-hot-table tbody td:first-child {
-            box-shadow: 1px 0 0 0 var(--border-dim);
-        }
         #home-hot-out .home-hot-table thead th {
             color: var(--text-main);
             font-weight: 800;
-            font-size: 0.65rem;
-            letter-spacing: 0.08em;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             border-bottom: 2px solid var(--border-dim);
         }
@@ -2838,16 +2851,17 @@
                 const v = formatAmount(item.amount || 0);
                 const cls = isBuy ? 'text-buy' : 'text-sell';
                 const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
-                return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-2 px-2">' + nm + cd + '</td><td class="py-2 px-2 text-right font-mono ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
+                return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-2.5 px-3 align-middle">' + nm + cd + '</td><td class="py-2.5 px-3 text-right font-mono tabular-nums ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
             }
-            const head = '<table class="w-full text-sm min-w-[240px] table-fixed table-sticky-cols-1 home-hot-table"><thead><tr class="border-b theme-border"><th class="text-left py-2 px-2 font-mono w-[55%]">買超</th><th class="text-right py-2 px-2 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed table-sticky-cols-1 home-hot-table"><thead><tr class="border-b theme-border"><th class="text-left py-2 px-2 font-mono w-[55%]">賣超</th><th class="text-right py-2 px-2 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
-            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
-            el.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">' +
-                '<div class="min-w-0">' + head + bHtml + '</tbody></table></div>' +
-                '<div class="min-w-0">' + head2 + sHtml + '</tbody></table></div></div>' +
-                '<p class="text-[11px] theme-text-dim mt-2 leading-relaxed">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>';
+            const head = '<table class="w-full text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-2.5 px-3 font-mono w-[55%]">買超</th><th class="text-right py-2.5 px-3 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-2.5 px-3 font-mono w-[55%]">賣超</th><th class="text-right py-2.5 px-3 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="2" class="py-3 px-3 theme-text-dim">無</td></tr>';
+            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="2" class="py-3 px-3 theme-text-dim">無</td></tr>';
+            el.innerHTML = '<div class="home-hot-wrap">' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 sm:divide-x theme-border">' +
+                '<div class="min-w-0 sm:pr-1">' + head + bHtml + '</tbody></table></div>' +
+                '<div class="min-w-0 sm:pl-1 pt-3 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div>' +
+                '<p class="text-[11px] theme-text-dim mt-3 px-1 leading-relaxed">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>';
         }
 
         function syncMarketsTickerVisibility() {
