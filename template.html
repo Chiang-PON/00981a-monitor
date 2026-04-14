@@ -103,7 +103,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --bg-panel-hover: #fafafa; --bg-row-even: #ffffff; --bg-row-odd: #fafafa;
+            --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --bg-panel-hover: #fafafa; --bg-row-even: #ffffff; --bg-row-odd: #eef1f6;
             --border-dim: #e4e4e7; --border-focus: #2563eb; --text-main: #18181b; --text-dim: #71717a;
             --color-buy: #dc2626; --color-sell: #059669; --color-accent: #2563eb;
             --shadow-buy: none; --shadow-sell: none; --shadow-accent: none; --box-shadow-buy: none; --box-shadow-sell: none;
@@ -111,7 +111,7 @@
         }
 
         [data-theme="dark"] {
-            --bg-base: #050505; --bg-nav: #050505; --bg-panel: #0d0d0d; --bg-panel-hover: #141414; --bg-row-even: #0d0d0d; --bg-row-odd: #0a0a0a;
+            --bg-base: #050505; --bg-nav: #050505; --bg-panel: #0d0d0d; --bg-panel-hover: #141414; --bg-row-even: #0d0d0d; --bg-row-odd: #1a1a1c;
             --border-dim: #262626; --border-focus: #00f0ff; --text-main: #f4f4f5; --text-dim: #84848f;
             --color-buy: #ff2a5f; --color-sell: #00ff9d; --color-accent: #00f0ff;
             --shadow-buy: 0 0 10px rgba(255, 42, 95, 0.4); --shadow-sell: 0 0 10px rgba(0, 255, 157, 0.4); --shadow-accent: 0 0 10px rgba(0, 240, 255, 0.4);
@@ -132,7 +132,7 @@
         .theme-bg-input:focus-within, .theme-bg-input:hover { border-color: var(--border-focus); }
         .row-even { background-color: var(--bg-row-even); border-color: var(--border-dim); }
         .row-odd { background-color: var(--bg-row-odd); border-color: var(--border-dim); }
-        .row-hover:hover { background-color: var(--bg-panel-hover); }
+        .row-hover:hover { background-color: var(--bg-panel-hover) !important; }
         .bar-track { background-color: var(--bar-track); }
 
         .text-buy { color: var(--color-buy); text-shadow: var(--shadow-buy); }
@@ -473,6 +473,66 @@
             background-color: var(--bg-panel-hover);
         }
 
+        /* 買／賣超排行：斑馬紋需蓋過 sticky 欄底色；縮小陰影避免「每行一張卡」 */
+        #data-table-container .rank-table tbody tr.row-even td {
+            background-color: var(--bg-row-even) !important;
+        }
+        #data-table-container .rank-table tbody tr.row-odd td {
+            background-color: var(--bg-row-odd) !important;
+        }
+        #data-table-container .rank-table tbody tr.row-hover:hover td {
+            background-color: var(--bg-panel-hover) !important;
+        }
+        #data-table-container .rank-table tbody td:nth-child(1) {
+            box-shadow: none;
+        }
+        #data-table-container .rank-table tbody td:nth-child(2) {
+            box-shadow: 1px 0 0 0 var(--border-dim);
+        }
+        #data-table-container .rank-table thead th {
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-dim);
+        }
+        #data-table-container .rank-table thead tr {
+            background: var(--bg-panel);
+        }
+        #data-table-container .rank-table thead th:nth-child(1),
+        #data-table-container .rank-table thead th:nth-child(2),
+        #data-table-container .rank-table thead th:nth-child(3) {
+            background-color: var(--bg-panel) !important;
+        }
+        .rank-trend-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.35rem;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.625rem;
+            font-family: "JetBrains Mono", monospace;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            line-height: 1;
+            color: var(--color-accent);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-dim);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            vertical-align: middle;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .rank-trend-btn:hover {
+            background: var(--bg-panel-hover);
+            border-color: var(--color-accent);
+        }
+        .rank-trend-btn:focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 1px;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             html {
                 scroll-behavior: auto !important;
@@ -789,14 +849,14 @@
                 <div id="data-table-container" class="hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="min-w-0">
-                            <h4 class="font-mono text-buy text-sm font-bold tracking-widest mb-3 border-l-4 border-buy pl-3 py-1">買超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-lg overflow-x-auto overflow-y-hidden">
-                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2">
+                            <h4 class="font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
+                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto overflow-y-hidden shadow-sm">
+                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
                                     <thead>
-                                        <tr class="theme-bg-input border-b theme-border">
-                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim w-14 sm:w-16">排名</th>
-                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim">股票</th>
-                                            <th class="text-right py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim whitespace-nowrap">淨買超</th>
+                                        <tr class="border-b theme-border">
+                                            <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
+                                            <th class="text-left py-3 px-3 sm:px-4 font-mono">股票</th>
+                                            <th class="text-right py-3 px-3 sm:px-4 font-mono whitespace-nowrap">淨買超</th>
                                         </tr>
                                     </thead>
                                     <tbody id="buy-rank-tbody"></tbody>
@@ -804,14 +864,14 @@
                             </div>
                         </div>
                         <div class="min-w-0">
-                            <h4 class="font-mono text-sell text-sm font-bold tracking-widest mb-3 border-l-4 border-sell pl-3 py-1">賣超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-lg overflow-x-auto overflow-y-hidden">
-                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2">
+                            <h4 class="font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
+                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto overflow-y-hidden shadow-sm">
+                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
                                     <thead>
-                                        <tr class="theme-bg-input border-b theme-border">
-                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim w-14 sm:w-16">排名</th>
-                                            <th class="text-left py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim">股票</th>
-                                            <th class="text-right py-3.5 px-3 sm:px-4 font-mono font-bold theme-text-dim whitespace-nowrap">淨賣超</th>
+                                        <tr class="border-b theme-border">
+                                            <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
+                                            <th class="text-left py-3 px-3 sm:px-4 font-mono">股票</th>
+                                            <th class="text-right py-3 px-3 sm:px-4 font-mono whitespace-nowrap">淨賣超</th>
                                         </tr>
                                     </thead>
                                     <tbody id="sell-rank-tbody"></tbody>
@@ -1128,9 +1188,10 @@
                 '<th class="text-right py-2 px-3 font-mono">買超列加總</th>' +
                 '<th class="text-right py-2 px-3 font-mono">賣超列加總</th>' +
                 '</tr></thead><tbody>' +
-                rows.map(function(r) {
+                rows.map(function(r, i) {
                     const cls = r.net > 0 ? 'text-buy' : (r.net < 0 ? 'text-sell' : 'theme-text');
-                    return '<tr class="border-b theme-border row-hover"><td class="py-2 px-3 font-bold">' + escapeHtmlText(r.name) + '</td>' +
+                    const stripe = i % 2 === 0 ? 'row-even' : 'row-odd';
+                    return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-2 px-3 font-bold">' + escapeHtmlText(r.name) + '</td>' +
                         '<td class="py-2 px-3 text-right font-mono font-bold ' + cls + '">' + fmtSigned(r.net) + '</td>' +
                         '<td class="py-2 px-3 text-right font-mono text-buy">' + fmtAbs(r.buy) + '</td>' +
                         '<td class="py-2 px-3 text-right font-mono text-sell">' + fmtAbs(r.sell) + '</td></tr>';
@@ -1179,9 +1240,10 @@
                 '<th class="text-right py-2 px-3 font-mono">B 淨' + th + '</th>' +
                 '<th class="text-right py-2 px-3 font-mono">B − A</th>' +
                 '</tr></thead><tbody>' +
-                rows.map(function(r) {
+                rows.map(function(r, i) {
                     const cls = r.d > 0 ? 'text-buy' : (r.d < 0 ? 'text-sell' : 'theme-text');
-                    return '<tr class="border-b theme-border row-hover"><td class="py-2 px-3"><span class="font-bold">' + escapeHtmlText(r.name) + '</span>' + (r.code ? '<span class="font-mono text-xs theme-text-dim ml-1">' + escapeHtmlText(r.code) + '</span>' : '') + '</td>' +
+                    const stripe = i % 2 === 0 ? 'row-even' : 'row-odd';
+                    return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-2 px-3"><span class="font-bold">' + escapeHtmlText(r.name) + '</span>' + (r.code ? '<span class="font-mono text-xs theme-text-dim ml-1">' + escapeHtmlText(r.code) + '</span>' : '') + '</td>' +
                         '<td class="py-2 px-3 theme-text-dim text-xs">' + escapeHtmlText(r.sector) + '</td>' +
                         '<td class="py-2 px-3 text-right font-mono">' + fmt(r.va) + '</td>' +
                         '<td class="py-2 px-3 text-right font-mono">' + fmt(r.vb) + '</td>' +
@@ -2514,17 +2576,18 @@
             const agg = aggregateData(FAMILY_TAB, 1);
             const buy = agg.buy.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 5);
             const sell = agg.sell.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 5);
-            function row(item, isBuy) {
+            function row(item, isBuy, idx) {
                 const nm = escapeHtmlText(item.name || '—');
                 const cd = item.code ? '<span class="font-mono text-[10px] theme-text-dim ml-1">' + escapeHtmlText(String(item.code)) + '</span>' : '';
                 const v = formatAmount(item.amount || 0);
                 const cls = isBuy ? 'text-buy' : 'text-sell';
-                return '<tr class="border-b theme-border row-hover"><td class="py-1.5 pr-2">' + nm + cd + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
+                const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
+                return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-1.5 pr-2">' + nm + cd + '</td><td class="py-1.5 text-right font-mono ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
             }
             const head = '<table class="w-full text-sm min-w-[240px] table-fixed table-sticky-cols-1"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">買超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
             const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed table-sticky-cols-1"><thead><tr class="theme-bg-input border-b theme-border"><th class="text-left py-2 px-1 font-mono text-xs w-[55%]">賣超</th><th class="text-right py-2 px-1 font-mono text-xs w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const bHtml = buy.length ? buy.map(function(i) { return row(i, true); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
-            const sHtml = sell.length ? sell.map(function(i) { return row(i, false); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
+            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
+            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="2" class="py-2 theme-text-dim">無</td></tr>';
             el.innerHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">' +
                 '<div class="min-w-0">' + head + bHtml + '</tbody></table></div>' +
                 '<div class="min-w-0">' + head2 + sHtml + '</tbody></table></div></div>' +
@@ -2871,7 +2934,7 @@
             return out;
         }
 
-        function renderMomentumResultRow(leftTitle, badgeHtml, totalDiff, totalAmt, isBuy, stockSubtitlePlain) {
+        function renderMomentumResultRow(leftTitle, badgeHtml, totalDiff, totalAmt, isBuy, stockSubtitlePlain, rowIndex) {
             const diffStr = (totalDiff >= 0 ? '+' : '') + Math.round(Number(totalDiff) || 0).toLocaleString() + ' 張';
             const amtNum = Number(totalAmt);
             const amtHtml = formatAmountNetDisplayHtml(isNaN(amtNum) ? null : amtNum);
@@ -2882,7 +2945,8 @@
             const badgeWrap = stockSubtitlePlain
                 ? '<div>' + badgeHtml + '</div>'
                 : '<div class="mt-1.5">' + badgeHtml + '</div>';
-            return '<div class="flex flex-row items-start justify-between gap-2 sm:gap-3 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover">' +
+            const stripe = (typeof rowIndex === 'number' && rowIndex >= 0) ? (rowIndex % 2 === 0 ? 'row-even' : 'row-odd') : '';
+            return '<div class="flex flex-row items-start justify-between gap-2 sm:gap-3 py-2.5 px-2 sm:px-3 border-b theme-border last:border-b-0 row-hover ' + stripe + '">' +
                 '<div class="min-w-0 flex-1 flex flex-col">' +
                 '<div class="text-base sm:text-lg font-bold text-zinc-800 dark:text-zinc-100 leading-snug break-words">' + leftTitle + '</div>' +
                 stockLine + badgeWrap + '</div>' +
@@ -2949,12 +3013,12 @@
             const sells = results.filter(function(r) { return r.dir === -1; });
             buys.sort(sortMomentum);
             sells.sort(sortMomentum);
-            function rowActor(r) {
+            function rowActor(r, i) {
                 const title = ((r.name || '—') + (r.code ? ' ' + r.code : '')).trim();
                 const badge = r.dir === 1
                     ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
                     : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
-                return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, null);
+                return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, null, i);
             }
             out.innerHTML = buildMomentumResultsGrid(
                 buys.map(rowActor).join(''),
@@ -3008,14 +3072,14 @@
             const sells = results.filter(function(x) { return x.r.dir === -1; });
             buys.sort(sortMomentumStock);
             sells.sort(sortMomentumStock);
-            function rowStock(x) {
+            function rowStock(x, i) {
                 const r = x.r;
                 const title = getActorLabelForReverseSearch(x.actorKey);
                 const stockSubtitle = [r.name, r.code].filter(function(p) { return p != null && String(p).trim() !== ''; }).map(function(p) { return String(p).trim(); }).join(' ');
                 const badge = r.dir === 1
                     ? '<span class="inline-block bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 px-2 py-1 rounded text-xs font-bold">連買 ' + r.streak + ' 天</span>'
                     : '<span class="inline-block bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">連賣 ' + r.streak + ' 天</span>';
-                return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, stockSubtitle || null);
+                return renderMomentumResultRow(title, badge, r.totalDiff, r.totalAmt, r.dir === 1, stockSubtitle || null, i);
             }
             out.innerHTML = buildMomentumResultsGrid(
                 buys.map(rowStock).join(''),
@@ -3310,22 +3374,24 @@
             buyTbody.innerHTML = buy.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const trendBtn = showTrendBtn && item.code
-                    ? ` <button type="button" class="text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="切換至走勢圖並繪製">走勢</button>`
+                    ? `<button type="button" class="rank-trend-btn shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="切換至走勢圖並繪製">走勢</button>`
                     : '';
                 const detail = formatBrokerBuySellDetailLine(item);
                 const dod = deltaLineHtml(item, buyPrevMap, true);
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}${trendBtn}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${dod}${detail}</div></td></tr>`;
+                const stripeBuy = i % 2 === 0 ? 'row-even' : 'row-odd';
+                return `<tr class="row-hover border-b theme-border last:border-0 ${stripeBuy}"><td class="py-3 px-3 sm:px-4 font-mono text-xs theme-text-dim align-top">${i + 1}</td><td class="py-3 px-3 sm:px-4 min-w-0 align-top"><div class="flex flex-wrap items-baseline gap-x-1 gap-y-1"><span class="font-bold theme-text break-words leading-snug">${item.name}</span>${codeHtml}${trendBtn}</div></td><td class="py-3 px-3 sm:px-4 text-right font-mono font-bold text-buy table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, true)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
 
             const sellTbody = document.getElementById('sell-rank-tbody');
             sellTbody.innerHTML = sell.map((item, i) => {
                 const codeHtml = item.code ? `<span class="font-mono text-[10px] theme-text-dim ml-1">${item.code}</span>` : '';
                 const trendBtn = showTrendBtn && item.code
-                    ? ` <button type="button" class="text-[10px] font-mono text-accent underline hover:opacity-90 shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="切換至走勢圖並繪製">走勢</button>`
+                    ? `<button type="button" class="rank-trend-btn shrink-0" data-trend-code="${String(item.code).replace(/"/g, '&quot;')}" title="切換至走勢圖並繪製">走勢</button>`
                     : '';
                 const detail = formatBrokerBuySellDetailLine(item);
                 const dod = deltaLineHtml(item, sellPrevMap, false);
-                return `<tr class="row-hover border-b theme-border last:border-0"><td class="py-3.5 px-3 sm:px-4 font-mono theme-text-dim">${i + 1}</td><td class="py-3.5 px-3 sm:px-4 min-w-0"><span class="font-bold theme-text break-words">${item.name}</span>${codeHtml}${trendBtn}</td><td class="py-3.5 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${dod}${detail}</div></td></tr>`;
+                const stripeSell = i % 2 === 0 ? 'row-even' : 'row-odd';
+                return `<tr class="row-hover border-b theme-border last:border-0 ${stripeSell}"><td class="py-3 px-3 sm:px-4 font-mono text-xs theme-text-dim align-top">${i + 1}</td><td class="py-3 px-3 sm:px-4 min-w-0 align-top"><div class="flex flex-wrap items-baseline gap-x-1 gap-y-1"><span class="font-bold theme-text break-words leading-snug">${item.name}</span>${codeHtml}${trendBtn}</div></td><td class="py-3 px-3 sm:px-4 text-right font-mono font-bold text-sell table-num-cell align-top"><div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>${formatVal(item, false)}</span>${dod}${detail}</div></td></tr>`;
             }).join('');
         }
 
