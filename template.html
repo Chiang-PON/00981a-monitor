@@ -536,88 +536,7 @@
             border-radius: 0.75rem;
         }
 
-        /* —— 全球戰情：儀表板視覺 —— */
-        #global-panel {
-            --gw-accent: var(--border-dim);
-        }
-        .global-war-hero {
-            border-radius: 1rem;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 70%, transparent);
-            background: linear-gradient(
-                165deg,
-                color-mix(in srgb, var(--bg-panel) 88%, var(--color-accent)) 0%,
-                var(--bg-panel) 48%,
-                color-mix(in srgb, var(--bg-panel) 96%, var(--bg-base)) 100%
-            );
-            box-shadow: 0 1px 0 color-mix(in srgb, #fff 8%, transparent) inset, 0 8px 32px color-mix(in srgb, #000 6%, transparent);
-        }
-        [data-theme="dark"] .global-war-hero {
-            background: linear-gradient(
-                165deg,
-                color-mix(in srgb, var(--bg-panel) 85%, #0a1628) 0%,
-                var(--bg-panel) 50%,
-                var(--bg-panel) 100%
-            );
-            box-shadow: 0 1px 0 color-mix(in srgb, #fff 4%, transparent) inset, 0 12px 40px rgba(0, 0, 0, 0.35);
-        }
-        .global-war-meta {
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-size: 0.625rem;
-            letter-spacing: 0.02em;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-        @media (min-width: 640px) {
-            .global-war-meta { font-size: 0.6875rem; }
-        }
-        /* 全球戰情：依洲／區塊分組（緊湊版面） */
-        #global-war-dashboard {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .global-war-main-block {
-            margin: 0;
-            padding: 0;
-            scroll-margin-top: 4rem;
-        }
-        .global-war-block-title {
-            font-size: 1rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            color: var(--text-main);
-            font-family: "Noto Sans TC", system-ui, sans-serif;
-            margin-bottom: 0.25rem;
-            padding-bottom: 0.45rem;
-            border-bottom: 1px solid color-mix(in srgb, var(--border-dim) 55%, transparent);
-        }
-        .global-war-block-lead {
-            font-size: 0.6875rem;
-            color: var(--text-dim);
-            line-height: 1.4;
-            margin-bottom: 0.65rem;
-            max-width: 40rem;
-        }
-        .global-war-subhead {
-            font-size: 0.75rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            color: var(--text-main);
-            margin: 0.75rem 0 0.4rem 0;
-            padding-bottom: 0.35rem;
-            border-bottom: 1px dashed color-mix(in srgb, var(--border-dim) 55%, transparent);
-        }
-        /* 全球指數：雙欄行情卡（參考行情 App 卡片網格） */
-        .global-war-snapshot {
-            margin: 0 0 0.25rem 0;
-        }
-        .global-war-snapshot__caption {
-            font-size: 0.6rem;
-            color: var(--text-dim);
-            line-height: 1.35;
-            margin: 0 0 0.45rem 0;
-            max-width: 48rem;
-        }
+        /* —— 指數卡網格（台灣總覽首屏 · gw-idx-*） —— */
         .gw-idx-board {
             border-radius: 0.75rem;
             border: 1px solid color-mix(in srgb, var(--border-dim) 72%, transparent);
@@ -640,30 +559,10 @@
             .gw-idx-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
-            /* 全球戰情多張卡維持 3 欄；首頁 4 張仍為 4 欄（權重高於上一則） */
+            /* 首頁 4 張指數卡維持 4 欄（權重高於上一則三欄預設） */
             #home-index-cards.gw-idx-grid {
                 grid-template-columns: repeat(4, minmax(0, 1fr));
             }
-        }
-        /* 全球戰情 · 指數卡：手機兩欄；平板三欄；寬螢幕四欄（與台灣總覽邏輯一致、較緊湊） */
-        @media (min-width: 640px) {
-            #global-war-index-cards.gw-idx-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
-        @media (min-width: 1024px) {
-            #global-war-index-cards.gw-idx-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-        }
-        .global-war-snapshot .gw-idx-board {
-            padding: 0.5rem 0.55rem 0.45rem;
-        }
-        .global-war-snapshot #global-war-index-cards.gw-idx-grid {
-            gap: 0.45rem;
-        }
-        .global-war-snapshot .gw-idx-card {
-            padding: 0.48rem 0.5rem 0.4rem;
         }
         .gw-idx-card {
             position: relative;
@@ -784,543 +683,6 @@
         html.elder-mode .gw-idx-card__chg {
             font-size: 0.85rem;
         }
-        /* 快跳：錨點至各國卡片 */
-        .global-war-pulse {
-            margin: 0.35rem 0 0.5rem 0;
-        }
-        .global-war-pulse__head {
-            font-size: 0.58rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin: 0 0 0.3rem 0;
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-        }
-        .global-war-pulse__track {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-        }
-        .global-war-pulse__chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.2rem 0.45rem;
-            border-radius: 9999px;
-            font-size: 0.62rem;
-            font-weight: 700;
-            text-decoration: none;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 65%, transparent);
-            background: color-mix(in srgb, var(--bg-base) 55%, var(--bg-panel));
-            color: var(--text-main);
-            transition: border-color 0.15s ease, background 0.15s ease;
-        }
-        .global-war-pulse__chip:hover {
-            border-color: color-mix(in srgb, var(--border-focus) 40%, var(--border-dim));
-        }
-        .global-war-pulse__chip--up { border-color: color-mix(in srgb, var(--color-buy) 28%, var(--border-dim)); }
-        .global-war-pulse__chip--down { border-color: color-mix(in srgb, var(--color-sell) 28%, var(--border-dim)); }
-        .global-war-pulse__pct { font-size: 0.58rem; opacity: 0.95; }
-        /* RSS 摘錄（緊湊） */
-        .global-war-news-digest {
-            margin: 0.35rem 0 0.6rem 0;
-            padding: 0.45rem 0.55rem 0.55rem;
-            border-radius: 0.5rem;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 60%, transparent);
-            background: color-mix(in srgb, var(--bg-base) 38%, var(--bg-panel));
-        }
-        .global-war-news-digest__head {
-            font-size: 0.65rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin: 0 0 0.35rem 0;
-            letter-spacing: 0.03em;
-        }
-        .global-war-news-digest__sub {
-            font-size: 0.55rem;
-            font-weight: 500;
-            color: var(--text-dim);
-            letter-spacing: 0;
-        }
-        .global-war-news-digest__list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-        .global-war-news-digest__link {
-            font-size: 0.65rem;
-            line-height: 1.4;
-            color: var(--text-main);
-            text-decoration: none;
-        }
-        .global-war-news-digest__link:hover {
-            color: var(--color-accent);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-        .global-war-news-digest__src {
-            display: block;
-            font-size: 0.52rem;
-            color: var(--text-dim);
-            margin-top: 0.1rem;
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-        }
-        .global-war-ai-disclaimer {
-            font-size: 0.52rem;
-            line-height: 1.4;
-            color: var(--text-dim);
-            margin: 0.25rem 0 0.5rem 0;
-            max-width: 48rem;
-        }
-        .global-war-card__preview {
-            font-size: 0.68rem;
-            line-height: 1.45;
-            color: var(--text-main);
-            margin: 0 0 0.45rem 0;
-            padding: 0.35rem 0.5rem;
-            border-radius: 0.35rem;
-            background: color-mix(in srgb, var(--bg-base) 72%, transparent);
-            border-left: 3px solid color-mix(in srgb, var(--border-focus) 45%, var(--border-dim));
-        }
-        .global-war-details {
-            margin: 0.35rem 0 0 0;
-            border-radius: 0.45rem;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 58%, transparent);
-            background: color-mix(in srgb, var(--bg-base) 50%, var(--bg-panel));
-        }
-        .global-war-details__summary {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
-            padding: 0.4rem 0.5rem;
-            font-size: 0.6875rem;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            color: var(--text-main);
-            list-style: none;
-            user-select: none;
-        }
-        .global-war-details__summary::-webkit-details-marker {
-            display: none;
-        }
-        .global-war-details__hint {
-            font-size: 0.58rem;
-            font-weight: 600;
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            letter-spacing: 0.02em;
-        }
-        .global-war-details[open] .global-war-details__hint {
-            opacity: 0.85;
-        }
-        .global-war-details__inner {
-            padding: 0 0.45rem 0.45rem;
-            border-top: 1px solid color-mix(in srgb, var(--border-dim) 45%, transparent);
-        }
-        .global-war-details__inner .global-war-card__summary--ai,
-        .global-war-details__inner .global-war-card__summary--plain {
-            margin-top: 0.35rem;
-        }
-        .global-war-details__inner .global-war-card__summary--ai {
-            border: 1px solid color-mix(in srgb, var(--border-focus) 22%, var(--border-dim));
-        }
-        html.elder-mode .global-war-details__summary {
-            font-size: 0.8rem;
-        }
-        .global-war-card--news {
-            border-style: dashed;
-            border-color: color-mix(in srgb, var(--border-dim) 75%, transparent);
-        }
-        .global-war-card--news .global-war-card__body {
-            padding-top: 0.35rem;
-        }
-        .global-war-region {
-            margin: 0;
-            padding: 0;
-            scroll-margin-top: 5rem;
-        }
-        .global-war-region__head {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            gap: 0.25rem 0.6rem;
-            margin-bottom: 0.35rem;
-            padding-bottom: 0.3rem;
-            border-bottom: 1px solid color-mix(in srgb, var(--border-dim) 50%, transparent);
-        }
-        .global-war-region__title {
-            font-size: 0.8125rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            color: var(--text-main);
-            font-family: "Noto Sans TC", system-ui, sans-serif;
-        }
-        .global-war-region__sub {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            margin-top: 0;
-            line-height: 1.35;
-            flex: 1 1 12rem;
-            min-width: 0;
-        }
-        .global-war-region__cards {
-            display: grid;
-            gap: 0.65rem;
-            grid-template-columns: 1fr;
-        }
-        @media (min-width: 640px) {
-            .global-war-region__cards[data-region-cols="2"] {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        @media (min-width: 1024px) {
-            .global-war-region__cards[data-region-cols="3"] {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
-        .global-war-card__accent--muted {
-            opacity: 0.45;
-        }
-        .global-war-card {
-            scroll-margin-top: 5rem;
-            --card-accent: var(--border-dim);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            border-radius: 0.75rem;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 65%, transparent);
-            background: var(--bg-panel);
-            box-shadow: 0 1px 8px color-mix(in srgb, #000 5%, transparent);
-            overflow: hidden;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        [data-theme="dark"] .global-war-card {
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
-        }
-        .global-war-card:hover {
-            border-color: color-mix(in srgb, var(--border-focus) 45%, var(--border-dim));
-            box-shadow: 0 8px 28px color-mix(in srgb, #000 8%, transparent);
-        }
-        .global-war-card[data-avg="up"] { --card-accent: var(--color-buy); }
-        .global-war-card[data-avg="down"] { --card-accent: var(--color-sell); }
-        .global-war-card[data-avg="none"] { --card-accent: color-mix(in srgb, var(--border-dim) 90%, var(--text-dim)); }
-        .global-war-card__accent {
-            height: 2px;
-            width: 100%;
-            background: linear-gradient(90deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 40%, transparent));
-            flex-shrink: 0;
-        }
-        .global-war-card__header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 0.5rem;
-            padding: 0.55rem 0.65rem 0.5rem;
-            border-bottom: 1px solid color-mix(in srgb, var(--border-dim) 55%, transparent);
-            background: color-mix(in srgb, var(--bg-panel) 92%, var(--bg-base));
-        }
-        [data-theme="dark"] .global-war-card__header {
-            background: color-mix(in srgb, var(--bg-panel) 88%, #000);
-        }
-        .global-war-card__title-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            min-width: 0;
-        }
-        .global-war-card__emoji {
-            font-size: 1.125rem;
-            line-height: 1;
-            flex-shrink: 0;
-        }
-        .global-war-card__title-text {
-            min-width: 0;
-        }
-        .global-war-card__title-text h3 {
-            font-size: 0.8125rem;
-            font-weight: 800;
-            letter-spacing: 0.03em;
-            color: var(--text-main);
-            line-height: 1.2;
-        }
-        .global-war-card__code {
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-size: 0.5625rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-top: 0.125rem;
-        }
-        .global-war-card__badge {
-            flex-shrink: 0;
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            padding: 0.2rem 0.45rem;
-            border-radius: 9999px;
-            line-height: 1.15;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 70%, transparent);
-            background: color-mix(in srgb, var(--bg-base) 80%, transparent);
-        }
-        .global-war-card__badge--up {
-            color: var(--color-buy);
-            border-color: color-mix(in srgb, var(--color-buy) 35%, var(--border-dim));
-            background: color-mix(in srgb, var(--color-buy) 10%, var(--bg-base));
-        }
-        .global-war-card__badge--down {
-            color: var(--color-sell);
-            border-color: color-mix(in srgb, var(--color-sell) 35%, var(--border-dim));
-            background: color-mix(in srgb, var(--color-sell) 10%, var(--bg-base));
-        }
-        .global-war-card__badge--flat {
-            color: var(--text-dim);
-        }
-        .global-war-card__body {
-            padding: 0.55rem 0.65rem 0.65rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            flex: 1;
-        }
-        .global-war-card__summary {
-            font-size: 0.75rem;
-            line-height: 1.5;
-            color: var(--text-main);
-        }
-        .global-war-card__summary--ai {
-            padding: 0.55rem 0.6rem 0.5rem;
-            border-radius: 0.5rem;
-            border: 1px solid color-mix(in srgb, var(--border-focus) 28%, var(--border-dim));
-            background: color-mix(in srgb, var(--bg-base) 65%, var(--bg-panel));
-            box-shadow: 0 1px 0 color-mix(in srgb, #fff 5%, transparent) inset;
-        }
-        [data-theme="dark"] .global-war-card__summary--ai {
-            background: color-mix(in srgb, var(--bg-panel) 70%, #0a0a0a);
-            border-color: color-mix(in srgb, var(--color-accent) 22%, var(--border-dim));
-        }
-        .global-war-card__summary--plain {
-            padding: 0.25rem 0 0;
-        }
-        .global-war-ai-label {
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-size: 0.5rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin: 0 0 0.35rem 0;
-        }
-        .global-war-ai-body {
-            margin: 0;
-        }
-        .global-war-ai-para {
-            margin: 0 0 0.45rem 0;
-            font-size: 0.75rem;
-            line-height: 1.55;
-            letter-spacing: 0.02em;
-            color: var(--text-main);
-            text-align: start;
-        }
-        .global-war-ai-para:last-child {
-            margin-bottom: 0;
-        }
-        .global-war-metric {
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-size: 0.92em;
-            color: var(--text-main);
-            letter-spacing: 0.02em;
-        }
-        .global-war-card__ai-foot {
-            font-size: 0.5rem;
-            letter-spacing: 0.03em;
-            color: var(--text-dim);
-            margin-top: 0.45rem;
-            padding-top: 0.4rem;
-            line-height: 1.4;
-            border-top: 1px solid color-mix(in srgb, var(--border-dim) 45%, transparent);
-        }
-        .global-war-card__section-block {
-            margin: 0.35rem 0 0 0;
-            padding-top: 0.45rem;
-            border-top: 1px solid color-mix(in srgb, var(--border-dim) 50%, transparent);
-        }
-        .global-war-card__body > .global-war-card__section-block:first-child {
-            margin-top: 0;
-            padding-top: 0;
-            border-top: none;
-        }
-        .global-war-card__section-title {
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-size: 0.5rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-bottom: 0.35rem;
-        }
-        .global-war-card__table-wrap {
-            border-radius: 0.5rem;
-            border: 1px solid color-mix(in srgb, var(--border-dim) 70%, transparent);
-            overflow: hidden;
-            background: color-mix(in srgb, var(--bg-base) 55%, var(--bg-panel));
-        }
-        .global-war-idx-table {
-            width: 100%;
-            font-size: 0.6875rem;
-            border-collapse: collapse;
-        }
-        .global-war-idx-table thead th {
-            font-family: "JetBrains Mono", ui-monospace, monospace;
-            font-weight: 600;
-            font-size: 0.5rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            padding: 0.3rem 0.4rem;
-            background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-base));
-            border-bottom: 1px solid color-mix(in srgb, var(--border-dim) 55%, transparent);
-        }
-        .global-war-idx-table tbody tr:nth-child(even) {
-            background: color-mix(in srgb, var(--bg-panel) 40%, transparent);
-        }
-        .global-war-idx-table tbody tr:hover {
-            background: color-mix(in srgb, var(--color-accent) 6%, var(--bg-panel));
-        }
-        .global-war-idx-table td {
-            padding: 0.3rem 0.45rem;
-            vertical-align: middle;
-        }
-        .global-war-sector {
-            margin: 0.35rem 0 0 0;
-            padding-top: 0.45rem;
-            border-top: 1px solid color-mix(in srgb, var(--border-dim) 50%, transparent);
-        }
-        .global-war-sector__head {
-            font-size: 0.5rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-bottom: 0.3rem;
-        }
-        .global-war-sector__list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        .global-war-sector__row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.65rem;
-            padding: 0.25rem 0.4rem;
-            border-radius: 0.3rem;
-            background: color-mix(in srgb, var(--bg-base) 70%, transparent);
-            border: 1px solid color-mix(in srgb, var(--border-dim) 50%, transparent);
-        }
-        .global-war-card__news {
-            margin: 0.75rem 0 0 0;
-            padding-top: 0.875rem;
-            border-top: 1px solid color-mix(in srgb, var(--border-dim) 50%, transparent);
-        }
-        .global-war-news-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .global-war-news-list li {
-            position: relative;
-            padding-left: 0.9rem;
-            line-height: 1.55;
-        }
-        .global-war-news-list li::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0.55em;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: color-mix(in srgb, var(--color-accent) 70%, var(--border-dim));
-        }
-        .global-war-news-list a {
-            font-size: 0.6875rem;
-            color: var(--text-main);
-            text-decoration: none;
-            transition: color 0.15s ease;
-        }
-        .global-war-news-list a:hover {
-            color: var(--color-accent);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-        .global-war-news-list .source {
-            font-size: 0.5625rem;
-            color: var(--text-dim);
-            display: block;
-            margin-top: 0.15rem;
-        }
-        .global-war-other {
-            grid-column: 1 / -1;
-            border-radius: 1rem;
-            border: 1px dashed color-mix(in srgb, var(--border-dim) 80%, transparent);
-            background: color-mix(in srgb, var(--bg-panel) 88%, var(--bg-base));
-            padding: 1rem 1.125rem 1.125rem;
-        }
-        .global-war-other h3 {
-            font-size: 0.8125rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            margin-bottom: 0.75rem;
-            color: var(--text-main);
-        }
-        .global-war-other ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: grid;
-            gap: 0.5rem 1.25rem;
-        }
-        @media (min-width: 640px) {
-            .global-war-other ul {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        html.elder-mode .global-war-card__summary,
-        html.elder-mode .global-war-card__summary--ai {
-            font-size: 0.95rem;
-        }
-        html.elder-mode .global-war-ai-para {
-            font-size: 0.95rem;
-            line-height: 1.9;
-        }
-        html.elder-mode .global-war-idx-table {
-            font-size: 0.9rem;
-        }
-        html.elder-mode .global-war-meta {
-            font-size: 0.8rem;
-        }
-        html.elder-mode .global-war-card__title-text h3 {
-            font-size: 1.05rem;
-        }
-        html.elder-mode .global-war-hero > p:last-of-type {
-            font-size: 0.95rem;
-            line-height: 1.65;
-        }
-
         /* 橫向捲動時固定左側欄（排名＋名稱／產業／股票名） */
         .table-sticky-cols-1,
         .table-sticky-cols-2 {
@@ -1539,7 +901,6 @@
             <div id="control-panel" class="mb-6 min-w-0">
                 <div class="-mx-1 px-1 mb-4 flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-x-visible pb-1 hide-scrollbar scroll-smooth">
                     <button type="button" id="mode-tab-home" onclick="setMode('HOME')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">台灣總覽</button>
-                    <button type="button" id="mode-tab-global" onclick="setMode('GLOBAL')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">全球戰情</button>
                     <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
                     <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
                     <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
@@ -1551,7 +912,7 @@
             <div id="home-panel" class="hidden mb-6 space-y-6">
                 <div id="home-markets-ticker-wrap" class="hidden rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 shadow-[var(--shadow-panel)]">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-1">台灣與美股 · 指數快照</h3>
-                    <p class="text-xs theme-text-dim mb-3 leading-relaxed">加權與 S&amp;P、Nasdaq、道瓊；版面與「全球戰情」相同卡片格式，資料來自同一 digest。</p>
+                    <p class="text-xs theme-text-dim mb-3 leading-relaxed">加權與 S&amp;P、Nasdaq、道瓊；卡片格式與 digest 指數欄位一致。</p>
                     <div id="home-index-cards" class="gw-idx-grid"></div>
                     <p id="home-index-cards-foot" class="gw-idx-board__foot mt-3 mb-0 hidden"></p>
                 </div>
@@ -1580,22 +941,6 @@
                     <h3 class="font-mono text-sm font-bold theme-text mb-1.5 leading-snug">本機資料 · 近 1 交易日買／賣超（金額）</h3>
                     <p class="text-[11px] theme-text-dim mb-3 leading-relaxed">合併本機內<strong class="theme-text font-semibold">已追蹤之各檔 ETF</strong>持倉變化加總（不含凱基分點、大聯盟、AI 等聚合列）。</p>
                     <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
-                </div>
-            </div>
-
-            <div id="global-panel" class="hidden mb-6 space-y-4">
-                <section class="global-war-hero p-3 sm:p-4 md:p-5" aria-labelledby="global-war-heading">
-                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 mb-2">
-                        <div class="min-w-0">
-                            <h2 id="global-war-heading" class="panel-section-title mb-1">全球戰情</h2>
-                            <p id="global-war-meta" class="global-war-meta"></p>
-                        </div>
-                        <span class="shrink-0 self-start rounded-full border theme-border px-2 py-0.5 text-[10px] font-mono font-semibold theme-text-dim uppercase tracking-wider">快照 · 非即時</span>
-                    </div>
-                    <p class="text-[11px] sm:text-xs theme-text-dim leading-snug max-w-3xl">上方為<strong class="theme-text font-semibold">指數卡片網格</strong>（大字價位、紅漲綠跌）；<strong class="theme-text font-semibold">快跳</strong>至各國摘要、<strong class="theme-text font-semibold">RSS</strong>補標題；下方為一句預覽與全文（台灣含產業）。AI 不預測股價。</p>
-                </section>
-                <div id="global-war-dashboard" aria-live="polite">
-                    <p class="text-sm theme-text-dim col-span-full py-8 text-center font-mono">載入中…</p>
                 </div>
             </div>
 
@@ -2146,7 +1491,7 @@
                 out.innerHTML = '<div class="theme-text-dim font-mono text-xs">請選擇對照結束日（B）</div>';
                 return;
             }
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'GLOBAL' || currentMode === 'TREND' || currentETF === AI_TAB) {
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND' || currentETF === AI_TAB) {
                 out.innerHTML = '';
                 return;
             }
@@ -2266,7 +1611,6 @@
 
         function updateModeTabStyles() {
             const homeBtn = document.getElementById('mode-tab-home');
-            const globalBtn = document.getElementById('mode-tab-global');
             const etfBtn = document.getElementById('mode-tab-etf');
             const brokerBtn = document.getElementById('mode-tab-broker');
             const searchBtn = document.getElementById('mode-tab-search');
@@ -2275,7 +1619,6 @@
             if (!etfBtn || !brokerBtn || !searchBtn) return;
             const base = 'tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors';
             if (homeBtn) homeBtn.className = base + ' ' + (currentMode === 'HOME' ? 'tab-active' : 'tab-inactive');
-            if (globalBtn) globalBtn.className = base + ' ' + (currentMode === 'GLOBAL' ? 'tab-active' : 'tab-inactive');
             etfBtn.className = base + ' ' + (currentMode === 'ETF' ? 'tab-active' : 'tab-inactive');
             brokerBtn.className = base + ' ' + (currentMode === 'BROKER' ? 'tab-active' : 'tab-inactive');
             searchBtn.className = base + ' ' + (currentMode === 'SEARCH' ? 'tab-active' : 'tab-inactive');
@@ -2375,7 +1718,7 @@
         }
 
         function exportCurrentRankCsv() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'GLOBAL' || currentMode === 'TREND' || currentETF === AI_TAB) {
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND' || currentETF === AI_TAB) {
                 alert('請先切換到 ETF／分點模式並選擇標的（非 AI）');
                 return;
             }
@@ -2402,7 +1745,7 @@
         }
 
         function setMode(mode) {
-            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM' && mode !== 'HOME' && mode !== 'GLOBAL' && mode !== 'TREND') return;
+            if (mode !== 'ETF' && mode !== 'BROKER' && mode !== 'SEARCH' && mode !== 'MOMENTUM' && mode !== 'HOME' && mode !== 'TREND') return;
             if (mode === currentMode) return;
             const prevMode = currentMode;
             currentMode = mode;
@@ -2421,11 +1764,9 @@
             const pillsSection = document.getElementById('section-pills');
             const tfrRow = document.getElementById('timeframe-unit-row');
             const homePanel = document.getElementById('home-panel');
-            const globalPanel = document.getElementById('global-panel');
             const trendPanel = document.getElementById('trend-panel');
             if (mode === 'HOME') {
                 if (trendPanel) trendPanel.classList.add('hidden');
-                if (globalPanel) globalPanel.classList.add('hidden');
                 if (pillsSection) pillsSection.classList.add('hidden');
                 if (tfrRow) tfrRow.classList.add('hidden');
                 if (dashPanel) dashPanel.classList.add('hidden');
@@ -2438,19 +1779,6 @@
             }
             if (homePanel) homePanel.classList.add('hidden');
             syncMarketsTickerVisibility();
-            if (mode === 'GLOBAL') {
-                if (trendPanel) trendPanel.classList.add('hidden');
-                if (pillsSection) pillsSection.classList.add('hidden');
-                if (tfrRow) tfrRow.classList.add('hidden');
-                if (dashPanel) dashPanel.classList.add('hidden');
-                if (searchPanel) searchPanel.classList.add('hidden');
-                if (momentumPanel) momentumPanel.classList.add('hidden');
-                if (globalPanel) globalPanel.classList.remove('hidden');
-                renderGlobalWarDashboard();
-                renderCompareDiff();
-                return;
-            }
-            if (globalPanel) globalPanel.classList.add('hidden');
             if (mode === 'TREND') {
                 if (pillsSection) pillsSection.classList.add('hidden');
                 if (tfrRow) tfrRow.classList.add('hidden');
@@ -3035,7 +2363,7 @@
         function updateDashboardTitleDateRange() {
             const el = document.getElementById('dashboard-title-date-range');
             if (!el) return;
-            if (currentMode === 'SEARCH' || currentETF === AI_TAB || currentMode === 'HOME' || currentMode === 'GLOBAL' || currentMode === 'TREND') {
+            if (currentMode === 'SEARCH' || currentETF === AI_TAB || currentMode === 'HOME' || currentMode === 'TREND') {
                 el.textContent = '';
                 el.classList.add('hidden');
                 return;
@@ -3238,8 +2566,10 @@
             let lm = 'ETF';
             try {
                 const x = localStorage.getItem('lastMode');
-                if (x === 'HOME' || x === 'GLOBAL' || x === 'ETF' || x === 'BROKER' || x === 'SEARCH' || x === 'MOMENTUM' || x === 'TREND') {
+                if (x === 'HOME' || x === 'ETF' || x === 'BROKER' || x === 'SEARCH' || x === 'MOMENTUM' || x === 'TREND') {
                     lm = x;
+                } else if (x === 'GLOBAL') {
+                    lm = 'HOME';
                 }
             } catch (e) {}
 
@@ -3530,54 +2860,18 @@
             }
         }
 
-        const GLOBAL_WAR_COUNTRIES = [
-            { key: 'TW', label: '台灣', emoji: '🇹🇼', symbols: ['TWSE'] },
-            { key: 'US', label: '美國', emoji: '🇺🇸', symbols: ['^SPX', '^NDX', '^DJI'] },
-            { key: 'CA', label: '加拿大', emoji: '🇨🇦', symbols: ['^GSPTSE'] },
-            { key: 'HK', label: '香港', emoji: '🇭🇰', symbols: ['^HSI'] },
-            { key: 'SG', label: '新加坡', emoji: '🇸🇬', symbols: ['^STI'] },
-            { key: 'KR', label: '南韓', emoji: '🇰🇷', symbols: ['^KOSPI'] },
-            { key: 'JP', label: '日本', emoji: '🇯🇵', symbols: ['^N225'] },
-            { key: 'AU', label: '澳洲', emoji: '🇦🇺', symbols: ['^AXJO'] },
-            { key: 'IN', label: '印度', emoji: '🇮🇳', symbols: ['^BSESN'] },
-            { key: 'CN', label: '中國', emoji: '🇨🇳', symbols: ['^SSEC'] },
-            { key: 'DE', label: '德國', emoji: '🇩🇪', symbols: ['^DAX'] },
-            { key: 'GB', label: '英國', emoji: '🇬🇧', symbols: ['^UKX'] },
-            { key: 'FR', label: '法國', emoji: '🇫🇷', symbols: ['^CAC'] }
-        ];
+        const HOME_INDEX_COUNTRY_META = {
+            TW: { key: 'TW', label: '台灣', emoji: '🇹🇼' },
+            US: { key: 'US', label: '美國', emoji: '🇺🇸' }
+        };
 
-        /** 儀表板分區：台灣、美洲、亞太、歐洲（sub 可空，不顯示副標） */
-        const GLOBAL_WAR_REGIONS = [
-            { id: 'tw', title: '台灣', sub: '', keys: ['TW'], regionCols: '' },
-            { id: 'am', title: '美洲', sub: '', keys: ['US', 'CA'], regionCols: '2' },
-            { id: 'ap', title: '亞太', sub: '', keys: ['HK', 'SG', 'KR', 'JP', 'AU', 'IN', 'CN'], regionCols: '2' },
-            { id: 'eu', title: '歐洲', sub: '', keys: ['DE', 'GB', 'FR'], regionCols: '3' }
-        ];
-
-        /** 台灣總覽首屏：加權 + 美股三大（與全球戰情同源） */
+        /** 台灣總覽首屏：加權 + 美股三大 */
         const HOME_INDEX_CARD_ORDER = [
             { cKey: 'TW', sym: 'TWSE' },
             { cKey: 'US', sym: '^SPX' },
             { cKey: 'US', sym: '^NDX' },
             { cKey: 'US', sym: '^DJI' }
         ];
-
-        /** 標題關鍵字 → 歸類（同則新聞僅入分數最高之國；digest 新聞多為台媒，台灣詞須具辨識度） */
-        const GLOBAL_WAR_NEWS_KEYWORDS = {
-            TW: ['台灣', '台股', '台幣', '新台幣', '加權', '台積電', '證交所', '櫃買', '櫃檯', 'TWSE', 'Taiwan', '外資買超', '投信買超', '元大', '國泰', '富邦', '凱基'],
-            US: ['美國', '美股', '道瓊', '那斯達克', 'Nasdaq', 'S&P', '標普', 'Fed', '聯準會', '川普', '美元', '美債', '白宮', '華爾街', '波音', '蘋果公司', '輝達', 'NVIDIA', '特斯拉'],
-            HK: ['香港', '恆生', '港股', '陸港股', '港交所', '恒生'],
-            SG: ['新加坡', '星洲', '星國'],
-            KR: ['韓國', '韓股', 'KOSPI', '南韓', '首爾'],
-            JP: ['日本', '日經', '日股', '日圓', '日銀', '東證'],
-            DE: ['德國', 'DAX', '柏林', '法蘭克福', '歐央行'],
-            GB: ['英國', '英鎊', '富時', '倫敦', '脫歐'],
-            FR: ['法國', '法股', '巴黎'],
-            CA: ['加拿大', '加股', '多倫多', 'TSX', '加拿大央行'],
-            AU: ['澳洲', '澳大利亞', '澳股', '雪梨', '澳洲央行', 'RBA'],
-            IN: ['印度', '印度股', '孟買', 'Sensex', 'Nifty'],
-            CN: ['中國', 'A股', '上證', '深證', '滬深', '人民幣']
-        };
 
         function parseMarketPct(it) {
             if (!it || it.price == null || it.price === '') return null;
@@ -3589,71 +2883,6 @@
             const raw = String(it.changePercent || '').replace(/,/g, '').trim();
             const n = parseFloat(raw);
             return isNaN(n) ? null : n;
-        }
-
-        function getGlobalWarItemsForCountry(key) {
-            const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
-            const markets = d.markets;
-            if (!markets || !markets.ok || !markets.items || !markets.items.length) return [];
-            const def = GLOBAL_WAR_COUNTRIES.find(function(c) { return c.key === key; });
-            if (!def) return [];
-            const symSet = {};
-            def.symbols.forEach(function(s) { symSet[s] = true; });
-            return markets.items.filter(function(it) { return symSet[it.symbol]; });
-        }
-
-        function buildGlobalWarSummaryTextForCountry(countryKey, items) {
-            const withPct = [];
-            items.forEach(function(it) {
-                const p = parseMarketPct(it);
-                if (p !== null) withPct.push({ it: it, pct: p });
-            });
-            if (!withPct.length) {
-                return '主要指數尚無可用報價（可能休市、延遲或尚無資料）。';
-            }
-            let up = 0;
-            let down = 0;
-            let sum = 0;
-            withPct.forEach(function(x) {
-                if (x.pct > 0) up++;
-                else if (x.pct < 0) down++;
-                sum += x.pct;
-            });
-            const avg = sum / withPct.length;
-            const name = (GLOBAL_WAR_COUNTRIES.find(function(c) { return c.key === countryKey; }) || {}).label || '';
-            let line1 = '';
-            if (up === withPct.length) line1 = name + '：主要指數全數收紅。';
-            else if (down === withPct.length) line1 = name + '：主要指數全數收黑。';
-            else if (up > down) line1 = name + '：上漲檔數多於下跌。';
-            else if (down > up) line1 = name + '：下跌檔數多於上漲。';
-            else line1 = name + '：多空交錯。';
-            const line2 = '平均漲跌幅約 ' + (avg >= 0 ? '+' : '') + avg.toFixed(2) + '%（以有資料之指數計）。';
-            return line1 + ' ' + line2;
-        }
-
-        function getGlobalItemsSortedForKey(key) {
-            const items = getGlobalWarItemsForCountry(key);
-            return items.slice().sort(function(a, b) {
-                const pa = parseMarketPct(a);
-                const pb = parseMarketPct(b);
-                if (pa === null && pb === null) return 0;
-                if (pa === null) return 1;
-                if (pb === null) return -1;
-                return Math.abs(pb) - Math.abs(pa);
-            });
-        }
-
-        /** 依各國 symbols 順序列出有資料之指數（一國可能多列） */
-        function getItemsForCountryInSymbolOrder(key) {
-            const def = GLOBAL_WAR_COUNTRIES.find(function(c) { return c.key === key; });
-            if (!def) return [];
-            const bySym = {};
-            getGlobalWarItemsForCountry(key).forEach(function(it) { bySym[it.symbol] = it; });
-            const out = [];
-            def.symbols.forEach(function(sym) {
-                if (bySym[sym]) out.push(bySym[sym]);
-            });
-            return out;
         }
 
         function formatGwIdxPctDisplay(it) {
@@ -3708,359 +2937,6 @@
                 buildGwIdxChgBlockHtml(it) +
                 buildGwTimeFooterHtml(it) +
                 '</article>';
-        }
-
-        function buildGwEmptyCountryCardHtml(c) {
-            const flag = c.emoji ? '<span class="gw-idx-card__flag" aria-hidden="true">' + c.emoji + '</span>' : '';
-            const mkt = '<div class="gw-idx-card__meta">' + flag + '<span class="gw-idx-card__mkt">' + escapeHtmlText(c.label) + '</span></div>';
-            return '<article class="gw-idx-card gw-idx-card--empty" data-trend="flat">' + mkt +
-                '<h4 class="gw-idx-card__name">—</h4>' +
-                '<p class="gw-idx-card__empty-msg">尚無指數資料</p>' +
-                buildGwTimeFooterHtml({}) +
-                '</article>';
-        }
-
-        function renderGlobalWarMarketsDisclaimerHtml() {
-            const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
-            const m = d.markets;
-            if (!m || !m.disclaimer) return '';
-            return '<p class="gw-idx-board__foot">' + escapeHtmlText(String(m.disclaimer)) + '</p>';
-        }
-
-        function truncateGlobalWarPreview(raw, maxLen) {
-            const n = maxLen || 100;
-            if (!raw || !String(raw).trim()) return '';
-            const s = String(raw).trim();
-            const first = s.split(/[。；\n]/)[0].trim();
-            const line = first || s;
-            if (line.length <= n) return line;
-            return line.slice(0, n - 1) + '…';
-        }
-
-        function renderGlobalWarPulseChipsHtml() {
-            const chips = GLOBAL_WAR_COUNTRIES.map(function(c) {
-                const items = getGlobalItemsSortedForKey(c.key);
-                const avg = avgPctForItems(items);
-                let mod = 'global-war-pulse__chip--flat';
-                if (avg !== null) mod = avg > 0 ? 'global-war-pulse__chip--up' : (avg < 0 ? 'global-war-pulse__chip--down' : 'global-war-pulse__chip--flat');
-                const pct = avg === null ? '—' : ((avg >= 0 ? '+' : '') + avg.toFixed(2) + '%');
-                const em = c.emoji ? '<span class="global-war-pulse__emoji" aria-hidden="true">' + c.emoji + '</span>' : '';
-                return '<a href="#global-war-stock-' + escapeHtmlText(c.key) + '" class="global-war-pulse__chip ' + mod + '">' + em +
-                    '<span class="global-war-pulse__lbl">' + escapeHtmlText(c.label) + '</span>' +
-                    '<span class="global-war-pulse__pct font-mono">' + escapeHtmlText(pct) + '</span></a>';
-            }).join('');
-            return '<nav class="global-war-pulse" aria-label="快跳至各國">' +
-                '<p class="global-war-pulse__head">快跳</p>' +
-                '<div class="global-war-pulse__track">' + chips + '</div></nav>';
-        }
-
-        function renderGlobalWarNewsDigestHtml() {
-            const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
-            if (!d.news || !d.news.ok || !d.news.items || !d.news.items.length) return '';
-            const buckets = assignNewsToCountryBuckets(d.news.items);
-            const picked = [];
-            const seen = {};
-            GLOBAL_WAR_COUNTRIES.forEach(function(c) {
-                const arr = buckets[c.key] || [];
-                for (let i = 0; i < arr.length; i++) {
-                    const t = String(arr[i].title || '').trim();
-                    if (t && !seen[t]) {
-                        seen[t] = true;
-                        picked.push(arr[i]);
-                        break;
-                    }
-                }
-            });
-            (buckets._other || []).forEach(function(it) {
-                if (picked.length >= 8) return;
-                const t = String(it.title || '').trim();
-                if (t && !seen[t]) {
-                    seen[t] = true;
-                    picked.push(it);
-                }
-            });
-            if (picked.length < 8) {
-                d.news.items.forEach(function(it) {
-                    if (picked.length >= 8) return;
-                    const t = String(it.title || '').trim();
-                    if (t && !seen[t]) {
-                        seen[t] = true;
-                        picked.push(it);
-                    }
-                });
-            }
-            const lis = picked.slice(0, 8).map(function(it) {
-                const raw = String(it.title || '');
-                const t = escapeHtmlText(raw.length > 90 ? raw.slice(0, 89) + '…' : raw);
-                const href = escapeHtmlText(it.link || '#');
-                const src = it.source ? '<span class="global-war-news-digest__src">' + escapeHtmlText(String(it.source)) + '</span>' : '';
-                return '<li><a href="' + href + '" target="_blank" rel="noopener noreferrer" class="global-war-news-digest__link">' + t + '</a>' + src + '</li>';
-            }).join('');
-            if (!lis) return '';
-            return '<aside class="global-war-news-digest" aria-label="RSS 標題摘錄">' +
-                '<p class="global-war-news-digest__head">RSS · 標題快訊 <span class="global-war-news-digest__sub">（稿池與指數非同源）</span></p>' +
-                '<ul class="global-war-news-digest__list">' + lis + '</ul></aside>';
-        }
-
-        function renderGlobalWarAiDisclaimerHtml() {
-            const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
-            const gw = d.globalWarAi;
-            if (!gw || !gw.ok || !gw.disclaimer) return '';
-            return '<p class="global-war-ai-disclaimer">' + escapeHtmlText(String(gw.disclaimer)) + '</p>';
-        }
-
-        function renderGlobalWarSnapshotTableHtml() {
-            const parts = [];
-            GLOBAL_WAR_COUNTRIES.forEach(function(c) {
-                const ordered = getItemsForCountryInSymbolOrder(c.key);
-                if (!ordered.length) {
-                    parts.push(buildGwEmptyCountryCardHtml(c));
-                    return;
-                }
-                ordered.forEach(function(it) {
-                    parts.push(buildGwIndexCardHtml(c, it));
-                });
-            });
-            return '<div class="global-war-snapshot" role="region" aria-label="全球主要指數">' +
-                '<p class="global-war-snapshot__caption">手機：<strong class="theme-text">兩欄</strong>；寬螢幕：<strong class="theme-text">三欄→四欄</strong>。大字為價位、紅漲綠跌。底部為資料說明。</p>' +
-                '<div class="gw-idx-board">' +
-                '<div id="global-war-index-cards" class="gw-idx-grid">' + parts.join('') + '</div>' +
-                renderGlobalWarMarketsDisclaimerHtml() +
-                '</div></div>';
-        }
-
-        function avgPctForItems(items) {
-            const vals = [];
-            items.forEach(function(it) {
-                const p = parseMarketPct(it);
-                if (p !== null) vals.push(p);
-            });
-            if (!vals.length) return null;
-            const sum = vals.reduce(function(a, b) { return a + b; }, 0);
-            return sum / vals.length;
-        }
-
-        function scoreNewsTitleForCountry(title, countryKey) {
-            const kw = GLOBAL_WAR_NEWS_KEYWORDS[countryKey];
-            if (!kw || !title) return 0;
-            let s = 0;
-            for (let i = 0; i < kw.length; i++) {
-                if (title.indexOf(kw[i]) >= 0) s += 1;
-            }
-            return s;
-        }
-
-        function assignNewsToCountryBuckets(newsItems) {
-            const buckets = {};
-            GLOBAL_WAR_COUNTRIES.forEach(function(c) { buckets[c.key] = []; });
-            buckets._other = [];
-            const sorted = (newsItems || []).slice().sort(function(a, b) {
-                return String(b.published || '').localeCompare(String(a.published || ''));
-            });
-            sorted.forEach(function(item) {
-                const tag = item.country;
-                if (tag && Object.prototype.hasOwnProperty.call(buckets, tag)) {
-                    buckets[tag].push(item);
-                    return;
-                }
-                const title = item.title || '';
-                let bestKey = null;
-                let bestScore = 0;
-                GLOBAL_WAR_COUNTRIES.forEach(function(c) {
-                    const sc = scoreNewsTitleForCountry(title, c.key);
-                    if (sc > bestScore) {
-                        bestScore = sc;
-                        bestKey = c.key;
-                    }
-                });
-                if (bestKey && bestScore > 0) {
-                    buckets[bestKey].push(item);
-                } else {
-                    buckets._other.push(item);
-                }
-            });
-            return buckets;
-        }
-
-        function renderGlobalWarSectorSnippetHtml() {
-            const sec = (typeof __DIGEST__ !== 'undefined' && __DIGEST__) ? __DIGEST__.sectors : null;
-            if (!sec || !sec.ok || !sec.items || !sec.items.length) {
-                return '';
-            }
-            const rows = sec.items.slice().sort(function(a, b) { return (b.absPct || 0) - (a.absPct || 0); }).slice(0, 3);
-            const lis = rows.map(function(r) {
-                const cls = r.changePct > 0 ? 'text-buy' : (r.changePct < 0 ? 'text-sell' : 'theme-text');
-                return '<div class="global-war-sector__row"><span class="truncate min-w-0">' + escapeHtmlText(r.shortName || r.name) + '</span>' +
-                    '<span class="font-mono shrink-0 font-bold ' + cls + '">' + (r.changePct >= 0 ? '+' : '') + r.changePct + '%</span></div>';
-            }).join('');
-            return '<div class="global-war-sector">' +
-                '<p class="global-war-sector__head">臺股產業 · |幅度| 前 3</p>' +
-                '<div class="global-war-sector__list">' + lis + '</div></div>';
-        }
-
-        function renderGlobalWarNewsListHtml(items, maxN) {
-            const n = maxN || 5;
-            const slice = (items || []).slice(0, n);
-            if (!slice.length) {
-                return '<div class="global-war-card__news"><p class="global-war-card__section-title">相關新聞</p>' +
-                    '<p class="text-xs theme-text-dim leading-relaxed">本批 digest 尚無此區稿件。</p></div>';
-            }
-            const lis = slice.map(function(it) {
-                const t = escapeHtmlText((it.title || '').length > 96 ? (it.title || '').slice(0, 95) + '…' : (it.title || ''));
-                const href = escapeHtmlText(it.link || '#');
-                const src = it.source ? '<span class="source">' + escapeHtmlText(String(it.source)) + '</span>' : '';
-                return '<li><a href="' + href + '" target="_blank" rel="noopener noreferrer" class="break-words">' + t + '</a>' + src + '</li>';
-            }).join('');
-            return '<div class="global-war-card__news">' +
-                '<p class="global-war-card__section-title">相關新聞</p>' +
-                '<ul class="global-war-news-list">' + lis + '</ul></div>';
-        }
-
-        function getGlobalWarAiSummaryText(countryKey) {
-            const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
-            const gw = d.globalWarAi;
-            if (!gw || !gw.ok || !gw.summaries) return '';
-            const s = gw.summaries[countryKey];
-            return typeof s === 'string' && s.trim() ? s.trim() : '';
-        }
-
-        /** 已 escape 之字串內突顯 % 與千分位數字，利於閱讀 */
-        function highlightGlobalWarMetrics(escapedLine) {
-            if (!escapedLine) return '';
-            let s = escapedLine;
-            s = s.replace(/(\+?\d[\d,]*\.?\d*%)/g, '<strong class="global-war-metric">$1</strong>');
-            s = s.replace(/(\d{1,3}(?:,\d{3})+(?:\.\d+)?)/g, '<strong class="global-war-metric">$1</strong>');
-            return s;
-        }
-
-        /** 將長文依句讀分段，並突顯數字；raw 會先經 escapeHtmlText */
-        function formatReadableSummaryHtml(raw) {
-            if (!raw || !String(raw).trim()) return '';
-            const esc = escapeHtmlText(String(raw).trim());
-            const parts = esc.split(/(?:[。；]+|\n+)/).map(function(x) { return x.trim(); }).filter(Boolean);
-            if (parts.length === 0) {
-                return '<div class="global-war-ai-body"><p class="global-war-ai-para">' + highlightGlobalWarMetrics(esc) + '</p></div>';
-            }
-            const paras = parts.map(function(p) {
-                let line = p;
-                if (!/[。！？；]$/.test(line)) line += '。';
-                return '<p class="global-war-ai-para">' + highlightGlobalWarMetrics(line) + '</p>';
-            }).join('');
-            return '<div class="global-war-ai-body">' + paras + '</div>';
-        }
-
-        /** 股票／大盤：一句預覽＋摺疊全文；指數見總表 */
-        function buildGlobalWarStockCardHtml(c) {
-            const items = getGlobalItemsSortedForKey(c.key);
-            const aiText = getGlobalWarAiSummaryText(c.key);
-            const summaryFallback = buildGlobalWarSummaryTextForCountry(c.key, items);
-            const previewRaw = truncateGlobalWarPreview(aiText || summaryFallback, 100);
-            const previewHtml = previewRaw
-                ? '<p class="global-war-card__preview">' + escapeHtmlText(previewRaw) + '</p>'
-                : '';
-            const innerAi = '<div class="global-war-card__summary global-war-card__summary--ai">' +
-                formatReadableSummaryHtml(aiText) +
-                '<p class="global-war-card__ai-foot">AI 生成摘要 · 非投資建議 · 僅依本日 digest 資料整理</p></div>';
-            const innerPlain = '<div class="global-war-card__summary global-war-card__summary--plain">' +
-                formatReadableSummaryHtml(summaryFallback) + '</div>';
-            const summaryBlock =
-                '<details class="global-war-details">' +
-                '<summary class="global-war-details__summary">' +
-                '<span>' + (aiText ? '完整 AI 摘要' : '完整規則摘要') + '</span>' +
-                '<span class="global-war-details__hint theme-text-dim">▼ 展開</span>' +
-                '</summary>' +
-                '<div class="global-war-details__inner">' + (aiText ? innerAi : innerPlain) + '</div></details>';
-            const avg = avgPctForItems(items);
-            let dataAvg = 'none';
-            if (avg !== null) {
-                dataAvg = avg > 0 ? 'up' : (avg < 0 ? 'down' : 'none');
-            }
-            const avgBadge = avg === null
-                ? '<span class="global-war-card__badge global-war-card__badge--flat">—</span>'
-                : '<span class="global-war-card__badge ' + (avg > 0 ? 'global-war-card__badge--up' : (avg < 0 ? 'global-war-card__badge--down' : 'global-war-card__badge--flat')) + '">' +
-                    (avg >= 0 ? '+' : '') + avg.toFixed(2) + '%</span>';
-            let extra = '';
-            if (c.key === 'TW') {
-                extra = renderGlobalWarSectorSnippetHtml();
-            }
-            const em = c.emoji ? '<span class="global-war-card__emoji" aria-hidden="true">' + c.emoji + '</span>' : '';
-            const cardId = 'global-war-stock-' + c.key;
-            return '<article id="' + cardId + '" class="global-war-card" data-avg="' + dataAvg + '">' +
-                '<div class="global-war-card__accent" aria-hidden="true"></div>' +
-                '<header class="global-war-card__header">' +
-                '<div class="global-war-card__title-row">' + em +
-                '<div class="global-war-card__title-text">' +
-                '<h3>' + escapeHtmlText(c.label) + '</h3>' +
-                '<p class="global-war-card__code">' + escapeHtmlText(c.key) + ' · 指數見上表</p></div></div>' + avgBadge + '</header>' +
-                '<div class="global-war-card__body">' + previewHtml + summaryBlock + extra + '</div></article>';
-        }
-
-        /** 新聞專用卡（與大盤分區） */
-        function buildGlobalWarNewsCardHtml(c, buckets) {
-            const newsHtml = renderGlobalWarNewsListHtml(buckets[c.key], 8);
-            const em = c.emoji ? '<span class="global-war-card__emoji" aria-hidden="true">' + c.emoji + '</span>' : '';
-            const cardId = 'global-war-news-' + c.key;
-            return '<article id="' + cardId + '" class="global-war-card global-war-card--news">' +
-                '<div class="global-war-card__accent global-war-card__accent--muted" aria-hidden="true"></div>' +
-                '<header class="global-war-card__header">' +
-                '<div class="global-war-card__title-row">' + em +
-                '<div class="global-war-card__title-text">' +
-                '<h3>' + escapeHtmlText(c.label) + ' · 新聞</h3>' +
-                '<p class="global-war-card__code">' + escapeHtmlText(c.key) + '</p></div></div></header>' +
-                '<div class="global-war-card__body">' + newsHtml + '</div></article>';
-        }
-
-        function renderGlobalWarRegionSections(buildCard, regionIdPrefix) {
-            const pfx = regionIdPrefix || 'gw';
-            return GLOBAL_WAR_REGIONS.map(function(region) {
-                const cardsInner = region.keys.map(function(k) {
-                    const c = GLOBAL_WAR_COUNTRIES.find(function(x) { return x.key === k; });
-                    return c ? buildCard(c) : '';
-                }).join('');
-                if (!cardsInner.trim()) return '';
-                const colsAttr = region.regionCols
-                    ? ' data-region-cols="' + escapeHtmlText(String(region.regionCols)) + '"'
-                    : '';
-                return '<section id="' + escapeHtmlText(pfx) + '-region-' + escapeHtmlText(region.id) + '" class="global-war-region">' +
-                    '<header class="global-war-region__head">' +
-                    '<h3 class="global-war-region__title">' + escapeHtmlText(region.title) + '</h3>' +
-                    (region.sub ? '<p class="global-war-region__sub">' + escapeHtmlText(region.sub) + '</p>' : '') +
-                    '</header>' +
-                    '<div class="global-war-region__cards"' + colsAttr + '>' + cardsInner + '</div>' +
-                    '</section>';
-            }).join('');
-        }
-
-        function renderGlobalWarDashboard() {
-            const root = document.getElementById('global-war-dashboard');
-            if (!root) return;
-            const metaEl = document.getElementById('global-war-meta');
-            if (metaEl) {
-                const d = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
-                let parts = [];
-                if (d.fetchedAt) parts.push('資料快照 ' + escapeHtmlText(String(d.fetchedAt)));
-                const gw = d.globalWarAi;
-                if (gw && gw.ok && gw.generatedAt) {
-                    parts.push('AI 總結 ' + escapeHtmlText(String(gw.generatedAt)) + (gw.model ? ' · ' + escapeHtmlText(String(gw.model)) : ''));
-                } else if (gw && gw.skipped) {
-                    parts.push('AI 未生成（略過）');
-                }
-                metaEl.innerHTML = parts.length ? parts.join(' · ') : '';
-            }
-            const stockSections = renderGlobalWarRegionSections(function(c) { return buildGlobalWarStockCardHtml(c); }, 'global-war-stock');
-            root.innerHTML =
-                '<section class="global-war-main-block" aria-labelledby="gw-stock-heading">' +
-                '<h2 id="gw-stock-heading" class="global-war-block-title">全球指數</h2>' +
-                '<p class="global-war-block-lead">指數以卡片呈現價位與漲跌；快跳、RSS 與各國一句預覽互補（台灣多產業列）。</p>' +
-                renderGlobalWarSnapshotTableHtml() +
-                renderGlobalWarPulseChipsHtml() +
-                renderGlobalWarNewsDigestHtml() +
-                renderGlobalWarAiDisclaimerHtml() +
-                '<h3 class="global-war-subhead" id="gw-zones-heading">脈絡 · 各國摘要</h3>' +
-                stockSections + '</section>';
-            if (document.documentElement.classList.contains('elder-mode')) {
-                root.querySelectorAll('.global-war-details').forEach(function(el) { el.open = true; });
-            }
         }
 
         function twseDeltaColorClassForGlobal(chgRaw, pctRaw) {
@@ -4217,7 +3093,7 @@
             syncMarketsTickerVisibility();
         }
 
-        /** 台灣總覽：加權 + 美股三大，卡片格式與全球戰情一致 */
+        /** 台灣總覽：加權 + 美股三大（gw-idx 卡片） */
         function renderHomeIndexCardsFromJson(j) {
             const el = document.getElementById('home-index-cards');
             const footEl = document.getElementById('home-index-cards-foot');
@@ -4235,7 +3111,7 @@
             j.items.forEach(function(it) { bySym[it.symbol] = it; });
             const parts = [];
             HOME_INDEX_CARD_ORDER.forEach(function(row) {
-                const c = GLOBAL_WAR_COUNTRIES.find(function(x) { return x.key === row.cKey; });
+                const c = HOME_INDEX_COUNTRY_META[row.cKey];
                 if (!c) return;
                 const it = bySym[row.sym];
                 if (it) parts.push(buildGwIndexCardHtml(c, it));
@@ -4931,7 +3807,7 @@
         }
 
         function refreshTable() {
-            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'GLOBAL' || currentMode === 'TREND') return;
+            if (currentMode === 'SEARCH' || currentMode === 'MOMENTUM' || currentMode === 'HOME' || currentMode === 'TREND') return;
             if (currentETF === AI_TAB) return;
             const { buy, sell } = aggregateData(currentETF, currentDays);
             const sortBy = currentUnit === 'amount' ? 'amount' : 'diff';
