@@ -300,9 +300,12 @@
         @media (min-width: 768px) {
             #trend-chart-canvas-wrap { min-height: min(72vh, 40rem); }
         }
-        .table-num-cell { white-space: nowrap; font-size: 0.8125rem; }
+        /* 數字欄：一般模式小螢幕維持可讀下限；大字模式繼承表格字級，數字不會比股名還小 */
+        .table-num-cell { white-space: nowrap; font-size: clamp(0.875rem, 0.78rem + 0.45vw, 0.9375rem); }
+        html.elder-mode .table-num-cell { font-size: inherit; }
         @media (min-width: 640px) {
             .table-num-cell { font-size: 0.875rem; }
+            html.elder-mode .table-num-cell { font-size: inherit; }
         }
 
         #ai-report-output h1, #ai-report-output h2, #ai-report-output h3 { margin-top: 1em; margin-bottom: 0.5em; font-weight: 700; }
@@ -824,26 +827,20 @@
             background-color: var(--bg-panel) !important;
         }
 
-        /* 窄螢幕：排行與首頁合併表字級略縮、行高緊湊，減少長輩手機（系統大字／LINE 內開）擠版 */
+        /*
+         * 窄螢幕（一般模式）：用 clamp 訂舒適下限，擠版靠行高；勿壓成蠅頭小字。
+         * 大字模式：不覆寫字級，沿用 html.elder-mode 對表格的放大。
+         */
         @media (max-width: 640px) {
-            #data-table-container .rank-table tbody td,
-            #data-table-container .rank-table thead th {
-                font-size: 0.8125rem;
-                line-height: 1.35;
+            html:not(.elder-mode) #data-table-container .rank-table tbody td,
+            html:not(.elder-mode) #data-table-container .rank-table thead th {
+                font-size: clamp(0.9375rem, 0.88rem + 0.35vw, 1.0625rem);
+                line-height: 1.42;
             }
-            #home-hot-out .home-hot-table tbody td,
-            #home-hot-out .home-hot-table thead th {
-                font-size: 0.8125rem;
-                line-height: 1.35;
-            }
-        }
-        @media (max-width: 640px) {
-            html.elder-mode #normal-view table,
-            html.elder-mode #dashboard-mode-panel table,
-            html.elder-mode #stock-reverse-results table,
-            html.elder-mode #compare-diff-out table,
-            html.elder-mode #home-panel table {
-                font-size: 0.92rem;
+            html:not(.elder-mode) #home-hot-out .home-hot-table tbody td,
+            html:not(.elder-mode) #home-hot-out .home-hot-table thead th {
+                font-size: clamp(0.9375rem, 0.88rem + 0.35vw, 1.0625rem);
+                line-height: 1.42;
             }
         }
 
