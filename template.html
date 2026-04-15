@@ -824,6 +824,29 @@
             background-color: var(--bg-panel) !important;
         }
 
+        /* 窄螢幕：排行與首頁合併表字級略縮、行高緊湊，減少長輩手機（系統大字／LINE 內開）擠版 */
+        @media (max-width: 640px) {
+            #data-table-container .rank-table tbody td,
+            #data-table-container .rank-table thead th {
+                font-size: 0.8125rem;
+                line-height: 1.35;
+            }
+            #home-hot-out .home-hot-table tbody td,
+            #home-hot-out .home-hot-table thead th {
+                font-size: 0.8125rem;
+                line-height: 1.35;
+            }
+        }
+        @media (max-width: 640px) {
+            html.elder-mode #normal-view table,
+            html.elder-mode #dashboard-mode-panel table,
+            html.elder-mode #stock-reverse-results table,
+            html.elder-mode #compare-diff-out table,
+            html.elder-mode #home-panel table {
+                font-size: 0.92rem;
+            }
+        }
+
         .rank-trend-btn {
             display: inline-flex;
             align-items: center;

@@ -3,7 +3,7 @@
 主動式 ETF 家族監控系統 + 凱基大聯盟 18 主力分點監控
 - 雲端/本機雙軌：GitHub Actions 自動略過券商爬蟲，本機解除 Headless 突破 Cloudflare
 - 凱基大聯盟：18 間凱基證券核心主力分點 (wantgoo 券商買賣超)
-- LINE 專屬推播：僅 7 檔 ETF
+- LINE 專屬推播：首則為全家族 ETF 合併近 1 日買／賣超前五（金額），其餘為 LINE_NOTIFY_LIST 各檔
 """
 
 import argparse
@@ -28,6 +28,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from broker_config import BROKER_LIST
+from generate_web import family_consensus_top5_for_date
 
 logging.basicConfig(
     level=logging.INFO,
@@ -546,10 +547,109 @@ def process_etf(etf_code: str, prices_dict: dict) -> dict:
     }
 
 
+def format_amount_display(amount_10k: float) -> str:
+    """與 template.html formatAmount 一致（萬元）。"""
+    if not amount_10k:
+        return "—"
+    val = abs(float(amount_10k))
+    if val >= 10000:
+        return f"約 {val / 10000:.2f} 億"
+    return f"約 {round(val):,} 萬"
+
+
+def build_family_consensus_bubble(buy5: list[dict], sell5: list[dict], report_date: str) -> dict:
+    """全家族 ETF 合併近 1 交易日買／賣超前五（金額），置於每日推播第一則。"""
+    sz = "xs"
+    header_box = {
+        "type": "box",
+        "layout": "vertical",
+        "backgroundColor": "#0f172a",
+        "paddingAll": "12px",
+        "contents": [
+            {"type": "text", "text": report_date, "color": "#94a3b8", "size": "xs", "weight": "bold", "margin": "none"},
+            {
+                "type": "text",
+                "text": "全家族 ETF 合併",
+                "weight": "bold",
+                "size": "sm",
+                "color": "#ffffff",
+                "margin": "xs",
+            },
+            {
+                "type": "text",
+                "text": "近 1 交易日 買超／賣超 前五（淨額）",
+                "size": sz,
+                "color": "#38bdf8",
+                "wrap": True,
+                "margin": "xs",
+            },
+        ],
+    }
+
+    def rank_rows(title: str, title_color: str, rows: list[dict], is_buy: bool) -> list:
+        out: list = [
+            {"type": "text", "text": title, "color": title_color, "weight": "bold", "size": sz, "margin": "md"},
+        ]
+        if not rows:
+            out.append({"type": "text", "text": "（無）", "color": "#94a3b8", "size": sz, "margin": "xs"})
+            return out
+        amt_color = "#dc2626" if is_buy else "#059669"
+        sign = "+" if is_buy else "−"
+        for i, it in enumerate(rows, start=1):
+            nm = str(it.get("name") or "—").strip()
+            cd = str(it.get("code") or "").strip()
+            left = f"{i}. {nm}" + (f" ({cd})" if cd else "")
+            amt = format_amount_display(float(it.get("amount") or 0))
+            out.append(
+                {
+                    "type": "box",
+                    "layout": "horizontal",
+                    "spacing": "sm",
+                    "margin": "xs",
+                    "contents": [
+                        {"type": "text", "text": left, "size": sz, "color": "#334155", "flex": 6, "wrap": True},
+                        {
+                            "type": "text",
+                            "text": f"{sign} {amt}",
+                            "size": sz,
+                            "color": amt_color,
+                            "flex": 4,
+                            "align": "end",
+                            "wrap": False,
+                        },
+                    ],
+                }
+            )
+        return out
+
+    body_contents: list = []
+    body_contents.extend(rank_rows("買超", "#dc2626", buy5, True))
+    body_contents.append({"type": "separator", "margin": "md", "color": "#e2e8f0"})
+    body_contents.extend(rank_rows("賣超", "#059669", sell5, False))
+    body_contents.append(
+        {
+            "type": "text",
+            "text": "資料為本機多檔 ETF 合併加總，非即時撮合。",
+            "color": "#94a3b8",
+            "size": "xs",
+            "wrap": True,
+            "margin": "md",
+        }
+    )
+
+    return {
+        "type": "bubble",
+        "size": "kilo",
+        "header": header_box,
+        "body": {"type": "box", "layout": "vertical", "paddingAll": "12px", "contents": body_contents},
+    }
+
+
 def build_single_bubble(res: dict, report_date: str) -> dict:
     etf_code = res["etf"]
     body_contents = []
     theme_text = ETF_THEMES.get(etf_code, "專屬監控 ETF")
+    body_sz = "xs"
 
     header_box = {
         "type": "box",
@@ -558,8 +658,8 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
         "paddingAll": "15px",
         "contents": [
             {"type": "text", "text": report_date, "color": "#95a5a6", "size": "xs", "weight": "bold", "margin": "none"},
-            {"type": "text", "text": etf_code, "weight": "bold", "size": "xl", "color": "#ffffff", "margin": "sm"},
-            {"type": "text", "text": theme_text, "weight": "bold", "size": "sm", "color": "#2563eb", "margin": "xs"},
+            {"type": "text", "text": etf_code, "weight": "bold", "size": "lg", "color": "#ffffff", "margin": "sm"},
+            {"type": "text", "text": theme_text, "weight": "bold", "size": "xs", "color": "#2563eb", "margin": "xs"},
         ],
     }
 
@@ -568,7 +668,7 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
             "type": "text",
             "text": "尚未公布或查無持股",
             "color": "#e74c3c",
-            "size": "sm",
+            "size": body_sz,
             "wrap": True,
             "align": "center",
             "margin": "xl",
@@ -578,7 +678,7 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
             "type": "text",
             "text": "今日無籌碼異動",
             "color": "#95a5a6",
-            "size": "sm",
+            "size": body_sz,
             "weight": "bold",
             "wrap": True,
             "align": "center",
@@ -593,7 +693,7 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
                 "text": title,
                 "color": title_color,
                 "weight": "bold",
-                "size": "sm",
+                "size": body_sz,
                 "margin": margin_top,
             })
             item_boxes = []
@@ -604,9 +704,9 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
                     "spacing": "sm",
                     "margin": "xs",
                     "contents": [
-                        {"type": "text", "text": name, "size": "sm", "color": "#333333", "flex": 5, "wrap": False},
-                        {"type": "text", "text": "|", "size": "sm", "color": "#bdc3c7", "flex": 1, "align": "center"},
-                        {"type": "text", "text": val, "size": "sm", "color": "#333333", "flex": 4, "align": "end", "wrap": False},
+                        {"type": "text", "text": name, "size": body_sz, "color": "#333333", "flex": 5, "wrap": True},
+                        {"type": "text", "text": "|", "size": body_sz, "color": "#bdc3c7", "flex": 1, "align": "center"},
+                        {"type": "text", "text": val, "size": body_sz, "color": "#333333", "flex": 4, "align": "end", "wrap": False},
                     ],
                 })
                 if (i + 1) % 5 == 0 and (i + 1) < len(items):
@@ -630,8 +730,15 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
     }
 
 
-def build_flex_payloads(results: list[dict], report_date: str) -> list[dict]:
-    bubbles = [build_single_bubble(res, report_date) for res in results]
+def build_flex_payloads(
+    results: list[dict],
+    report_date: str,
+    lead_bubble: dict | None = None,
+) -> list[dict]:
+    bubbles: list[dict] = []
+    if lead_bubble is not None:
+        bubbles.append(lead_bubble)
+    bubbles.extend([build_single_bubble(res, report_date) for res in results])
     flex_messages = []
     current_bubbles = []
     current_size = 0
@@ -711,7 +818,13 @@ def main() -> None:
     crawl_all_brokers()
 
     if results_for_line:
-        payloads = build_flex_payloads(results_for_line, today_str)
+        try:
+            buy5, sell5 = family_consensus_top5_for_date(today_str, list(CRAWL_LIST))
+            lead = build_family_consensus_bubble(buy5, sell5, today_str)
+        except Exception as e:
+            logger.warning("全家族合併前五計算失敗，略過首則 bubble: %s", e)
+            lead = None
+        payloads = build_flex_payloads(results_for_line, today_str, lead_bubble=lead)
         send_flex_messages(payloads)
     elif LINE_TOKEN:
         headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}

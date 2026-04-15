@@ -390,6 +390,177 @@ def collect_file_map() -> dict[str, list[tuple[str, str]]]:
     return file_map
 
 
+def aggregate_row_key_py(code: str, name: str) -> str:
+    """與 template.html aggregateRowKey 一致。"""
+    c = str(code or "").strip()
+    n = str(name or "").strip()
+    return f"{c}\t{n}" if c else n
+
+
+def diff_one_day_etf_pair(prev_file: str, curr_file: str) -> tuple[list, list, list, list]:
+    """與 process_etf_file 單日差分邏輯一致；回傳 new_buy, sold_out, increased, decreased。"""
+    new_buy: list = []
+    sold_out: list = []
+    increased: list = []
+    decreased: list = []
+    try:
+        df_prev = pd.read_csv(prev_file, dtype={"code": str})
+        df_curr = pd.read_csv(curr_file, dtype={"code": str})
+        for df in (df_prev, df_curr):
+            if "price" not in df.columns:
+                df["price"] = 0.0
+            if "weight" not in df.columns:
+                df["weight"] = 0.0
+            if "weight" in df.columns:
+                df["weight"] = pd.to_numeric(df["weight"], errors="coerce").fillna(0.0)
+            if "price" in df.columns:
+                df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0.0)
+            if "shares" in df.columns:
+                df["shares"] = pd.to_numeric(df["shares"], errors="coerce").fillna(0)
+            if "name" in df.columns:
+                df["name"] = df["name"].apply(
+                    lambda x: "" if x is None or (isinstance(x, float) and pd.isna(x)) else str(x)
+                )
+
+        df_prev["code"] = df_prev["code"].astype(str)
+        df_curr["code"] = df_curr["code"].astype(str)
+        prev_idx = df_prev.set_index("code")
+        curr_idx = df_curr.set_index("code")
+
+        prev_codes = set(prev_idx.index)
+        curr_codes = set(curr_idx.index)
+        common_codes = prev_codes & curr_codes
+
+        for c in (curr_codes - prev_codes):
+            row = _normalize_index_row(curr_idx.loc[c])
+            shares = _shares_thousands(row["shares"])
+            price = _scalar_numeric(row.get("price", 0), 0.0)
+            c_name = clean_stock_name(row.get("name", ""))
+            amount_10k = (shares * price) / 10 if price > 0 else 0
+            new_buy.append(_row_to_item(row, c_name, c, shares, amount_10k, _scalar_numeric(row.get("weight", 0), 0.0)))
+
+        for c in (prev_codes - curr_codes):
+            row = _normalize_index_row(prev_idx.loc[c])
+            shares = _shares_thousands(row["shares"])
+            price = _scalar_numeric(row.get("price", 0), 0.0)
+            weight = _scalar_numeric(row.get("weight", 0), 0.0)
+            c_name = clean_stock_name(row.get("name", ""))
+            amount_10k = (shares * price) / 10 if price > 0 else 0
+            sold_out.append(
+                {
+                    "name": c_name,
+                    "code": str(c),
+                    "diff": shares,
+                    "weight": 0.0,
+                    "w_diff": -weight,
+                    "amount": amount_10k,
+                    "sector": SECTOR_MAP.get(c_name, "其他"),
+                    "price": price,
+                }
+            )
+
+        for c in common_codes:
+            row_curr = _normalize_index_row(curr_idx.loc[c])
+            row_prev = _normalize_index_row(prev_idx.loc[c])
+            shares_curr = _shares_thousands(row_curr["shares"])
+            shares_prev = _shares_thousands(row_prev["shares"])
+            diff = shares_curr - shares_prev
+            if diff == 0:
+                continue
+            weight_curr = _scalar_numeric(row_curr.get("weight", 0), 0.0)
+            weight_prev = _scalar_numeric(row_prev.get("weight", 0), 0.0)
+            w_diff = weight_curr - weight_prev
+            price_curr = _scalar_numeric(row_curr.get("price", 0), 0.0)
+            c_name = clean_stock_name(row_curr.get("name", ""))
+            amount_10k = (abs(diff) * price_curr) / 10 if price_curr > 0 else 0
+            if diff > 0:
+                increased.append(_row_to_item(row_curr, c_name, c, diff, amount_10k, w_diff))
+            else:
+                decreased.append(_row_to_item(row_curr, c_name, c, abs(diff), amount_10k, w_diff))
+
+        sort_key = lambda x: (-x["diff"], -x.get("amount", 0))
+        new_buy.sort(key=sort_key)
+        sold_out.sort(key=sort_key)
+        increased.sort(key=sort_key)
+        decreased.sort(key=sort_key)
+    except Exception as e:
+        print(f"diff_one_day_etf_pair 失敗 {prev_file} -> {curr_file}: {e}")
+
+    return new_buy, sold_out, increased, decreased
+
+
+def _merge_family_day_into_agg(
+    agg: dict[str, dict],
+    new_buy: list,
+    sold_out: list,
+    increased: list,
+    decreased: list,
+) -> None:
+    """與 template aggregateData 合併邏輯一致。"""
+
+    def merge_positive(items: list) -> None:
+        for i in items:
+            key = aggregate_row_key_py(i.get("code", ""), i.get("name", ""))
+            if key not in agg:
+                agg[key] = {
+                    "name": str(i.get("name", "") or "").strip() or key,
+                    "code": str(i.get("code", "") or "").strip(),
+                    "diff": 0,
+                    "amount": 0.0,
+                }
+            agg[key]["diff"] += int(i.get("diff", 0) or 0)
+            agg[key]["amount"] += float(i.get("amount", 0) or 0)
+
+    def merge_negative(items: list) -> None:
+        for i in items:
+            key = aggregate_row_key_py(i.get("code", ""), i.get("name", ""))
+            if key not in agg:
+                agg[key] = {
+                    "name": str(i.get("name", "") or "").strip() or key,
+                    "code": str(i.get("code", "") or "").strip(),
+                    "diff": 0,
+                    "amount": 0.0,
+                }
+            agg[key]["diff"] -= int(i.get("diff", 0) or 0)
+            agg[key]["amount"] -= float(i.get("amount", 0) or 0)
+
+    merge_positive(new_buy)
+    merge_positive(increased)
+    merge_negative(decreased)
+    merge_negative(sold_out)
+
+
+def family_consensus_top5_for_date(today_str: str, etf_codes: list[str]) -> tuple[list[dict], list[dict]]:
+    """
+    與前端 aggregateData(GLOBAL_CONSENSUS, 1) 相同：跨 ETF 合併後依淨額取買超／賣超各前五。
+    amount 為萬元（與 generate_web process_etf_file 一致）。
+    """
+    file_map = collect_file_map()
+    agg: dict[str, dict] = {}
+    for etf in etf_codes:
+        pairs = file_map.get(etf) or []
+        if len(pairs) < 2:
+            continue
+        pairs.sort(key=lambda x: x[0])
+        for i in range(1, len(pairs)):
+            prev_date, prev_file = pairs[i - 1]
+            curr_date, curr_file = pairs[i]
+            if curr_date != today_str:
+                continue
+            nb, so, inc, dec = diff_one_day_etf_pair(prev_file, curr_file)
+            _merge_family_day_into_agg(agg, nb, so, inc, dec)
+
+    buy_raw = [x for x in agg.values() if x["diff"] > 0]
+    sell_raw = [
+        {**x, "diff": abs(x["diff"]), "amount": abs(x["amount"])}
+        for x in agg.values()
+        if x["diff"] < 0
+    ]
+    buy_sorted = sorted(buy_raw, key=lambda x: (-(x.get("amount") or 0), -(x.get("diff") or 0)))[:5]
+    sell_sorted = sorted(sell_raw, key=lambda x: (-(x.get("amount") or 0), -(x.get("diff") or 0)))[:5]
+    return buy_sorted, sell_sorted
+
+
 def build_holdings_trend_series(file_map: dict[str, list[tuple[str, str]]]) -> dict:
     """從原始 CSV 建立持股／分點淨張時間序列，供前端 Chart.js（與單日 diff 資料庫互補）。"""
     out_etf: dict = {}
