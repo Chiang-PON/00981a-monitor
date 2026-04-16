@@ -771,7 +771,6 @@
         :root {
             --nav-sticky-offset: 4.75rem;
             --rank-banner-h: 3.75rem;
-            --rank-section-h: 2.75rem;
         }
         #data-table-container .rank-table thead th {
             color: var(--text-main);
@@ -781,9 +780,19 @@
             text-transform: uppercase;
             border-bottom: 2px solid var(--border-dim);
             position: sticky;
-            top: calc(var(--nav-sticky-offset) + var(--rank-banner-h));
             z-index: 31;
             background-clip: padding-box;
+        }
+        /* 僅桌機：表頭垂直固定（手機見下方，避免 overflow 父層內 sticky 錯位蓋住資料） */
+        @media (min-width: 768px) {
+            #data-table-container .rank-table thead th {
+                top: calc(var(--nav-sticky-offset) + var(--rank-banner-h));
+            }
+        }
+        @media (max-width: 767px) {
+            #data-table-container .rank-table thead th {
+                top: auto !important;
+            }
         }
         #data-table-container .rank-table thead th:nth-child(1) {
             z-index: 43;
@@ -858,9 +867,6 @@
             }
             [data-theme="dark"] #data-table-container .rank-section-heading {
                 box-shadow: 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
-            }
-            #data-table-container .rank-table thead th {
-                top: calc(var(--nav-sticky-offset) + var(--rank-banner-h) + var(--rank-section-h, 2.75rem));
             }
         }
 
@@ -1271,7 +1277,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="min-w-0">
                             <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto overflow-y-hidden shadow-sm">
+                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm">
                                 <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
                                     <thead>
                                         <tr class="border-b theme-border">
@@ -1286,7 +1292,7 @@
                         </div>
                         <div class="min-w-0">
                             <h4 class="rank-section-heading font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto overflow-y-hidden shadow-sm">
+                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm">
                                 <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
                                     <thead>
                                         <tr class="border-b theme-border">
@@ -1755,31 +1761,6 @@
             });
         }
 
-        /** 手機版 sticky「買超／賣超」h4 實際高度，供表頭 top 疊算 */
-        function syncRankSectionHeadingHeight() {
-            if (typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 768px)').matches) {
-                document.documentElement.style.removeProperty('--rank-section-h');
-                return;
-            }
-            const h4 = document.querySelector('#data-table-container .rank-section-heading');
-            const dataContainer = document.getElementById('data-table-container');
-            if (!h4 || !dataContainer || dataContainer.classList.contains('hidden')) {
-                document.documentElement.style.removeProperty('--rank-section-h');
-                return;
-            }
-            requestAnimationFrame(function() {
-                const h = Math.ceil(h4.getBoundingClientRect().height);
-                document.documentElement.style.setProperty('--rank-section-h', h + 'px');
-            });
-        }
-
-        function syncRankStickyMetrics() {
-            syncRankBannerHeight();
-            requestAnimationFrame(function() {
-                syncRankSectionHeadingHeight();
-            });
-        }
-
         function updateRankTableContextBar() {
             const bar = document.getElementById('rank-table-screenshot-bar');
             const badge = document.getElementById('rank-table-context-badge');
@@ -1799,7 +1780,7 @@
             metaEl.textContent = '結束日 ' + (currentDate || '—') + ' · 近 ' + currentDays + ' 交易日 · 排行依「' + unitLabel + '」';
             bar.classList.remove('hidden');
             requestAnimationFrame(function() {
-                syncRankStickyMetrics();
+                syncRankBannerHeight();
             });
         }
 
@@ -1919,7 +1900,7 @@
             } catch (e) {}
             syncElderModeUi();
             requestAnimationFrame(function() {
-                syncRankStickyMetrics();
+                syncRankBannerHeight();
             });
         }
 
@@ -2790,7 +2771,7 @@
             window.addEventListener('resize', function() {
                 if (rankBannerResizeTimer) clearTimeout(rankBannerResizeTimer);
                 rankBannerResizeTimer = setTimeout(function() {
-                    syncRankStickyMetrics();
+                    syncRankBannerHeight();
                     rankBannerResizeTimer = null;
                 }, 120);
             });
@@ -4260,7 +4241,6 @@
                 const ssBar = document.getElementById('rank-table-screenshot-bar');
                 if (ssBar) ssBar.classList.add('hidden');
                 document.documentElement.style.removeProperty('--rank-banner-h');
-                document.documentElement.style.removeProperty('--rank-section-h');
                 return;
             }
             emptyState.classList.add('hidden');
