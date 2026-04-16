@@ -768,6 +768,11 @@
         #data-table-container .rank-table tbody td:nth-child(2) {
             box-shadow: 1px 0 0 0 var(--border-dim);
         }
+        :root {
+            --nav-sticky-offset: 4.75rem;
+            --rank-banner-h: 3.75rem;
+            --rank-section-h: 2.75rem;
+        }
         #data-table-container .rank-table thead th {
             color: var(--text-main);
             font-weight: 800;
@@ -775,6 +780,16 @@
             letter-spacing: 0.1em;
             text-transform: uppercase;
             border-bottom: 2px solid var(--border-dim);
+            position: sticky;
+            top: calc(var(--nav-sticky-offset) + var(--rank-banner-h));
+            z-index: 31;
+            background-clip: padding-box;
+        }
+        #data-table-container .rank-table thead th:nth-child(1) {
+            z-index: 43;
+        }
+        #data-table-container .rank-table thead th:nth-child(2) {
+            z-index: 42;
         }
         #data-table-container .rank-table thead tr {
             background: var(--bg-panel);
@@ -783,6 +798,70 @@
         #data-table-container .rank-table thead th:nth-child(2),
         #data-table-container .rank-table thead th:nth-child(3) {
             background-color: var(--bg-panel) !important;
+        }
+        /* 截圖用：捲動時仍顯示「ETF／凱基」與標的、日期區間（給長輩分享螢幕截圖） */
+        .rank-table-screenshot-bar {
+            position: sticky;
+            top: var(--nav-sticky-offset);
+            z-index: 44;
+            margin-bottom: 0.75rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-dim);
+            background: var(--bg-panel);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="dark"] .rank-table-screenshot-bar {
+            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+        }
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.35rem;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+        .rank-badge-etf {
+            background: color-mix(in srgb, var(--color-accent) 18%, var(--bg-base));
+            color: var(--color-accent);
+            border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+        }
+        .rank-badge-broker {
+            background: color-mix(in srgb, var(--color-buy) 14%, var(--bg-base));
+            color: var(--color-buy);
+            border: 1px solid color-mix(in srgb, var(--color-buy) 35%, transparent);
+        }
+        html.elder-mode .rank-table-screenshot-bar {
+            padding: 0.75rem 0.95rem;
+        }
+        html.elder-mode .rank-badge {
+            font-size: 0.72rem;
+            padding: 0.25rem 0.55rem;
+        }
+
+        /* 手機單欄：買超／賣超標題也跟著固定，截圖捲到下半部仍看得出表別 */
+        @media (max-width: 767px) {
+            #data-table-container .rank-section-heading {
+                position: sticky;
+                top: calc(var(--nav-sticky-offset) + var(--rank-banner-h));
+                z-index: 42;
+                margin-bottom: 0.5rem !important;
+                padding-top: 0.35rem;
+                padding-bottom: 0.45rem;
+                background: var(--bg-base);
+                box-shadow: 0 1px 0 color-mix(in srgb, var(--border-dim) 80%, transparent);
+            }
+            [data-theme="dark"] #data-table-container .rank-section-heading {
+                box-shadow: 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+            }
+            #data-table-container .rank-table thead th {
+                top: calc(var(--nav-sticky-offset) + var(--rank-banner-h) + var(--rank-section-h, 2.75rem));
+            }
         }
 
         /* 首頁「近 1 日買／賣超」：對齊主排行 rank-table；不加 sticky（雙欄小表避免首欄底色與斑馬紋錯位） */
@@ -1179,9 +1258,19 @@
                     > NO_DATA_DETECTED_
                 </div>
                 <div id="data-table-container" class="hidden">
+                    <div id="rank-table-screenshot-bar" class="rank-table-screenshot-bar hidden" aria-live="polite">
+                        <div class="flex flex-wrap items-start gap-x-2 gap-y-1 min-w-0">
+                            <span id="rank-table-context-badge" class="rank-badge rank-badge-etf mt-0.5">ETF</span>
+                            <div class="min-w-0 flex-1">
+                                <p id="rank-table-context-title" class="text-sm sm:text-base font-bold theme-text leading-snug break-words">—</p>
+                                <p id="rank-table-context-sub" class="text-[11px] sm:text-xs font-mono theme-text-dim mt-0.5 leading-snug">—</p>
+                            </div>
+                        </div>
+                        <p id="rank-table-context-meta" class="text-[11px] sm:text-xs font-mono theme-text-dim mt-2 pt-2 border-t theme-border border-dashed leading-relaxed">—</p>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="min-w-0">
-                            <h4 class="font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
+                            <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
                             <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto overflow-y-hidden shadow-sm">
                                 <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
                                     <thead>
@@ -1196,7 +1285,7 @@
                             </div>
                         </div>
                         <div class="min-w-0">
-                            <h4 class="font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
+                            <h4 class="rank-section-heading font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
                             <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto overflow-y-hidden shadow-sm">
                                 <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
                                     <thead>
@@ -1633,6 +1722,87 @@
             return full.replace(/凱基/g, '').replace(/\s+/g, ' ').trim();
         }
 
+        /** 截圖／捲動橫幅主標（與主畫面標的一致，方便長輩截圖分享） */
+        function getScreenshotRankSourceTitle() {
+            if (currentETF === FAMILY_TAB) return '全家族 ETF 合併';
+            if (currentETF === KAIJI_TAB) return '凱基大聯盟（分點合併）';
+            if (brokerLabels[currentETF]) return getBrokerDisplayLabel(currentETF);
+            return getETFLabel(currentETF);
+        }
+
+        function getScreenshotRankSourceSub() {
+            if (currentMode === 'ETF') {
+                if (currentETF === FAMILY_TAB) return 'ETF 模式 · 多檔 ETF 持股變化合併';
+                if (currentETF === AI_TAB) return '';
+                return 'ETF 模式 · 單一 ETF 持股變化';
+            }
+            if (currentMode === 'BROKER') {
+                if (currentETF === KAIJI_TAB) return '分點模式 · 多檔分點淨買賣超合併';
+                return '分點模式 · 單一凱基分點';
+            }
+            return '';
+        }
+
+        function syncRankBannerHeight() {
+            const bar = document.getElementById('rank-table-screenshot-bar');
+            if (!bar || bar.classList.contains('hidden')) {
+                document.documentElement.style.removeProperty('--rank-banner-h');
+                return;
+            }
+            requestAnimationFrame(function() {
+                const h = Math.ceil(bar.getBoundingClientRect().height);
+                document.documentElement.style.setProperty('--rank-banner-h', h + 'px');
+            });
+        }
+
+        /** 手機版 sticky「買超／賣超」h4 實際高度，供表頭 top 疊算 */
+        function syncRankSectionHeadingHeight() {
+            if (typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 768px)').matches) {
+                document.documentElement.style.removeProperty('--rank-section-h');
+                return;
+            }
+            const h4 = document.querySelector('#data-table-container .rank-section-heading');
+            const dataContainer = document.getElementById('data-table-container');
+            if (!h4 || !dataContainer || dataContainer.classList.contains('hidden')) {
+                document.documentElement.style.removeProperty('--rank-section-h');
+                return;
+            }
+            requestAnimationFrame(function() {
+                const h = Math.ceil(h4.getBoundingClientRect().height);
+                document.documentElement.style.setProperty('--rank-section-h', h + 'px');
+            });
+        }
+
+        function syncRankStickyMetrics() {
+            syncRankBannerHeight();
+            requestAnimationFrame(function() {
+                syncRankSectionHeadingHeight();
+            });
+        }
+
+        function updateRankTableContextBar() {
+            const bar = document.getElementById('rank-table-screenshot-bar');
+            const badge = document.getElementById('rank-table-context-badge');
+            const titleEl = document.getElementById('rank-table-context-title');
+            const subEl = document.getElementById('rank-table-context-sub');
+            const metaEl = document.getElementById('rank-table-context-meta');
+            if (!bar || !badge || !titleEl || !subEl || !metaEl) return;
+            const isBroker = currentETF === KAIJI_TAB || brokerCodes.indexOf(currentETF) >= 0;
+            badge.textContent = isBroker ? '凱基' : 'ETF';
+            badge.classList.remove('rank-badge-etf', 'rank-badge-broker');
+            badge.classList.add(isBroker ? 'rank-badge-broker' : 'rank-badge-etf');
+            titleEl.textContent = getScreenshotRankSourceTitle();
+            const sub = getScreenshotRankSourceSub();
+            subEl.textContent = sub;
+            subEl.classList.toggle('hidden', !sub);
+            const unitLabel = currentUnit === 'amount' ? '金額（萬元）' : '張數';
+            metaEl.textContent = '結束日 ' + (currentDate || '—') + ' · 近 ' + currentDays + ' 交易日 · 排行依「' + unitLabel + '」';
+            bar.classList.remove('hidden');
+            requestAnimationFrame(function() {
+                syncRankStickyMetrics();
+            });
+        }
+
         function getDropdownEtfList() {
             if (currentMode === 'ETF') {
                 return [FAMILY_TAB, AI_TAB, ...etfCodes];
@@ -1748,6 +1918,9 @@
                 localStorage.setItem('elderMode', on ? '1' : '0');
             } catch (e) {}
             syncElderModeUi();
+            requestAnimationFrame(function() {
+                syncRankStickyMetrics();
+            });
         }
 
         function onDodToggleChange() {
@@ -2612,6 +2785,15 @@
                     btnTop.classList.toggle('pointer-events-none', !show);
                 }, { passive: true });
             }
+
+            let rankBannerResizeTimer = null;
+            window.addEventListener('resize', function() {
+                if (rankBannerResizeTimer) clearTimeout(rankBannerResizeTimer);
+                rankBannerResizeTimer = setTimeout(function() {
+                    syncRankStickyMetrics();
+                    rankBannerResizeTimer = null;
+                }, 120);
+            });
 
             window.addEventListener('popstate', function() {
                 hideSectorTreemapOverlayUi();
@@ -4075,10 +4257,15 @@
             if (buy.length === 0 && sell.length === 0) {
                 emptyState.classList.remove('hidden');
                 dataContainer.classList.add('hidden');
+                const ssBar = document.getElementById('rank-table-screenshot-bar');
+                if (ssBar) ssBar.classList.add('hidden');
+                document.documentElement.style.removeProperty('--rank-banner-h');
+                document.documentElement.style.removeProperty('--rank-section-h');
                 return;
             }
             emptyState.classList.add('hidden');
             dataContainer.classList.remove('hidden');
+            updateRankTableContextBar();
 
             const sfContainer = document.getElementById('sector-flow-container');
             const sectorTotals = {};
