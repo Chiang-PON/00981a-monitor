@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#f4f4f5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
     <title>ETF 籌碼決策戰情室 v8.0 - 決策雷達</title>
+    <link rel="icon" type="image/png" href="assets/site-logo.png" sizes="any">
+    <link rel="apple-touch-icon" href="assets/site-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -853,6 +855,27 @@
             padding: 0.25rem 0.55rem;
         }
 
+        /* 頂欄：家裡狗狗圓形 logo（截圖／書籤辨識用） */
+        .site-logo-mark {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 9999px;
+            object-fit: cover;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+            border: 2px solid color-mix(in srgb, var(--border-dim) 65%, transparent);
+        }
+        @media (min-width: 640px) {
+            .site-logo-mark {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+        }
+        html.elder-mode .site-logo-mark {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
         /* 手機單欄：買超／賣超標題也跟著固定，截圖捲到下半部仍看得出表別 */
         @media (max-width: 767px) {
             #data-table-container .rank-section-heading {
@@ -986,11 +1009,12 @@
 <body class="pb-[max(6rem,env(safe-area-inset-bottom,0px))] pt-6">
 
     <nav class="w-full theme-nav border-b fixed top-0 z-50 flex justify-between items-center px-3 sm:px-4 md:px-8 py-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] transition-colors">
-        <div class="flex items-center gap-4">
-            <span class="live-dot"></span>
-            <span class="font-mono text-sm tracking-widest font-bold text-buy">SYSTEM.LIVE</span>
-            <span class="theme-text-dim hidden md:inline">|</span>
-            <h1 class="text-base sm:text-lg font-black tracking-[0.15em] sm:tracking-[0.2em] theme-text truncate max-w-[42vw] sm:max-w-none">戰情室 <span class="theme-text-dim font-mono text-xs">v8.0</span></h1>
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img src="assets/site-logo.png" width="40" height="40" alt="家裡的狗狗｜戰情室標誌" class="site-logo-mark" loading="eager" decoding="async">
+            <span class="live-dot shrink-0"></span>
+            <span class="font-mono text-sm tracking-widest font-bold text-buy shrink-0">SYSTEM.LIVE</span>
+            <span class="theme-text-dim hidden md:inline shrink-0">|</span>
+            <h1 class="text-base sm:text-lg font-black tracking-[0.15em] sm:tracking-[0.2em] theme-text truncate max-w-[38vw] sm:max-w-none min-w-0">戰情室 <span class="theme-text-dim font-mono text-xs">v8.0</span></h1>
         </div>
         <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
             <span id="live-clock" class="hidden md:inline">Loading...</span>

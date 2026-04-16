@@ -45,6 +45,10 @@ def main() -> int:
         print("[FAIL] trend.html 仍含占位符，請執行 python3 generate_web.py")
         return 1
 
+    logo = ROOT / "assets" / "site-logo.png"
+    if not logo.is_file():
+        print("[WARN] 缺少 assets/site-logo.png（頂欄 logo／favicon 將無法顯示）")
+
     print("[OK] 可部署檢查通過（請一併上傳 index.html、trend.html、tailwind-built.css）")
     return 0
 
