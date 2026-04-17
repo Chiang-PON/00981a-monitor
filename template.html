@@ -772,8 +772,10 @@
         }
         :root {
             --nav-sticky-offset: 4.75rem;
-            --rank-banner-h: 3.75rem;
+            /* 預設 0：截圖列隱藏時不可回退成固定 rem，否則 rank-table 表頭 sticky top 會多算一截、蓋住資料列 */
+            --rank-banner-h: 0px;
         }
+        /* 表頭保留 position:sticky 以配合 table-sticky-cols 的橫向固定；勿設垂直 top（外層 overflow-x-auto 會讓 sticky top 相對錯誤捲動盒，表頭看起來卡在資料列中間） */
         #data-table-container .rank-table thead th {
             color: var(--text-main);
             font-weight: 800;
@@ -782,19 +784,9 @@
             text-transform: uppercase;
             border-bottom: 2px solid var(--border-dim);
             position: sticky;
+            top: auto !important;
             z-index: 31;
             background-clip: padding-box;
-        }
-        /* 僅桌機：表頭垂直固定（手機見下方，避免 overflow 父層內 sticky 錯位蓋住資料） */
-        @media (min-width: 768px) {
-            #data-table-container .rank-table thead th {
-                top: calc(var(--nav-sticky-offset) + var(--rank-banner-h));
-            }
-        }
-        @media (max-width: 767px) {
-            #data-table-container .rank-table thead th {
-                top: auto !important;
-            }
         }
         #data-table-container .rank-table thead th:nth-child(1) {
             z-index: 43;
@@ -1776,13 +1768,18 @@
         function syncRankBannerHeight() {
             const bar = document.getElementById('rank-table-screenshot-bar');
             if (!bar || bar.classList.contains('hidden')) {
-                document.documentElement.style.removeProperty('--rank-banner-h');
+                document.documentElement.style.setProperty('--rank-banner-h', '0px');
                 return;
             }
-            requestAnimationFrame(function() {
-                const h = Math.ceil(bar.getBoundingClientRect().height);
-                document.documentElement.style.setProperty('--rank-banner-h', h + 'px');
-            });
+            void bar.offsetHeight;
+            let h = Math.ceil(bar.getBoundingClientRect().height);
+            document.documentElement.style.setProperty('--rank-banner-h', h + 'px');
+            if (h === 0) {
+                requestAnimationFrame(function() {
+                    h = Math.ceil(bar.getBoundingClientRect().height);
+                    document.documentElement.style.setProperty('--rank-banner-h', h + 'px');
+                });
+            }
         }
 
         function updateRankTableContextBar() {
@@ -1803,9 +1800,7 @@
             const unitLabel = currentUnit === 'amount' ? '金額（萬元）' : '張數';
             metaEl.textContent = '結束日 ' + (currentDate || '—') + ' · 近 ' + currentDays + ' 交易日 · 排行依「' + unitLabel + '」';
             bar.classList.remove('hidden');
-            requestAnimationFrame(function() {
-                syncRankBannerHeight();
-            });
+            syncRankBannerHeight();
         }
 
         function getDropdownEtfList() {
@@ -4264,7 +4259,7 @@
                 dataContainer.classList.add('hidden');
                 const ssBar = document.getElementById('rank-table-screenshot-bar');
                 if (ssBar) ssBar.classList.add('hidden');
-                document.documentElement.style.removeProperty('--rank-banner-h');
+                document.documentElement.style.setProperty('--rank-banner-h', '0px');
                 return;
             }
             emptyState.classList.add('hidden');
