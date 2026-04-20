@@ -1,9 +1,16 @@
 {
   "ok": true,
-  "fetchedAt": "2026-04-17T08:41:41",
+  "fetchedAt": "2026-04-20T08:47:21",
   "news": {
     "ok": true,
     "items": [
+      {
+        "title": "水利署把握降雨機會 集水區施作人工增雨",
+        "link": "https://money.udn.com/money/story/11799/9447694",
+        "source": "經濟日報",
+        "published": "2026-04-28T17:43:14+08:00",
+        "country": "TW"
+      },
       {
         "title": "KIRIN淡麗攜手全新代言人田馥甄 以「輕盈自在」重新定義日常啤酒的選擇",
         "link": "https://money.udn.com/money/story/7843/9442122",
@@ -19,662 +26,655 @@
         "country": "TW"
       },
       {
-        "title": "Trump says war in Iran is going 'swimmingly' and 'should be ending pretty soon'",
-        "link": "https://www.cnbc.com/2026/04/16/trump-iran-war-predicts-end-soon.html",
-        "source": "CNBC",
-        "published": "2026-04-17T08:37:39+08:00",
-        "country": "US"
-      },
-      {
-        "title": "IMF警告亞洲能源風險，依賴中東燃料恐致經濟遭受嚴重打擊",
-        "link": "https://tw.stock.yahoo.com/news/imf%E8%AD%A6%E5%91%8A%E4%BA%9E%E6%B4%B2%E8%83%BD%E6%BA%90%E9%A2%A8%E9%9A%AA-%E4%BE%9D%E8%B3%B4%E4%B8%AD%E6%9D%B1%E7%87%83%E6%96%99%E6%81%90%E8%87%B4%E7%B6%93%E6%BF%9F%E9%81%AD%E5%8F%97%E5%9A%B4%E9%87%8D%E6%89%93%E6%93%8A-003712874.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:37:12+08:00",
+        "title": "美伊談判添變數 投顧：台股高檔震盪留意通膨風險",
+        "link": "https://money.udn.com/money/story/5612/9451909",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:45:20+08:00",
         "country": "TW"
       },
       {
-        "title": "IMF再促陸放手人民幣彈性，匯價偏強背後直指順差擴大與再平衡壓力",
-        "link": "https://tw.stock.yahoo.com/news/imf%E5%86%8D%E4%BF%83%E9%99%B8%E6%94%BE%E6%89%8B%E4%BA%BA%E6%B0%91%E5%B9%A3%E5%BD%88%E6%80%A7-%E5%8C%AF%E5%83%B9%E5%81%8F%E5%BC%B7%E8%83%8C%E5%BE%8C%E7%9B%B4%E6%8C%87%E9%A0%86%E5%B7%AE%E6%93%B4%E5%A4%A7%E8%88%87%E5%86%8D%E5%B9%B3%E8%A1%A1%E5%A3%93%E5%8A%9B-003631727.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:36:31+08:00",
-        "country": "TW"
+        "title": "Pope Leo XIV recalls 'great suffering' at historic slave trade shrine in Angola",
+        "link": "https://www.france24.com/en/africa/20260420-pope-leo-xiv-recalls-great-suffering-at-historic-slave-trade-shrine-in-angola",
+        "source": "France 24",
+        "published": "2026-04-20T08:42:03+08:00",
+        "country": "FR"
       },
       {
-        "title": "巧克力龍頭百樂嘉利寶發布獲利預警，週四股價崩跌15.6%創半年新低",
-        "link": "https://tw.stock.yahoo.com/news/%E5%B7%A7%E5%85%8B%E5%8A%9B%E9%BE%8D%E9%A0%AD%E7%99%BE%E6%A8%82%E5%98%89%E5%88%A9%E5%AF%B6%E7%99%BC%E5%B8%83%E7%8D%B2%E5%88%A9%E9%A0%90%E8%AD%A6-%E9%80%B1%E5%9B%9B%E8%82%A1%E5%83%B9%E5%B4%A9%E8%B7%8C15-6-%E5%89%B5%E5%8D%8A%E5%B9%B4%E6%96%B0%E4%BD%8E-003604888.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:36:04+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "10大外資忙著上修台積電目標價！最高上看2875元",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406683",
-        "source": "自由時報財經",
-        "published": "2026-04-17T08:35:56+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Labrador mix Luca is a bundle of love",
-        "link": "https://www.japantimes.co.jp/community/2026/04/17/our-lives/adoption-dogs-luca/",
-        "source": "Japan Times",
-        "published": "2026-04-17T08:35:00+08:00",
-        "country": "JP"
-      },
-      {
-        "title": "Experian榮獲2026年CIO 100大獎",
-        "link": "https://tw.stock.yahoo.com/news/experian%E6%A6%AE%E7%8D%B22026%E5%B9%B4cio-100%E5%A4%A7%E7%8D%8E-003400544.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:34:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "中東降溫助攻，美股週四再攀高峰但輪動加劇，那指、費半連12紅",
-        "link": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E6%9D%B1%E9%99%8D%E6%BA%AB%E5%8A%A9%E6%94%BB-%E7%BE%8E%E8%82%A1%E9%80%B1%E5%9B%9B%E5%86%8D%E6%94%80%E9%AB%98%E5%B3%B0%E4%BD%86%E8%BC%AA%E5%8B%95%E5%8A%A0%E5%8A%87-%E9%82%A3%E6%8C%87-%E8%B2%BB%E5%8D%8A%E9%80%A312%E7%B4%85-003254863.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:32:54+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "中東戰火加溫通膨壓力，歐元區3月份CPI終值上修至2.6%",
-        "link": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E6%9D%B1%E6%88%B0%E7%81%AB%E5%8A%A0%E6%BA%AB%E9%80%9A%E8%86%A8%E5%A3%93%E5%8A%9B-%E6%AD%90%E5%85%83%E5%8D%803%E6%9C%88%E4%BB%BDcpi%E7%B5%82%E5%80%BC%E4%B8%8A%E4%BF%AE%E8%87%B32-6-003233590.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:32:33+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "觀望美伊談判及能源危機風險，道瓊歐洲600週四追低0.05%，航空股領跌",
-        "link": "https://tw.stock.yahoo.com/news/%E8%A7%80%E6%9C%9B%E7%BE%8E%E4%BC%8A%E8%AB%87%E5%88%A4%E5%8F%8A%E8%83%BD%E6%BA%90%E5%8D%B1%E6%A9%9F%E9%A2%A8%E9%9A%AA-%E9%81%93%E7%93%8A%E6%AD%90%E6%B4%B2600%E9%80%B1%E5%9B%9B%E8%BF%BD%E4%BD%8E0-05-%E8%88%AA%E7%A9%BA%E8%82%A1%E9%A0%98%E8%B7%8C-003039081.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:30:39+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "AI 晶片需求爆發，AMD、英特爾市值雙雙創下多年新高",
-        "link": "https://technews.tw/2026/04/17/amds-market-cap-hits-all-time-high/",
+        "title": "傳禮來擬收購新藥生技 Kelonia  擴充癌症產品線",
+        "link": "https://finance.technews.tw/2026/04/20/lilly-in-advanced-talks-to-acquire-kelonia-therapeutics-for-over-2-billion/",
         "source": "科技新報",
-        "published": "2026-04-17T08:30:38+08:00",
+        "published": "2026-04-20T08:40:30+08:00",
         "country": "TW"
       },
       {
-        "title": "Bars gearing up for bumper Hong Kong Sevens weekend",
-        "link": "https://www.scmp.com/news/hong-kong/hong-kong-economy/article/3350374/bars-gearing-bumper-hong-kong-sevens-weekend?utm_source=rss_feed",
+        "title": "百年大乾旱加上超級聖嬰，美國不祥之兆來襲",
+        "link": "https://technews.tw/2026/04/20/extre-drought-in-us/",
+        "source": "科技新報",
+        "published": "2026-04-20T08:40:13+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "進香放鞭炮殘屑掛台鐵電車線 通霄至新埔單線行車",
+        "link": "https://money.udn.com/money/story/5648/9451903",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:36:44+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "荷莫茲海峽再封鎖 國際油價彈漲逾6%",
+        "link": "https://money.udn.com/money/story/5599/9451902",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:36:34+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "南屏防高溫 吳德榮：23日起雨區由北而南擴大",
+        "link": "https://money.udn.com/money/story/122328/9451901",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:36:19+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "美能源部長估汽油價格見頂，但明年才有望跌破每加侖3美元",
+        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%83%BD%E6%BA%90%E9%83%A8%E9%95%B7%E4%BC%B0%E6%B1%BD%E6%B2%B9%E5%83%B9%E6%A0%BC%E8%A6%8B%E9%A0%82-%E4%BD%86%E6%98%8E%E5%B9%B4%E6%89%8D%E6%9C%89%E6%9C%9B%E8%B7%8C%E7%A0%B4%E6%AF%8F%E5%8A%A0%E4%BE%963%E7%BE%8E%E5%85%83-003506272.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:35:06+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "AI競賽白熱化：OpenAI 推GPT-5.4-Cyber，Anthropic Mythos陷安全爭議",
+        "link": "https://tw.stock.yahoo.com/news/ai%E7%AB%B6%E8%B3%BD%E7%99%BD%E7%86%B1%E5%8C%96-%E9%96%8B%E6%94%BE%E4%BA%BA%E5%B7%A5%E6%99%BA%E6%85%A7%E6%8E%A8gpt-5-4-cyber-001535943.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:34:51+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "穆迪下調比利時信用評級至A1，展望穩定",
+        "link": "https://tw.stock.yahoo.com/news/%E7%A9%86%E8%BF%AA%E4%B8%8B%E8%AA%BF%E6%AF%94%E5%88%A9%E6%99%82%E4%BF%A1%E7%94%A8%E8%A9%95%E7%B4%9A%E8%87%B3a1-%E5%B1%95%E6%9C%9B%E7%A9%A9%E5%AE%9A-003434002.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:34:34+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "歐洲央行管委Kocher示警，勿因不確定性提前採取利率行動",
+        "link": "https://tw.stock.yahoo.com/news/%E6%AD%90%E6%B4%B2%E5%A4%AE%E8%A1%8C%E7%AE%A1%E5%A7%94kocher%E7%A4%BA%E8%AD%A6-%E5%8B%BF%E5%9B%A0%E4%B8%8D%E7%A2%BA%E5%AE%9A%E6%80%A7%E6%8F%90%E5%89%8D%E6%8E%A1%E5%8F%96%E5%88%A9%E7%8E%87%E8%A1%8C%E5%8B%95-003326682.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:33:26+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "美伊僵局再起荷莫茲海峽變數多 國際油價本週劇烈震盪",
+        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E4%BC%8A%E5%83%B5%E5%B1%80%E5%86%8D%E8%B5%B7%E8%8D%B7%E8%8E%AB%E8%8C%B2%E6%B5%B7%E5%B3%BD%E8%AE%8A%E6%95%B8%E5%A4%9A-%E5%9C%8B%E9%9A%9B%E6%B2%B9%E5%83%B9%E6%9C%AC%E9%80%B1%E5%8A%87%E7%83%88%E9%9C%87%E7%9B%AA-003252163.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:32:52+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "華許將為Fed帶入新思維，戴莉稱經濟變化恐帶來意外挑戰",
+        "link": "https://tw.stock.yahoo.com/news/%E8%8F%AF%E8%A8%B1%E5%B0%87%E7%82%BAfed%E5%B8%B6%E5%85%A5%E6%96%B0%E6%80%9D%E7%B6%AD-%E6%88%B4%E8%8E%89%E7%A8%B1%E7%B6%93%E6%BF%9F%E8%AE%8A%E5%8C%96%E6%81%90%E5%B8%B6%E4%BE%86%E6%84%8F%E5%A4%96%E6%8C%91%E6%88%B0-003247078.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:32:47+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "美伊停火倒數3天！伊朗否認與美重啟談判 開出1前提條件",
+        "link": "https://money.udn.com/money/story/5599/9451896",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:31:46+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "世銀啟動新戰略協助小國應對挑戰，強調創造就業與吸引民間投資",
+        "link": "https://tw.stock.yahoo.com/news/%E4%B8%96%E9%8A%80%E5%95%9F%E5%8B%95%E6%96%B0%E6%88%B0%E7%95%A5%E5%8D%94%E5%8A%A9%E5%B0%8F%E5%9C%8B%E6%87%89%E5%B0%8D%E6%8C%91%E6%88%B0-%E5%BC%B7%E8%AA%BF%E5%89%B5%E9%80%A0%E5%B0%B1%E6%A5%AD%E8%88%87%E5%90%B8%E5%BC%95%E6%B0%91%E9%96%93%E6%8A%95%E8%B3%87-003135119.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:31:35+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "AI 晶片新秀 Cerebras 重啟 IPO  拚 5 月中旬掛牌",
+        "link": "https://technews.tw/2026/04/20/ai-chip-newcomer-cerebras-revives-ipo-targeting-mid-may-listing/",
+        "source": "科技新報",
+        "published": "2026-04-20T08:30:50+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "比特幣衝擊9萬美元關卡 聯準會決策牽動市場，Pepeto預售掀熱潮",
+        "link": "https://tw.stock.yahoo.com/news/%E6%AF%94%E7%89%B9%E5%B9%A3%E8%A1%9D%E6%93%8A9%E8%90%AC%E7%BE%8E%E5%85%83%E9%97%9C%E5%8D%A1-%E8%81%AF%E6%BA%96%E6%9C%83%E6%B1%BA%E7%AD%96%E7%89%BD%E5%8B%95%E5%B8%82%E5%A0%B4-pepeto%E9%A0%90%E5%94%AE%E6%8E%80%E7%86%B1%E6%BD%AE-003038711.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:30:38+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "20 Hong Kong couples get triple baby bonus of HK$60,000 each but disbursement lags",
+        "link": "https://www.scmp.com/news/hong-kong/education/article/3350642/20-hong-kong-couples-get-triple-baby-bonus-hk60000-each-disbursement-lags?utm_source=rss_feed",
         "source": "SCMP",
-        "published": "2026-04-17T08:30:09+08:00",
+        "published": "2026-04-20T08:30:16+08:00",
         "country": "HK"
       },
       {
-        "title": "快沒油了！IEA警告：歐洲航空燃油只剩6週",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406682",
+        "title": "Toys ‘R’ Us game-changer: ‘kidults’, compact shops fuel pivot as Hong Kong retail evolves",
+        "link": "https://www.scmp.com/business/article/3350624/toys-r-us-game-changer-kidults-compact-shops-fuel-pivot-hong-kong-retail-evolves?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-20T08:30:13+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "＜財經週報-低軌衛星＞決戰外太空 電信三雄衛布建全方位網",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409241",
         "source": "自由時報財經",
-        "published": "2026-04-17T08:27:51+08:00",
+        "published": "2026-04-20T08:30:00+08:00",
         "country": "TW"
       },
       {
-        "title": "Intel 推 18A 製程 Core Series 3，搶攻 AI PC 市場",
-        "link": "https://technews.tw/2026/04/17/intel-18a-core-series-3/",
-        "source": "科技新報",
-        "published": "2026-04-17T08:27:42+08:00",
+        "title": "＜財經週報-低軌衛星＞太空板PCB前景看俏 台廠佔有先機",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409239",
+        "source": "自由時報財經",
+        "published": "2026-04-20T08:30:00+08:00",
         "country": "TW"
       },
       {
-        "title": "美伊停火前景樂觀＋中國買盤，LME期銅週四上漲0.17%",
-        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E4%BC%8A%E5%81%9C%E7%81%AB%E5%89%8D%E6%99%AF%E6%A8%82%E8%A7%80-%E4%B8%AD%E5%9C%8B%E8%B2%B7%E7%9B%A4-lme%E6%9C%9F%E9%8A%85%E9%80%B1%E5%9B%9B%E4%B8%8A%E6%BC%B20-17-002716669.html",
+        "title": "＜財經週報-低軌衛星＞低軌衛星商機爆發！台網通大廠卡位地面設備",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409236",
+        "source": "自由時報財經",
+        "published": "2026-04-20T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-低軌衛星＞SpaceX IPO炒熱低軌衛星 台廠供應鏈不看淡",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409231",
+        "source": "自由時報財經",
+        "published": "2026-04-20T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-低軌衛星＞LEO 供應鏈新藍海：昇達科、萊德光電紅利穩定",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409235",
+        "source": "自由時報財經",
+        "published": "2026-04-20T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "貝森特會晤阿聯酋央行總裁，雙方探討加強金融合作及貨幣交換",
+        "link": "https://tw.stock.yahoo.com/news/%E8%B2%9D%E6%A3%AE%E7%89%B9%E6%9C%83%E6%99%A4%E9%98%BF%E8%81%AF%E9%85%8B%E5%A4%AE%E8%A1%8C%E7%B8%BD%E8%A3%81-%E9%9B%99%E6%96%B9%E6%8E%A2%E8%A8%8E%E5%8A%A0%E5%BC%B7%E9%87%91%E8%9E%8D%E5%90%88%E4%BD%9C%E5%8F%8A%E8%B2%A8%E5%B9%A3%E4%BA%A4%E6%8F%9B-002810878.html",
         "source": "Yahoo 股市",
-        "published": "2026-04-17T08:27:16+08:00",
+        "published": "2026-04-20T08:28:10+08:00",
         "country": "TW"
       },
       {
-        "title": "Asia relying on U.S. crude to replace Middle East supply",
-        "link": "https://www.japantimes.co.jp/business/2026/04/17/asia-rely-us-oil-supply/",
+        "title": "2026北京亦庄人形機器人半馬開跑，「閃電」機器人50分26秒奪冠",
+        "link": "https://tw.stock.yahoo.com/news/2026%E5%8C%97%E4%BA%AC%E4%BA%A6%E5%BA%84%E4%BA%BA%E5%BD%A2%E6%A9%9F%E5%99%A8%E4%BA%BA%E5%8D%8A%E9%A6%AC%E9%96%8B%E8%B7%91-%E9%96%83%E9%9B%BB-%E6%A9%9F%E5%99%A8%E4%BA%BA50%E5%88%8626%E7%A7%92%E5%A5%AA%E5%86%A0-002705519.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-20T08:27:05+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Canada's U.S. ties have become a weakness, Carney says",
+        "link": "https://www.japantimes.co.jp/news/2026/04/20/world/politics/carney-canada-us-ties-weakness/",
         "source": "Japan Times",
-        "published": "2026-04-17T08:24:00+08:00",
+        "published": "2026-04-20T08:26:00+08:00",
         "country": "JP"
       },
       {
-        "title": "美國會晶片設備銷陸議案刪減限制 但 ASML 的 DUV 仍受限",
-        "link": "https://money.udn.com/money/story/5599/9447237",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:23:37+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "中東局勢推升油價，美債價格承壓、10年期殖利率週四揚升2.78個基點",
-        "link": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E6%9D%B1%E5%B1%80%E5%8B%A2%E6%8E%A8%E5%8D%87%E6%B2%B9%E5%83%B9-%E7%BE%8E%E5%82%B5%E5%83%B9%E6%A0%BC%E6%89%BF%E5%A3%93-10%E5%B9%B4%E6%9C%9F%E6%AE%96%E5%88%A9%E7%8E%87%E9%80%B1%E5%9B%9B%E6%8F%9A%E5%8D%872-78%E5%80%8B%E5%9F%BA%E9%BB%9E-002331554.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:23:31+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "歐安組織觀選報告：匈牙利選戰激烈但競爭不公平",
-        "link": "https://money.udn.com/money/story/5599/9447235",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:22:49+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "吳德榮：北部下午轉雨 颱風辛樂克對台日無威脅",
-        "link": "https://money.udn.com/money/story/122328/9447234",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:22:07+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Netflix共同創辦人哈斯汀卸任董事長 股價重挫約9%",
-        "link": "https://money.udn.com/money/story/5599/9447232",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:21:39+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "4月17日盤前／台積電法說會報佳音 台股短線正乖離大 預期高檔震盪",
-        "link": "https://money.udn.com/money/story/5607/9447227",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:19:17+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "美伊談判可能改簽備忘錄！伊朗提「放錢換放船」 濃縮鈾部分妥協",
-        "link": "https://money.udn.com/money/story/5599/9447229",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:19:15+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "美債殖利率攀升＋中東不確定性，紐約期金和現貨金週四走跌0.32%、0.02%",
-        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%82%B5%E6%AE%96%E5%88%A9%E7%8E%87%E6%94%80%E5%8D%87-%E4%B8%AD%E6%9D%B1%E4%B8%8D%E7%A2%BA%E5%AE%9A%E6%80%A7-%E7%B4%90%E7%B4%84%E6%9C%9F%E9%87%91%E5%92%8C%E7%8F%BE%E8%B2%A8%E9%87%91%E9%80%B1%E5%9B%9B%E8%B5%B0%E8%B7%8C0-32-0-001653908.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-17T08:16:53+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "經濟型汽車消亡，普通收入者再也買不起車",
-        "link": "https://technews.tw/2026/04/17/affordable-cars-less-choice/",
-        "source": "科技新報",
-        "published": "2026-04-17T08:14:30+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "貿易戰中國豬不吃美國大豆，豬飼料「菜單」大改變",
-        "link": "https://technews.tw/2026/04/17/chinese-pigs-fed-new-menu-as-beijing-weans-farmers-off-us-soy/",
-        "source": "科技新報",
-        "published": "2026-04-17T08:10:39+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "藝術家常陵個展登陸布魯塞爾 作品探討故鄉抽象性",
-        "link": "https://money.udn.com/money/story/5599/9447211",
-        "source": "經濟日報",
-        "published": "2026-04-17T08:00:47+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "微軟想讓所有 PC 內建龍蝦，洗刷 Microslop 污名",
-        "link": "https://technews.tw/2026/04/17/microsoft-integrate-lobster-pcs-shed-microslop-stigma/",
-        "source": "科技新報",
-        "published": "2026-04-17T08:00:43+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "王毅見義外長談中東局勢：當務之急是推動美伊重回談判，尋求政治解決",
-        "link": "https://money.udn.com/money/story/5603/9447210",
-        "source": "經濟日報",
-        "published": "2026-04-17T07:59:07+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Mutual insurance companies are paying record-breaking dividends to their customers this year. Is using one right for you?",
-        "link": "https://www.marketwatch.com/story/mutual-insurance-companies-are-paying-record-breaking-dividends-to-their-customers-this-year-is-using-one-right-for-you-cb6717e8?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T07:59:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "With the largest industrial IPO since 1999, this air-quality giant’s stock opens with a bang",
-        "link": "https://www.marketwatch.com/story/with-the-largest-industrial-ipo-since-1999-this-air-quality-giant-is-going-public-08a50184?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T07:55:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Suspect in 1982 Paris Jewish restaurant attack extradited to France",
-        "link": "https://www.france24.com/en/europe/20260416-suspect-in-1982-paris-jewish-restaurant-attack-extradited-to-france",
-        "source": "France 24",
-        "published": "2026-04-17T07:52:31+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "公司虧損董事卻加薪？11 家上市公司獲利衰退，董事酬金逆勢調升",
-        "link": "https://finance.technews.tw/2026/04/17/directors-pay-raises-despite-company-losses-11-listed-companies-profit-decline-compensation-rises-against-trend/",
-        "source": "科技新報",
-        "published": "2026-04-17T07:50:53+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "川普：美伊談判可能在本週末 和平協議將為美帶來免費的石油和荷姆茲海峽",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406649",
+        "title": "荷姆茲海峽局勢升溫！國際油價又飆逾7％",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409309",
         "source": "自由時報財經",
-        "published": "2026-04-17T07:49:27+08:00",
+        "published": "2026-04-20T08:22:27+08:00",
         "country": "TW"
       },
       {
-        "title": "美調整對中晶片設備法案，仍鎖 ASML DUV",
-        "link": "https://technews.tw/2026/04/17/usa-asml-duv-limit/",
+        "title": "川普稱美軍截獲伊貨船、和談前局勢惡化  油價飆",
+        "link": "https://technews.tw/2026/04/20/u-s-struck-seized-iranian-flagged-ship-touska-in-gulf-of-oman/",
         "source": "科技新報",
-        "published": "2026-04-17T07:42:09+08:00",
+        "published": "2026-04-20T08:20:55+08:00",
         "country": "TW"
       },
       {
-        "title": "AI 代理程式安全隱憂，三大平台漏洞恐成駭客攻擊目標",
-        "link": "https://infosecu.technews.tw/2026/04/17/access-tokens/",
+        "title": "從中國駛往伊朗貨輪遭美軍扣押 德黑蘭誓言報復",
+        "link": "https://money.udn.com/money/story/5599/9451882",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:13:08+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "「越聰明越燒錢」主動式代理 AI 時代來臨，Token 消耗量翻 30 倍的殘酷現實",
+        "link": "https://finance.technews.tw/2026/04/20/cost-challenges-weigh-on-ai-startups/",
         "source": "科技新報",
-        "published": "2026-04-17T07:40:38+08:00",
+        "published": "2026-04-20T08:10:00+08:00",
         "country": "TW"
       },
       {
-        "title": "France to reimburse young women for reusable menstrual products",
-        "link": "https://www.france24.com/en/europe/20260416-france-to-reimburse-young-women-for-reusable-menstrual-products",
-        "source": "France 24",
-        "published": "2026-04-17T07:37:03+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "Pepsi says price cuts and wellness push are bringing back customers — and the stock surges",
-        "link": "https://www.marketwatch.com/story/pepsi-says-price-cuts-and-wellness-push-are-bringing-back-customers-and-the-stock-surges-e6e5ea05?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T07:33:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "台股史上最旺第一季！上市櫃營收飆 14.36 兆元、183 家公司創新高撐出台股多頭",
-        "link": "https://finance.technews.tw/2026/04/17/10-high-revenue-growth-low-pe-stocks-group/",
-        "source": "科技新報",
-        "published": "2026-04-17T07:30:55+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "伊朗擊傷美國20架軍機？商用衛星竟成F-35剋星",
-        "link": "https://www.gvm.com.tw/article/129443",
-        "source": "遠見",
-        "published": "2026-04-17T07:25:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "AI 聊天機器人暗中對人類打分數，揭密 LLM 的隱藏邏輯",
-        "link": "https://technews.tw/2026/04/17/ai-chatbots-secretly-score-humans/",
-        "source": "科技新報",
-        "published": "2026-04-17T07:20:17+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Could a digital twin make you into a 'superworker'?",
-        "link": "https://www.bbc.com/news/articles/c1d907lq6nyo?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T07:04:15+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Judge blocks above-ground construction of Trump's White House ballroom, administration appeals",
-        "link": "https://www.cnbc.com/2026/04/16/white-house-ballroom-trump-judge.html",
+        "title": "Asia markets open mixed as U.S.-Iran tensions escalate after ship seizure",
+        "link": "https://www.cnbc.com/2026/04/20/asia-markets-set-to-open-higher-amid-renewed-iran-us-tensions-.html",
         "source": "CNBC",
-        "published": "2026-04-17T07:03:50+08:00",
+        "published": "2026-04-20T08:07:45+08:00",
         "country": "US"
       },
       {
-        "title": "Rising value of Pokémon cards sparks smash and grab crime spree",
-        "link": "https://www.bbc.com/news/articles/c4gvvnpl5kno?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T07:01:59+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Jury finds that Live Nation is an illegal monopoly, but a breakup with Ticketmaster is unlikely, analysts say",
-        "link": "https://www.marketwatch.com/story/jury-finds-that-live-nation-is-an-illegal-monopoly-but-a-breakup-with-ticketmaster-is-unlikely-analysts-say-b45f0c00?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T07:01:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "LTN經濟通》一包10元  印尼商品橫掃非洲",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5392170",
-        "source": "自由時報財經",
-        "published": "2026-04-17T07:00:00+08:00",
+        "title": "藍源「新葛倫」火箭酬載衛星錯入軌道 挑戰 SpaceX 再受挫",
+        "link": "https://money.udn.com/money/story/5599/9451878",
+        "source": "經濟日報",
+        "published": "2026-04-20T08:06:08+08:00",
         "country": "TW"
       },
       {
-        "title": "AMD has ‘indispensable assets’ — powering the stock toward its best run in two decades",
-        "link": "https://www.marketwatch.com/story/amd-has-indispensable-assets-powering-the-stock-toward-its-best-run-in-two-decades-aa44c469?mod=mw_rss_topstories",
+        "title": "AI 算力的「隱形稅」：當石油衝擊推升電費，雲端巨頭開啟利潤保衛戰",
+        "link": "https://technews.tw/2026/04/20/the-hidden-tax-on-ai-computing-power/",
+        "source": "科技新報",
+        "published": "2026-04-20T08:00:10+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "突破千億保健市場紅海！Cofit聯手adGeek善用AI，把百萬流量精準變現",
+        "link": "https://www.gvm.com.tw/article/129047",
+        "source": "遠見",
+        "published": "2026-04-20T08:00:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Counseling and community for foreign cancer patients in Japan",
+        "link": "https://www.japantimes.co.jp/community/2026/04/20/how-tos/cancer-treatment-japan-foreign-residents/",
+        "source": "Japan Times",
+        "published": "2026-04-20T08:00:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "U.S. stock futures tumble, oil surges as this weekend’s Iran developments rekindle uncertainty",
+        "link": "https://www.marketwatch.com/story/investors-brace-for-renewed-volatility-after-this-weekends-iran-developments-4b707c11?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-04-17T06:58:00+08:00",
+        "published": "2026-04-20T07:57:00+08:00",
         "country": "US"
       },
       {
-        "title": "【科技早餐】Tesla AI5 完成設計定案，馬斯克點名台積電與三星",
-        "link": "https://techorange.com/2026/04/17/elon-musk-confirms-tesla-a15-tape-out-tsmc-samsung-production/?utm_source=rss&utm_medium=feed&utm_campaign=techorange_rss",
+        "title": "Oil prices jump as Strait of Hormuz tensions escalate",
+        "link": "https://www.bbc.com/news/articles/c5yjzy35825o?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-04-20T07:53:44+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "AI，你最好有長進一點",
+        "link": "https://technews.tw/2026/04/20/ai-youd-better-improve/",
+        "source": "科技新報",
+        "published": "2026-04-20T07:50:46+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "I’m planning to retire at 60. Should I sell my house and invest the $500,000?",
+        "link": "https://www.marketwatch.com/story/im-planning-to-retire-at-60-should-i-sell-my-house-and-invest-the-500-000-2b504dd9?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-04-20T07:42:00+08:00",
+        "country": "US"
+      },
+      {
+        "title": "‘I have full guardianship’: My son has special needs. If I buy him a condo, will that hurt his benefits?",
+        "link": "https://www.marketwatch.com/story/i-have-full-guardianship-my-son-has-special-needs-if-i-buy-him-a-condo-will-that-hurt-his-benefits-6f26e904?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-04-20T07:41:00+08:00",
+        "country": "US"
+      },
+      {
+        "title": "2026 廣告霸主換人當，Meta 靠「耐心與 AI」雙料布局超車 Google",
+        "link": "https://technews.tw/2026/04/20/meta-expected-to-unseat-google-as-worlds-largest-digital-ad-player/",
+        "source": "科技新報",
+        "published": "2026-04-20T07:40:37+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Oil prices jump after Iran and U.S. attack commercial ships as tensions escalate over Strait of Hormuz",
+        "link": "https://www.cnbc.com/2026/04/19/oil-price-iran-war-strait-hormuz-tanker.html",
+        "source": "CNBC",
+        "published": "2026-04-20T07:37:13+08:00",
+        "country": "US"
+      },
+      {
+        "title": "把競爭同業當客戶，景美科技「探針卡神盾」以退為進成功轉型",
+        "link": "https://technews.tw/2026/04/20/cmat-tek/",
+        "source": "科技新報",
+        "published": "2026-04-20T07:30:18+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "農地贈與免繳稅攻略  受贈對象才是關鍵",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409167",
+        "source": "自由時報財經",
+        "published": "2026-04-20T07:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "蘋果「黑暗時代」的意外遺產，瀕臨破產的 11 年如何孕育出現代 AI 與網路",
+        "link": "https://technews.tw/2026/04/20/apple-dark-ages-11-years-bankruptcy-legacy-modern-ai-internet/",
+        "source": "科技新報",
+        "published": "2026-04-20T07:20:53+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Is Xi feeling stronger than Trump?",
+        "link": "https://www.japantimes.co.jp/commentary/2026/04/20/world/xi-trump-iran-war/",
+        "source": "Japan Times",
+        "published": "2026-04-20T07:20:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "Middle East war live: Iran vows response after US destroyer fires on cargo ship",
+        "link": "https://www.france24.com/en/middle-east/20260419-middle-east-war-live-iran-vows-response-after-us-destroyer-fires-on-cargo-ship",
+        "source": "France 24",
+        "published": "2026-04-20T07:16:20+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "North Korea conducts ballistic missile tests: KCNA",
+        "link": "https://www.japantimes.co.jp/news/2026/04/20/asia-pacific/north-korea-missile-tests-kcna/",
+        "source": "Japan Times",
+        "published": "2026-04-20T07:10:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "Why your recycled clothes could end up in this South American desert",
+        "link": "https://www.bbc.com/news/articles/c62kg63k8v6o?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-04-20T07:02:11+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "The insider trading suspicions looming over Trump's presidency",
+        "link": "https://www.bbc.com/news/articles/cge0grppe3po?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-04-20T07:02:06+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "【科技早餐】AI 一邊加碼、一邊裁員，Meta、Disney、Snap 接連重整人力",
+        "link": "https://techorange.com/2026/04/20/meta-disney-snap-ai-investment-accelerates-layoff-follows/?utm_source=rss&utm_medium=feed&utm_campaign=techorange_rss",
         "source": "科技報橘",
-        "published": "2026-04-17T06:50:00+08:00",
+        "published": "2026-04-20T06:50:00+08:00",
         "country": "TW"
       },
       {
-        "title": "Microsoft’s stock sees its best four-day stretch in six years — with an extreme bounce",
-        "link": "https://www.marketwatch.com/story/microsofts-stock-sees-its-best-four-day-stretch-in-six-years-with-an-extreme-bounce-3eb834d6?mod=mw_rss_topstories",
+        "title": "WSJ：英特爾尚未脫離險境 股價狂飆不能反映賺錢力",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5409187",
+        "source": "自由時報財經",
+        "published": "2026-04-20T06:47:59+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Israel vows to level homes in Lebanon, counter threats with 'full force'",
+        "link": "https://www.japantimes.co.jp/news/2026/04/20/world/israel-homes-lebanon-full-force/",
+        "source": "Japan Times",
+        "published": "2026-04-20T06:46:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "LTN經濟通》貴如金賤如土 卻是全球經濟關鍵",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5402385",
+        "source": "自由時報財經",
+        "published": "2026-04-20T06:45:29+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Bulgaria's pro-Russian former president takes strong lead",
+        "link": "https://www.france24.com/en/bulgaria-s-pro-russian-former-president-takes-strong-lead",
+        "source": "France 24",
+        "published": "2026-04-20T06:25:58+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "U.S. seizes first Iranian ship in blockade, imperiling talks",
+        "link": "https://www.japantimes.co.jp/news/2026/04/20/world/politics/us-iranian-ship-blockade-talks/",
+        "source": "Japan Times",
+        "published": "2026-04-20T06:01:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "Here are things going right for stocks despite new Iran war setbacks",
+        "link": "https://www.cnbc.com/2026/04/19/jim-cramer-here-are-things-going-right-for-stocks-despite-new-iran-war-setbacks.html",
+        "source": "CNBC",
+        "published": "2026-04-20T05:36:49+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Why Hong Kong is hitting pause on basketball betting",
+        "link": "https://www.scmp.com/opinion/hong-kong-opinion/article/3350322/why-hong-kong-hitting-pause-basketball-betting?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-20T05:30:09+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "新青安2.0額度 61％盼延續8成、1千萬",
+        "link": "https://ec.ltn.com.tw/article/paper/1751587",
+        "source": "自由時報財經",
+        "published": "2026-04-20T05:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "U.S. struck, seized Iranian-flagged ship Touska in Gulf of Oman, Trump says",
+        "link": "https://www.cnbc.com/2026/04/19/trump-navy-iran-ship-gulf-of-oman.html",
+        "source": "CNBC",
+        "published": "2026-04-20T05:28:47+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Ukrainian best-selling author, Andrey Kurkov speaks to France 24",
+        "link": "https://www.france24.com/en/ukrainian-author-andrey-kurkov-speaks-to-france-24",
+        "source": "France 24",
+        "published": "2026-04-20T05:26:50+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "AI startup Cursor in talks to raise $2 billion funding round at valuation of over $50 billion",
+        "link": "https://www.cnbc.com/2026/04/19/cursor-ai-2-billion-funding-round.html",
+        "source": "CNBC",
+        "published": "2026-04-20T05:19:57+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Locating Shakespeare's £140 London Flat",
+        "link": "https://www.france24.com/en/tv-shows/spotlight/20260419-locatin-shakespeare-s-140%C2%A3-london-flat",
+        "source": "France 24",
+        "published": "2026-04-20T04:52:30+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "Trump says US delegation will travel to Islamabad on Monday, Iran declines talks",
+        "link": "https://www.france24.com/en/middle-east/20260419-trump-says-us-delegation-will-travel-to-islamabad-on-monday-iran-declines-talks",
+        "source": "France 24",
+        "published": "2026-04-20T04:44:23+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "The S&P 500 has blown past 7,000 in an epic comeback rally. Here’s why it can keep going.",
+        "link": "https://www.marketwatch.com/story/the-s-p-500-blowed-past-7-000-in-an-epic-comeback-rally-heres-why-it-can-keep-going-higher-632d6a38?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-04-17T06:45:00+08:00",
+        "published": "2026-04-20T04:41:00+08:00",
         "country": "US"
       },
       {
-        "title": "Trump nominates Erica Schwartz as CDC director amid turmoil around leadership, vaccine policy",
-        "link": "https://www.cnbc.com/2026/04/16/trump-nominates-erica-schwartz-as-cdc-director.html",
-        "source": "CNBC",
-        "published": "2026-04-17T06:39:45+08:00",
-        "country": "US"
+        "title": "Up to the job? FBI Chief’s ‘questionable’ conduct",
+        "link": "https://www.france24.com/en/tv-shows/spotlight/20260419-up-to-the-job-fbi-chief-s-questionable-conduct",
+        "source": "France 24",
+        "published": "2026-04-20T04:36:32+08:00",
+        "country": "FR"
       },
       {
-        "title": "Netflix stock sinks despite earnings beat, streamer says Reed Hastings to exit board",
-        "link": "https://www.cnbc.com/2026/04/16/netflix-nflx-earnings-q1-2026.html",
-        "source": "CNBC",
-        "published": "2026-04-17T06:30:18+08:00",
-        "country": "US"
-      },
-      {
-        "title": "‘Felony charges are pending’: My mother set up a trust for my sibling who stole $100,000 from a bank. Can the trust be seized?",
-        "link": "https://www.marketwatch.com/story/felony-charges-are-pending-my-mother-set-up-a-trust-for-my-sibling-who-stole-100-000-from-a-bank-can-the-trust-be-seized-ae69dbaf?mod=mw_rss_topstories",
+        "title": "These Alzheimer’s drugs were supposed to revolutionize the way we fight the disease. The reality is more complicated.",
+        "link": "https://www.marketwatch.com/story/these-alzheimers-drugs-were-supposed-to-revolutionize-the-way-we-fight-the-disease-the-reality-is-more-complicated-80223b95?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-04-17T06:30:00+08:00",
+        "published": "2026-04-20T04:13:00+08:00",
         "country": "US"
       },
       {
-        "title": "鴻海旗下工業富聯展望強勁 董座鄭弘孟：公司進入CPO元年",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406586",
-        "source": "自由時報財經",
-        "published": "2026-04-17T06:27:39+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "‘We keep our finances separate’: My boyfriend is in his 50s with no retirement savings — how worried should I be?",
-        "link": "https://www.marketwatch.com/story/we-keep-our-finances-separate-my-boyfriend-is-in-his-50s-with-no-retirement-savings-how-worried-should-i-be-65983086?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T06:14:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "日薪663萬！ 魏哲家去年年薪跳增至24.22億元",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406600",
-        "source": "自由時報財經",
-        "published": "2026-04-17T06:00:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Netflix co-founder Reed Hastings to step down as chairman",
-        "link": "https://www.bbc.com/news/articles/cvglzn9e82eo?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T05:59:56+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Trump administration to lobby allies to support 'trade over aid' push",
-        "link": "https://www.france24.com/en/trump-administration-to-lobby-allies-to-support-trade-over-aid-push",
-        "source": "France 24",
-        "published": "2026-04-17T05:59:09+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "北京推「去美元化」沒用！2月外國持有美債金額創新高",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406532",
-        "source": "自由時報財經",
-        "published": "2026-04-17T05:59:02+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "美國封死伊朗海上命脈  這些船隻全納入",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406461",
-        "source": "自由時報財經",
-        "published": "2026-04-17T05:58:25+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "躺著賺！他靠這輕鬆副業「每月穩賺19萬」 親曝成功心路",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406346",
-        "source": "自由時報財經",
-        "published": "2026-04-17T05:57:30+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "荷姆茲「過路費」1毛都沒收到！伊朗傻眼了",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5406543",
-        "source": "自由時報財經",
-        "published": "2026-04-17T05:56:53+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Netflix co-founder Reed Hastings to exit company, saying it’s so strong it doesn’t need him anymore",
-        "link": "https://www.marketwatch.com/story/netflix-shatters-profit-expectations-thanks-to-price-increase-and-2-8-billion-breakup-fee-from-warner-bros-ea3a80f8?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T05:52:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "ICE agent charged with assault by Minnesota prosecutors, arrest warrant issued",
-        "link": "https://www.cnbc.com/2026/04/16/ice-agent-assault-charge-minnesota-minneapolis.html",
+        "title": "FBI Director Kash Patel vows to sue The Atlantic over alcohol abuse claims",
+        "link": "https://www.cnbc.com/2026/04/19/kash-patel-atlantic-lawsuit-alcohol.html",
         "source": "CNBC",
-        "published": "2026-04-17T05:45:52+08:00",
+        "published": "2026-04-20T03:56:11+08:00",
         "country": "US"
       },
       {
-        "title": "Tesla, IBM and Intel report earnings next week — here’s the best way to play a volatile market",
-        "link": "https://www.marketwatch.com/story/the-s-p-500s-record-high-may-be-an-illusion-and-this-rally-is-a-warning-893b81e5?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-04-17T05:26:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "France finance minister says Hormuz must open 'but not at any price'",
-        "link": "https://www.france24.com/en/tv-shows/a-propos/20260416-france-finance-minister-says-hormuz-must-open-but-not-at-any-price",
+        "title": "Manchester City beats Arsenal 2-1, reignites Premier League title race",
+        "link": "https://www.france24.com/en/sport/20260419-manchester-city-beats-arsenal-2-1-reignites-premier-league-title-race",
         "source": "France 24",
-        "published": "2026-04-17T05:15:40+08:00",
+        "published": "2026-04-20T02:45:47+08:00",
         "country": "FR"
       },
       {
-        "title": "South African opposition leader Malema gets jail sentence",
-        "link": "https://www.france24.com/en/south-african-opposition-leader-malema-gets-jail-sentence",
-        "source": "France 24",
-        "published": "2026-04-17T04:51:58+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "Trump says gas prices 'not very high' as most U.S. voters blame him for price spike",
-        "link": "https://www.cnbc.com/2026/04/16/trump-gas-prices-iran-war.html",
+        "title": "Software stock dogs have joined market rally. There's a classic investing lesson in the rebound",
+        "link": "https://www.cnbc.com/2026/04/19/software-tech-stocks-market-rally-microsoft.html",
         "source": "CNBC",
-        "published": "2026-04-17T04:51:27+08:00",
+        "published": "2026-04-20T02:38:11+08:00",
         "country": "US"
       },
       {
-        "title": "Senate overturns Boundary Waters protections, a boon for Chilean mining company",
-        "link": "https://www.cnbc.com/2026/04/16/minnesota-boundary-waters-mining-congress.html",
-        "source": "CNBC",
-        "published": "2026-04-17T04:51:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "European airlines could run out of jet fuel 'in six weeks'",
-        "link": "https://www.france24.com/en/european-airlines-could-run-out-of-jet-fuel-in-six-weeks",
+        "title": "Eight children killed in Louisiana domestic violence mass shooting",
+        "link": "https://www.france24.com/en/americas/20260419-8-children-between-1-and-14-killed-in-mass-shooting-in-louisiana-police-say",
         "source": "France 24",
-        "published": "2026-04-17T04:48:33+08:00",
+        "published": "2026-04-20T00:53:49+08:00",
         "country": "FR"
       },
       {
-        "title": "How could the Iran war affect fizzy drinks in the UK?",
-        "link": "https://www.bbc.com/news/videos/cly9peevj5yo?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T04:39:15+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Why the stock market is hitting records despite Iran war",
-        "link": "https://www.cnbc.com/2026/04/16/stocks-record-highs-iran-war.html",
-        "source": "CNBC",
-        "published": "2026-04-17T04:32:19+08:00",
-        "country": "US"
-      },
-      {
-        "title": "RFK Jr.'s peptide policy could boost Hims & Hers as its GLP-1 business evolves",
-        "link": "https://www.cnbc.com/2026/04/16/rfk-jr-peptides-hims-hers-glp-1.html",
-        "source": "CNBC",
-        "published": "2026-04-17T04:19:19+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Quantum stocks on pace for a massive week after Nvidia debuts AI models to boost the tech",
-        "link": "https://www.cnbc.com/2026/04/16/quantum-stocks-nvidia-ai-models.html",
-        "source": "CNBC",
-        "published": "2026-04-17T04:15:50+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Israeli military admit to posting AI photo of Lebanese journalist it killed",
-        "link": "https://www.france24.com/en/israeli-military-admit-to-posting-ai-photo-of-killed-lebanese-journalist",
-        "source": "France 24",
-        "published": "2026-04-17T03:46:13+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "French billionaire Bolloré sparks turmoil at Grasset as 115 authors leave publishing house",
-        "link": "https://www.france24.com/en/video/20260416-french-billionaire-bollor%C3%A9-sparks-turmoil-at-grasset-as-115-authors-leave-publishing-house",
-        "source": "France 24",
-        "published": "2026-04-17T03:34:24+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "Europe has 'maybe six weeks of jet fuel left', energy boss warns",
-        "link": "https://www.bbc.com/news/articles/czjw2kz0l22o?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T03:19:07+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Emergency services in Ukraine 'need armored vehicles' as Russia targets rescue workers",
-        "link": "https://www.france24.com/en/emergency-services-in-ukraine-need-armored-vehicles-as-russia-targets-rescue-workers",
-        "source": "France 24",
-        "published": "2026-04-17T03:12:23+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "Is Trump meeting the moment for US conservatives?",
-        "link": "https://www.bbc.com/news/videos/crr1pk5jkyqo?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T02:49:01+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Israel's Netanyahu says he agrees to a 10-day ceasefire in Lebanon",
-        "link": "https://www.france24.com/en/israel-s-netanyahu-says-he-agrees-to-a-10-day-ceasefire-in-lebanon",
-        "source": "France 24",
-        "published": "2026-04-17T02:37:28+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "台積電法說三關鍵，魏哲家全說了！如何看馬斯克與三星？揭擴廠進度",
-        "link": "https://www.gvm.com.tw/article/129449",
-        "source": "遠見",
-        "published": "2026-04-17T02:36:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "馬斯克宣布AI5晶片投片，特斯拉大漲8%！發文要謝台積電卻鬧烏龍",
-        "link": "https://www.gvm.com.tw/article/129448",
-        "source": "遠見",
-        "published": "2026-04-17T02:05:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "2026全台桐花祭》五月雪來了！週末賞桐祕境、活動一次看",
-        "link": "https://www.gvm.com.tw/article/129446",
-        "source": "遠見",
-        "published": "2026-04-17T01:53:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "大甲媽祖4/17起駕！遶境教會我的事：冷漠需要學習，拒絕也是一種成長",
-        "link": "https://www.gvm.com.tw/article/60332",
-        "source": "遠見",
-        "published": "2026-04-17T01:44:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Why the UK is preparing for food shortages due to Iran war",
-        "link": "https://www.bbc.com/news/videos/cevkp8j91n9o?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T01:41:02+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "​​大立光Q1毛利飆驚喜！矽光子為何切入FAU？林恩平親解",
-        "link": "https://www.gvm.com.tw/article/129445",
-        "source": "遠見",
-        "published": "2026-04-17T01:39:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "「我沒有殺人！」從9次死刑判決到無罪重生，這是他的真實人生",
-        "link": "https://www.gvm.com.tw/article/129444",
-        "source": "遠見",
-        "published": "2026-04-17T01:28:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "No issues with UK fuel supply, says Reeves",
-        "link": "https://www.bbc.com/news/articles/c5y97jjnqzyo?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T01:05:32+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Social supermarket opens to cut food bills",
-        "link": "https://www.bbc.com/news/articles/c747rd00388o?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T00:34:00+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "Cheaper Doritos and Lays helps PepsiCo win back struggling snackers",
-        "link": "https://www.bbc.com/news/articles/c625dqzpm7qo?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-04-17T00:26:58+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "EPS估賺1股本！「CCL大廠」飆漲停累漲23.5%創高　拿ASIC訂單、攻低軌衛星獲利大增",
-        "link": "https://tw.stock.yahoo.com/news/eps%E4%BC%B0%E8%B3%BA1%E8%82%A1%E6%9C%AC-ccl%E5%A4%A7%E5%BB%A0-%E9%A3%86%E6%BC%B2%E5%81%9C%E7%B4%AF%E6%BC%B223-5-%E5%89%B5%E9%AB%98-002100142.html",
+        "title": "美方扣押伊朗貨船引爆停火變數，布油和紐油亞洲盤初每桶飆破96、90美元",
+        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E6%96%B9%E6%89%A3%E6%8A%BC%E4%BC%8A%E6%9C%97%E8%B2%A8%E8%88%B9%E5%BC%95%E7%88%86%E5%81%9C%E7%81%AB%E8%AE%8A%E6%95%B8-%E5%B8%83%E6%B2%B9%E5%92%8C%E7%B4%90%E6%B2%B9%E4%BA%9E%E6%B4%B2%E7%9B%A4%E5%88%9D%E6%AF%8F%E6%A1%B6%E9%A3%86%E7%A0%B496-90%E7%BE%8E%E5%85%83-002649406.html",
         "source": "Yahoo 財經",
-        "published": "2026-04-17T00:21:00+08:00",
+        "published": "2026-04-20T00:26:49+08:00",
         "country": "TW"
       },
       {
-        "title": "誰在狂飆？ 「ASIC龍頭」三個月狂噴229% 、台表科飆43%成交量爆近8倍被盯上　台股瘋漲卻抓40擋注意股",
-        "link": "https://tw.stock.yahoo.com/news/%E8%AA%B0%E5%9C%A8%E7%8B%82%E9%A3%86-asic%E9%BE%8D%E9%A0%AD-%E4%B8%89%E5%80%8B%E6%9C%88%E7%8B%82%E5%99%B4229-%E5%8F%B0%E8%A1%A8%E7%A7%91%E9%A3%8643-%E6%88%90%E4%BA%A4%E9%87%8F%E7%88%86%E8%BF%918%E5%80%8D%E8%A2%AB%E7%9B%AF%E4%B8%8A-002000645.html",
+        "title": "比特幣堅守 7.5 萬美元關卡 加密市場承壓待宏觀信號",
+        "link": "https://tw.stock.yahoo.com/news/%E6%AF%94%E7%89%B9%E5%B9%A3%E5%A0%85%E5%AE%88-7-5-%E8%90%AC%E7%BE%8E%E5%85%83%E9%97%9C%E5%8D%A1-%E5%8A%A0%E5%AF%86%E5%B8%82%E5%A0%B4%E6%89%BF%E5%A3%93%E5%BE%85%E5%AE%8F%E8%A7%80%E4%BF%A1%E8%99%9F-002416995.html",
         "source": "Yahoo 財經",
-        "published": "2026-04-17T00:20:00+08:00",
+        "published": "2026-04-20T00:24:16+08:00",
         "country": "TW"
       },
       {
-        "title": "朝野破冰總預算下週啟動審查，軍警加薪案會過關嗎？",
-        "link": "https://www.gvm.com.tw/article/129442",
+        "title": "Ciao UFO takes top prizes at Hong Kong Film Awards as Sons of the Neon Night glows",
+        "link": "https://www.scmp.com/news/hong-kong/article/3350651/ciao-ufo-takes-top-prizes-hong-kong-film-awards-sons-neon-night-glows?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-20T00:12:07+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "偵查奇襲都靠它！烏克蘭不對稱戰爭的祕密武器：電動滑板車",
+        "link": "https://www.gvm.com.tw/article/129461",
         "source": "遠見",
-        "published": "2026-04-17T00:19:00+08:00",
+        "published": "2026-04-20T00:00:00+08:00",
         "country": "TW"
       },
       {
-        "title": "Netflix共同創辦人哈斯汀卸任董事長　股價重挫約9%",
-        "link": "https://tw.news.yahoo.com/netflix%E5%85%B1%E5%90%8C%E5%89%B5%E8%BE%A6%E4%BA%BA%E5%93%88%E6%96%AF%E6%B1%80%E5%8D%B8%E4%BB%BB%E8%91%A3%E4%BA%8B%E9%95%B7-%E8%82%A1%E5%83%B9%E9%87%8D%E6%8C%AB%E7%B4%849-001401164.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-17T00:14:01+08:00",
+        "title": "Australia's most decorated serviceman vows to fight war crime charges",
+        "link": "https://www.france24.com/en/australia-s-most-decorated-serviceman-vows-to-fight-war-crime-charges",
+        "source": "France 24",
+        "published": "2026-04-19T23:57:09+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "Amazon, USPS and the risk of a widening delivery divide in rural America",
+        "link": "https://www.cnbc.com/2026/04/19/amazon-usps-package-delivery-costs-rural-america.html",
+        "source": "CNBC",
+        "published": "2026-04-19T22:16:12+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Gas prices may not drop below $3 a gallon until next year: Energy Secretary Wright",
+        "link": "https://www.cnbc.com/2026/04/19/gas-prices-drop-until-next-year-wright.html",
+        "source": "CNBC",
+        "published": "2026-04-19T22:00:35+08:00",
+        "country": "US"
+      },
+      {
+        "title": "I'm a psychologist who studies couples: People in the happiest relationships do 5 things on Sundays—that most neglect",
+        "link": "https://www.cnbc.com/2026/04/19/psychologist-who-studies-couples-people-in-the-happiest-relationships-do-5-things-on-sundays.html",
+        "source": "CNBC",
+        "published": "2026-04-19T21:32:35+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Hong Kong’s spinal muscular atrophy patients seek aid for injection therapy",
+        "link": "https://www.scmp.com/news/hong-kong/health-environment/article/3350640/hong-kongs-spinal-muscular-atrophy-patients-seek-aid-injection-therapy?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-19T21:30:17+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "Over 250 rare Han dynasty relics on display in major Hong Kong showcase",
+        "link": "https://www.scmp.com/news/hong-kong/article/3350639/over-250-rare-han-dynasty-relics-display-major-hong-kong-showcase?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-19T21:21:47+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "Hong Kong homebuyers extend sell-out streak amid renewed confidence in market",
+        "link": "https://www.scmp.com/property/hong-kong-china/article/3350638/hong-kong-homebuyers-extend-sell-out-streak-amid-renewed-confidence-market?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-19T21:10:25+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "Blue Origin launches rocket with used booster for first time",
+        "link": "https://www.japantimes.co.jp/news/2026/04/19/world/blue-origin-launches-with-used-booster/",
+        "source": "Japan Times",
+        "published": "2026-04-19T20:02:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "Hong Kong Sevens a treat for fans but local restaurants hungry for more trade",
+        "link": "https://www.scmp.com/news/hong-kong/society/article/3350630/hong-kong-sevens-treat-fans-local-restaurants-hungry-more-trade?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-19T19:20:28+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "‘I have more money than I know what to do with’: I’m a single millionaire with no heirs and don’t like spending. What’s wrong with me?",
+        "link": "https://www.marketwatch.com/story/i-have-more-money-than-i-know-what-to-do-with-im-a-single-millionaire-with-no-heirs-and-dont-like-spending-whats-wrong-dd5acfb6?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-04-19T18:30:00+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Hong Kong urged to be more proactive in removing barriers with Shenzhen",
+        "link": "https://www.scmp.com/news/hong-kong/politics/article/3350627/hong-kong-urged-be-more-proactive-removing-barriers-shenzhen?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-19T18:13:39+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "AI產製內容氾濫！AI貼文數首次超越人類撰寫，「社群真實感」反而變珍貴",
+        "link": "https://www.gvm.com.tw/article/129459",
+        "source": "遠見",
+        "published": "2026-04-19T18:00:00+08:00",
         "country": "TW"
       },
       {
-        "title": "發票中100萬 國稅局查出1身分不能領：沒統編也一樣",
-        "link": "https://tw.news.yahoo.com/%E7%99%BC%E7%A5%A8%E4%B8%AD100%E8%90%AC-%E5%9C%8B%E7%A8%85%E5%B1%80%E6%9F%A5%E5%87%BA1%E8%BA%AB%E5%88%86%E4%B8%8D%E8%83%BD%E9%A0%98-%E6%B2%92%E7%B5%B1%E7%B7%A8%E4%B9%9F-%E6%A8%A3-001115964.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-17T00:11:15+08:00",
-        "country": "TW"
+        "title": "Hormuz at standstill, denting U.S.-Iran peace deal hopes",
+        "link": "https://www.japantimes.co.jp/news/2026/04/19/world/politics/hormuz-standstill-us-iran-peace-deal/",
+        "source": "Japan Times",
+        "published": "2026-04-19T16:52:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "Bulgaria votes as pro-Russian former president leads the polls",
+        "link": "https://www.japantimes.co.jp/news/2026/04/19/world/politics/bulgaria-election-pro-russian-polls/",
+        "source": "Japan Times",
+        "published": "2026-04-19T16:45:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "‘It is their fault’: My condo board forgot to bill for storage fees. Must I pay retroactively?",
+        "link": "https://www.marketwatch.com/story/it-is-their-fault-my-condo-board-forgot-to-bill-for-storage-fees-must-i-pay-retroactively-e5f6246b?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-04-19T16:35:00+08:00",
+        "country": "US"
+      },
+      {
+        "title": "'My school cannot afford free breakfast club'",
+        "link": "https://www.bbc.com/news/articles/c8x7217vv28o?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-04-19T16:24:53+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "Returning to a fire-ravaged home in Wang Fuk Court: what to prepare",
+        "link": "https://www.scmp.com/news/hong-kong/society/article/3350618/returning-fire-ravaged-home-wang-fuk-court-what-prepare?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-19T16:23:14+08:00",
+        "country": "HK"
       }
     ],
     "disclaimer": "新聞標題與連結來自公開 RSS，版權歸各媒體；僅供參考。部分稿件含 country 欄位（依訂閱來源標註國別），未標者於全球戰情仍以標題關鍵字歸類。"
@@ -696,38 +696,38 @@
       {
         "symbol": "^SPX",
         "label": "S&P 500",
-        "price": "7041.28",
-        "change": "+3.50",
-        "changePercent": "0.05",
+        "price": "7126.06",
+        "change": "+51.51",
+        "changePercent": "0.73",
         "changeNote": "開→收",
         "currency": "USD",
         "region": "美洲",
         "source": "stooq",
-        "asOf": "2026-04-16 23:00:00"
+        "asOf": "2026-04-17 23:00:00"
       },
       {
         "symbol": "^NDX",
         "label": "Nasdaq 100",
-        "price": "26333.00",
-        "change": "+76.12",
-        "changePercent": "0.29",
+        "price": "26672.43",
+        "change": "+121.27",
+        "changePercent": "0.46",
         "changeNote": "開→收",
         "currency": "USD",
         "region": "美洲",
         "source": "stooq",
-        "asOf": "2026-04-16 23:00:00"
+        "asOf": "2026-04-17 23:00:00"
       },
       {
         "symbol": "^DJI",
         "label": "道瓊",
-        "price": "48578.72",
-        "change": "+20.90",
-        "changePercent": "0.04",
+        "price": "49447.43",
+        "change": "+658.62",
+        "changePercent": "1.35",
         "changeNote": "開→收",
         "currency": "USD",
         "region": "美洲",
         "source": "stooq",
-        "asOf": "2026-04-16 23:00:00"
+        "asOf": "2026-04-17 23:00:00"
       },
       {
         "symbol": "^GSPTSE",
@@ -744,38 +744,38 @@
       {
         "symbol": "^HSI",
         "label": "恆生指數",
-        "price": "26394.26",
+        "price": "26160.33",
         "change": "+0.00",
         "changePercent": "0.00",
         "changeNote": "開→收",
         "currency": "HKD",
         "region": "亞洲",
         "source": "stooq",
-        "asOf": "2026-04-17 02:35:54"
+        "asOf": "2026-04-20 02:35:48"
       },
       {
         "symbol": "^STI",
         "label": "新加坡 STI",
-        "price": "5007.83",
-        "change": "-31.28",
-        "changePercent": "-0.62",
+        "price": "4997.93",
+        "change": "-14.92",
+        "changePercent": "-0.30",
         "changeNote": "開→收",
         "currency": "SGD",
         "region": "亞洲",
         "source": "stooq",
-        "asOf": "2026-04-16 21:44:00"
+        "asOf": "2026-04-17 21:44:00"
       },
       {
         "symbol": "^KOSPI",
         "label": "韓國 KOSPI",
-        "price": "6205.40",
-        "change": "-24.92",
-        "changePercent": "-0.40",
+        "price": "6218.68",
+        "change": "+4.76",
+        "changePercent": "0.08",
         "changeNote": "開→收",
         "currency": "KRW",
         "region": "亞洲",
         "source": "stooq",
-        "asOf": "2026-04-17 02:21:20"
+        "asOf": "2026-04-20 02:27:00"
       },
       {
         "symbol": "^N225",
@@ -828,38 +828,38 @@
       {
         "symbol": "^DAX",
         "label": "德國 DAX",
-        "price": "24154.47",
-        "change": "+18.98",
-        "changePercent": "0.08",
+        "price": "24702.24",
+        "change": "+551.77",
+        "changePercent": "2.28",
         "changeNote": "開→收",
         "currency": "EUR",
         "region": "歐洲",
         "source": "stooq",
-        "asOf": "2026-04-16 23:00:00"
+        "asOf": "2026-04-17 23:00:00"
       },
       {
         "symbol": "^UKX",
         "label": "英國富時 100",
-        "price": "10589.99",
-        "change": "+30.41",
-        "changePercent": "0.29",
+        "price": "10667.63",
+        "change": "+77.28",
+        "changePercent": "0.73",
         "changeNote": "開→收",
         "currency": "GBP",
         "region": "歐洲",
         "source": "stooq",
-        "asOf": "2026-04-16 23:00:00"
+        "asOf": "2026-04-17 23:00:00"
       },
       {
         "symbol": "^CAC",
         "label": "法國 CAC 40",
-        "price": "8262.70",
-        "change": "-18.85",
-        "changePercent": "-0.23",
+        "price": "8425.13",
+        "change": "+159.86",
+        "changePercent": "1.93",
         "changeNote": "開→收",
         "currency": "EUR",
         "region": "歐洲",
         "source": "stooq",
-        "asOf": "2026-04-16 23:00:00"
+        "asOf": "2026-04-17 23:00:00"
       }
     ],
     "disclaimer": "加權指數為證交所；其餘為 Stooq 延遲資料（多為開盤→收盤），與即時撮合不同。"
@@ -1161,23 +1161,23 @@
   },
   "globalWarAi": {
     "ok": true,
-    "generatedAt": "2026-04-17T08:41:56",
+    "generatedAt": "2026-04-20T08:48:04",
     "model": "gpt-4o-mini",
     "disclaimer": "以下為 AI 依本日快照與新聞標題生成之摘要，僅供參考，非投資建議，亦不構成股價預測。",
     "summaries": {
-      "TW": "台灣加權指數今日上漲409.88點，收於37,132.02點，漲幅為1.12%。電子零組件、塑膠及居家生活三大產業表現亮眼，分別上漲2.79%、2.57%及2.33%。市場關注國際機器人密度增長及IMF對亞洲能源風險的警告。",
-      "US": "美國股市整體表現平穩，S&P 500小幅上漲3.50點，收於7041.28點，漲幅0.05%。Nasdaq 100和道瓊指數也有小幅上漲，分別上漲76.12點及20.90點。市場焦點集中在特朗普對伊朗戰爭的最新評論及Pepsi的業績回升。",
-      "CA": "本稿池資料有限，暫無加拿大市場報價及新聞內容。",
-      "HK": "香港恆生指數今日持平，報26394.26點，變動為0.00%。市場關注即將舉行的香港七人欖球賽，預期將吸引大量人潮及消費。",
-      "SG": "本稿池資料有限，暫無新加坡市場報價及新聞內容。",
-      "KR": "本稿池資料有限，暫無南韓市場報價及新聞內容。",
-      "JP": "本稿池資料有限，暫無日本市場報價及新聞內容。",
-      "AU": "本稿池資料有限，暫無澳洲市場報價及新聞內容。",
-      "IN": "本稿池資料有限，暫無印度市場報價及新聞內容。",
-      "CN": "本稿池資料有限，暫無中國市場報價及新聞內容。",
-      "DE": "德國DAX指數小幅上漲18.98點，收於24154.47點，漲幅為0.08%。市場動態相對平穩，無重大新聞影響。",
-      "GB": "英國富時100指數上漲30.41點，報10589.99點，漲幅為0.29%。市場關注特朗普與伊朗戰爭的影響及食品短缺的潛在風險。",
-      "FR": "法國CAC 40指數下跌18.85點，報8262.70點，跌幅為0.23%。市場面臨多重挑戰，包括能源供應危機及國際政治緊張局勢。"
+      "TW": "台灣加權指數今日上漲409.88點，收於37,132.02點，漲幅為1.12%。電子零組件、塑膠及居家生活三大產業表現亮眼，分別上漲2.79%、2.57%及2.33%。市場關注美伊談判的變數，投顧提醒需留意通膨風險。",
+      "US": "美國股市今日普遍上漲，S&P 500指數上漲51.51點，收於7126.06點，漲幅為0.73%。道瓊指數漲幅最大，增加658.62點，收於49447.43點，漲幅為1.35%。市場因美伊緊張局勢而波動，油價也因相關事件而上漲。",
+      "CA": "本稿池資料有限，加拿大股市目前暫無報價（休市或延遲）。",
+      "HK": "香港恆生指數今日持平，報26160.33點，變化為0.00%。市場消息包括本地家庭延續購房熱潮，顯示出對市場的信心。其他新聞則涉及本地文化活動及社會議題。",
+      "SG": "本稿池資料有限，新加坡股市目前暫無報價（休市或延遲）。",
+      "KR": "韓國KOSPI指數小幅上漲4.76點，報6218.68點，漲幅為0.08%。市場消息有限，未來走勢仍需持續關注。",
+      "JP": "本稿池資料有限，日本股市目前暫無報價（休市或延遲）。",
+      "AU": "本稿池資料有限，澳洲股市目前暫無報價（休市或延遲）。",
+      "IN": "本稿池資料有限，印度股市目前暫無報價（休市或延遲）。",
+      "CN": "本稿池資料有限，中國股市目前暫無報價（休市或延遲）。",
+      "DE": "德國DAX指數今日上漲551.77點，收於24702.24點，漲幅為2.28%。市場情緒回暖，投資者對經濟前景持樂觀態度。",
+      "GB": "英國富時100指數上漲77.28點，報10667.63點，漲幅為0.73%。油價因霍爾木茲海峽的緊張局勢而上漲，市場反應敏感。",
+      "FR": "法國CAC 40指數上漲159.86點，報8425.13點，漲幅為1.93%。市場受到中東局勢影響，投資者情緒有所波動。"
     }
   }
 }
