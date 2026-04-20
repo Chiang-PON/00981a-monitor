@@ -1072,7 +1072,7 @@
                     <p id="home-sector-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
                 </div>
 
-                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
                         <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
                         <div id="home-news-filter-wrap" class="hidden mb-3 space-y-2">
                             <div>
@@ -1085,10 +1085,15 @@
                         <p id="home-news-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
                 </div>
 
-                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
-                    <h3 class="font-mono text-sm font-bold theme-text mb-1.5 leading-snug">本機資料 · 近 1 交易日買／賣超（金額）</h3>
-                    <p class="text-[11px] theme-text-dim mb-3 leading-relaxed">合併本機內<strong class="theme-text font-semibold">已追蹤之各檔 ETF</strong>持倉變化加總（不含凱基分點、大聯盟、AI 等聚合列）。</p>
-                    <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
+                    <div class="home-hot-section rounded-xl border theme-border bg-[var(--bg-panel)] p-3 sm:p-4 md:p-5">
+                    <h3 class="font-mono text-sm font-bold theme-text mb-1 leading-snug">本機資料 · 近 1 交易日買／賣超（金額）</h3>
+                    <p class="text-[10px] sm:text-[11px] theme-text-dim mb-2 leading-snug">合併本機內<strong class="theme-text font-semibold">已追蹤之各檔 ETF</strong>持倉變化加總（不含凱基分點、大聯盟、AI 等聚合列）。</p>
+                        <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
+                        <div id="home-new-entries-wrap" class="mt-2 pt-2 border-t theme-border">
+                            <h4 class="font-mono text-xs font-bold theme-text mb-1">新進場名單</h4>
+                            <p class="text-[10px] theme-text-dim mb-1.5 leading-snug">各檔 ETF 較前一交易日<strong class="theme-text font-semibold">新納入</strong>之成分（與各檔明細「新進場」相同來源）；同一標的可能多檔 ETF 各列一行。</p>
+                            <div id="home-new-entries-out" class="text-xs overflow-x-auto"></div>
+                        </div>
                 </div>
             </div>
 
@@ -1204,13 +1209,13 @@
                         <div class="w-full min-w-0 border-t theme-border pt-5 sm:pt-0 sm:border-t-0">
                             <p class="ui-label mb-2.5">主力 凱基</p>
                             <div id="momentum-actor-broker-buttons" class="flex flex-wrap gap-2.5 sm:gap-2 max-h-[min(40vh,14rem)] sm:max-h-[min(44vh,16rem)] md:max-h-none overflow-y-auto overflow-x-hidden pr-1 -mr-1 scroll-smooth" role="group" aria-label="主力凱基分點"></div>
-                        </div>
                     </div>
+                        </div>
                     <div id="momentum-input-stock" class="hidden flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-3 sm:items-end mb-5 sm:mb-4">
                         <div class="min-w-0 w-full sm:flex-1 sm:max-w-xs">
                             <label for="momentum-stock-input" class="ui-label">股票代號或名稱</label>
                             <input type="search" id="momentum-stock-input" placeholder="代號或名稱，如 2330、台積電" autocomplete="off" enterkeyhint="search" inputmode="search" class="theme-bg-input border theme-border ui-input-stock px-3 py-2.5 text-sm theme-text w-full min-h-[44px]">
-                        </div>
+                    </div>
                         <button type="button" id="momentum-scan-stock" class="tab-btn px-5 py-2.5 font-mono rounded-lg border theme-border hover:theme-text transition-colors w-full sm:w-auto min-h-[44px] shrink-0">搜尋</button>
                     </div>
                     <div id="momentum-results" class="mt-1 rounded-xl border theme-border theme-bg-input overflow-hidden min-h-[6rem]"></div>
@@ -3100,11 +3105,45 @@
             return Array.from(map.values());
         }
 
+        /** 與 aggregateData(FAMILY_TAB) 相同之 ETF 鍵（不含聚合列／分點／AI） */
+        function familyConsensusEtfKeys() {
+            return etfList.filter(function(e) {
+                return e !== FAMILY_TAB && e !== KAIJI_TAB && e !== AI_TAB && brokerCodes.indexOf(e) < 0;
+            });
+        }
+
+        /** 近 1 交易日、依結束日：各檔 ETF 之 new_buy 列（可重複標的），張數為千張 */
+        function collectFamilyNewEntries1d(endDateOverride) {
+            const out = [];
+            if (!availableDatesDesc.length) return out;
+            const endDate = endDateOverride != null && endDateOverride !== '' ? endDateOverride : currentDate;
+            const dataOfDay = db[endDate] || {};
+            familyConsensusEtfKeys().forEach(function(etf) {
+                const dayData = dataOfDay[etf];
+                if (!dayData) return;
+                (dayData.new_buy || []).forEach(function(item) {
+                    out.push({
+                        etf: etf,
+                        name: String(item.name || '').trim() || '—',
+                        code: String(item.code || '').trim(),
+                        diff: Number(item.diff) || 0,
+                        amount: Number(item.amount) || 0
+                    });
+                });
+            });
+            out.sort(function(a, b) {
+                if (b.diff !== a.diff) return b.diff - a.diff;
+                return String(a.etf).localeCompare(String(b.etf), 'en');
+            });
+            return out;
+        }
+
         function renderHomeHotStocks() {
             const el = document.getElementById('home-hot-out');
             if (!el) return;
             if (!availableDatesDesc.length) {
                 el.innerHTML = '<p class="theme-text-dim text-sm">尚無本機交易日資料。</p>';
+                renderHomeNewEntries();
                 return;
             }
             const agg = aggregateData(FAMILY_TAB, 1);
@@ -3116,17 +3155,48 @@
                 const v = formatAmount(item.amount || 0);
                 const cls = isBuy ? 'text-buy' : 'text-sell';
                 const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
-                return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-2.5 px-3 align-middle">' + nm + cd + '</td><td class="py-2.5 px-3 text-right font-mono tabular-nums ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
+                return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-1.5 px-2 sm:px-2.5 align-middle">' + nm + cd + '</td><td class="py-1.5 px-2 sm:px-2.5 text-right font-mono tabular-nums text-xs ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
             }
-            const head = '<table class="w-full text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-2.5 px-3 font-mono w-[55%]">買超</th><th class="text-right py-2.5 px-3 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const head2 = '<table class="w-full text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-2.5 px-3 font-mono w-[55%]">賣超</th><th class="text-right py-2.5 px-3 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="2" class="py-3 px-3 theme-text-dim">無</td></tr>';
-            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="2" class="py-3 px-3 theme-text-dim">無</td></tr>';
+            const head = '<table class="w-full text-xs sm:text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-1.5 px-2 sm:px-2.5 font-mono w-[55%]">買超</th><th class="text-right py-1.5 px-2 sm:px-2.5 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const head2 = '<table class="w-full text-xs sm:text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-1.5 px-2 sm:px-2.5 font-mono w-[55%]">賣超</th><th class="text-right py-1.5 px-2 sm:px-2.5 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
+            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="2" class="py-2 px-2 theme-text-dim">無</td></tr>';
+            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="2" class="py-2 px-2 theme-text-dim">無</td></tr>';
             el.innerHTML = '<div class="home-hot-wrap">' +
                 '<div class="grid grid-cols-1 sm:grid-cols-2 sm:divide-x theme-border">' +
                 '<div class="min-w-0 sm:pr-1">' + head + bHtml + '</tbody></table></div>' +
-                '<div class="min-w-0 sm:pl-1 pt-3 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div>' +
-                '<p class="text-[11px] theme-text-dim mt-3 px-1 leading-relaxed">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>';
+                '<div class="min-w-0 sm:pl-1 pt-2 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div>' +
+                '<p class="text-[10px] theme-text-dim mt-2 px-0.5 leading-snug">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>';
+            renderHomeNewEntries();
+        }
+
+        function renderHomeNewEntries() {
+            const el = document.getElementById('home-new-entries-out');
+            if (!el) return;
+            if (!availableDatesDesc.length) {
+                el.innerHTML = '<p class="theme-text-dim py-1">尚無本機交易日資料。</p>';
+                return;
+            }
+            const rows = collectFamilyNewEntries1d();
+            if (!rows.length) {
+                el.innerHTML = '<p class="theme-text-dim py-1">本日無新進場</p>';
+                return;
+            }
+            const th = '<table class="w-full min-w-[280px] table-fixed home-hot-table rank-table text-xs"><thead><tr>' +
+                '<th class="text-left py-1 px-2 font-mono w-[18%]">ETF</th>' +
+                '<th class="text-left py-1 px-2 font-mono w-[52%]">標的</th>' +
+                '<th class="text-right py-1 px-2 font-mono w-[30%]">張數</th>' +
+                '</tr></thead><tbody>';
+            const body = rows.map(function(r, idx) {
+                const nm = escapeHtmlText(r.name);
+                const cd = r.code ? '<span class="font-mono text-[10px] theme-text-dim ml-0.5">' + escapeHtmlText(r.code) + '</span>' : '';
+                const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
+                const zhang = (r.diff || 0).toLocaleString() + ' 張';
+                return '<tr class="border-b theme-border row-hover ' + stripe + '">' +
+                    '<td class="py-1 px-2 font-mono text-[11px] theme-text-dim align-top">' + escapeHtmlText(r.etf) + '</td>' +
+                    '<td class="py-1 px-2 align-top">' + nm + cd + '</td>' +
+                    '<td class="py-1 px-2 text-right font-mono tabular-nums text-buy align-top">' + zhang + '</td></tr>';
+            }).join('');
+            el.innerHTML = th + body + '</tbody></table>';
         }
 
         function syncMarketsTickerVisibility() {
@@ -3516,11 +3586,11 @@
                 const twoLineH = fs + fsPct + 6;
                 const useTwoLines = ch >= twoLineH && cw >= 40;
                 if (useTwoLines) {
-                    g.append('text')
+                g.append('text')
                         .attr('x', padX)
                         .attr('y', padY + fs)
-                        .attr('fill', '#ffffff')
-                        .style('font-size', fs + 'px')
+                    .attr('fill', '#ffffff')
+                    .style('font-size', fs + 'px')
                         .style('font-weight', '600')
                         .style('font-family', '"Noto Sans TC", system-ui, sans-serif')
                         .style('text-shadow', '0 1px 3px rgba(0,0,0,0.45)')

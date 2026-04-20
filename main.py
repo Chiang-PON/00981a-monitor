@@ -3,7 +3,7 @@
 主動式 ETF 家族監控系統 + 凱基大聯盟 18 主力分點監控
 - 雲端/本機雙軌：GitHub Actions 自動略過券商爬蟲，本機解除 Headless 突破 Cloudflare
 - 凱基大聯盟：18 間凱基證券核心主力分點 (wantgoo 券商買賣超)
-- LINE 專屬推播：首則為全家族 ETF 合併近 1 日買／賣超前五（金額），其餘為 LINE_NOTIFY_LIST 各檔
+- LINE 專屬推播：首則為全家族 ETF 合併近 1 日買／賣超前五（金額），第二則為全家族新進場名單，其餘為 LINE_NOTIFY_LIST 各檔
 """
 
 import argparse
@@ -397,6 +397,28 @@ def fetch_broker_data(broker_code: str, driver: webdriver.Chrome) -> list[dict]:
         return []
 
 
+def _parse_shares_display(s: object) -> int:
+    """解析 new_buy / sold_out 第二欄字串（如 '1,234 張'、'出清 500 張'）為整數張數，供排序用。"""
+    if s is None:
+        return 0
+    try:
+        if pd.isna(s):
+            return 0
+    except (TypeError, ValueError):
+        pass
+    if not isinstance(s, str):
+        try:
+            v = float(pd.to_numeric(s, errors="coerce"))
+            return int(v) if not pd.isna(v) else 0
+        except (TypeError, ValueError):
+            return 0
+    t = s.replace(" 張", "").replace(",", "").replace("出清 ", "").replace("+", "").strip() or "0"
+    try:
+        return int(float(t))
+    except (TypeError, ValueError):
+        return 0
+
+
 def crawl_all_brokers() -> None:
     """使用單一 WebDriver 實例依序爬取 18 間凱基分點。具備雲端/本機環境感知能力。"""
     if not BROKER_LIST:
@@ -507,28 +529,8 @@ def process_etf(etf_code: str, prices_dict: dict) -> dict:
         except Exception as e:
             logger.warning("[%s] 比較歷史資料失敗: %s", etf_code, e)
 
-    def _parse_shares(s) -> int:
-        if s is None:
-            return 0
-        try:
-            if pd.isna(s):
-                return 0
-        except (TypeError, ValueError):
-            pass
-        if not isinstance(s, str):
-            try:
-                v = float(pd.to_numeric(s, errors="coerce"))
-                return int(v) if not pd.isna(v) else 0
-            except (TypeError, ValueError):
-                return 0
-        t = s.replace(" 張", "").replace(",", "").replace("出清 ", "").replace("+", "").strip() or "0"
-        try:
-            return int(float(t))
-        except (TypeError, ValueError):
-            return 0
-
-    new_buy_list.sort(key=lambda x: _parse_shares(x[1]), reverse=True)
-    sold_out_list.sort(key=lambda x: _parse_shares(x[1]), reverse=True)
+    new_buy_list.sort(key=lambda x: _parse_shares_display(x[1]), reverse=True)
+    sold_out_list.sort(key=lambda x: _parse_shares_display(x[1]), reverse=True)
     increased_list.sort(key=lambda x: x[1], reverse=True)
     decreased_list.sort(key=lambda x: x[1])
 
@@ -645,6 +647,101 @@ def build_family_consensus_bubble(buy5: list[dict], sell5: list[dict], report_da
     }
 
 
+def build_family_new_entries_bubble(
+    entries: list[tuple[str, str, str]],
+    report_date: str,
+) -> dict:
+    """全家族 ETF 合併新進場（較前一日新納入持股），置於每日推播第二則。"""
+    sz = "xs"
+    header_box = {
+        "type": "box",
+        "layout": "vertical",
+        "backgroundColor": "#0f172a",
+        "paddingAll": "12px",
+        "contents": [
+            {"type": "text", "text": report_date, "color": "#94a3b8", "size": "xs", "weight": "bold", "margin": "none"},
+            {
+                "type": "text",
+                "text": "新進場名單",
+                "weight": "bold",
+                "size": "sm",
+                "color": "#ffffff",
+                "margin": "xs",
+            },
+            {
+                "type": "text",
+                "text": "全家族 ETF 合併｜較前一日持股新納入",
+                "size": sz,
+                "color": "#f97316",
+                "wrap": True,
+                "margin": "xs",
+            },
+        ],
+    }
+
+    body_contents: list = []
+    if not entries:
+        body_contents.append(
+            {"type": "text", "text": "（本日無新進場）", "color": "#94a3b8", "size": sz, "margin": "md", "wrap": True}
+        )
+    else:
+        for etf_code, name, val in entries:
+            theme = ETF_THEMES.get(etf_code, etf_code)
+            left_top = f"{etf_code} · {theme}"
+            body_contents.append(
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "spacing": "xs",
+                    "margin": "sm",
+                    "contents": [
+                        {"type": "text", "text": left_top, "size": "xs", "color": "#64748b", "wrap": True},
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "spacing": "sm",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": name,
+                                    "size": sz,
+                                    "color": "#334155",
+                                    "flex": 6,
+                                    "wrap": True,
+                                },
+                                {
+                                    "type": "text",
+                                    "text": val,
+                                    "size": sz,
+                                    "color": "#dc2626",
+                                    "flex": 4,
+                                    "align": "end",
+                                    "wrap": False,
+                                },
+                            ],
+                        },
+                    ],
+                }
+            )
+    body_contents.append(
+        {
+            "type": "text",
+            "text": "依張數由多至少排列。",
+            "color": "#94a3b8",
+            "size": "xs",
+            "wrap": True,
+            "margin": "md",
+        }
+    )
+
+    return {
+        "type": "bubble",
+        "size": "kilo",
+        "header": header_box,
+        "body": {"type": "box", "layout": "vertical", "paddingAll": "12px", "contents": body_contents},
+    }
+
+
 def build_single_bubble(res: dict, report_date: str) -> dict:
     etf_code = res["etf"]
     body_contents = []
@@ -734,10 +831,13 @@ def build_flex_payloads(
     results: list[dict],
     report_date: str,
     lead_bubble: dict | None = None,
+    new_entries_bubble: dict | None = None,
 ) -> list[dict]:
     bubbles: list[dict] = []
     if lead_bubble is not None:
         bubbles.append(lead_bubble)
+    if new_entries_bubble is not None:
+        bubbles.append(new_entries_bubble)
     bubbles.extend([build_single_bubble(res, report_date) for res in results])
     flex_messages = []
     current_bubbles = []
@@ -806,14 +906,20 @@ def main() -> None:
 
     prices_dict = fetch_tw_stock_prices()
     results_for_line: list[dict] = []
+    family_new_entries: list[tuple[str, str, str]] = []
 
     for etf in CRAWL_LIST:
         try:
             res = process_etf(etf, prices_dict)
             if etf in LINE_NOTIFY_LIST:
                 results_for_line.append(res)
+            if not res.get("error"):
+                for name, val in res.get("new_buy", []):
+                    family_new_entries.append((etf, name, val))
         except Exception as e:
             logger.error("處理 %s 發生錯誤: %s", etf, e)
+
+    family_new_entries.sort(key=lambda t: (-_parse_shares_display(t[2]), t[0]))
 
     crawl_all_brokers()
 
@@ -824,7 +930,13 @@ def main() -> None:
         except Exception as e:
             logger.warning("全家族合併前五計算失敗，略過首則 bubble: %s", e)
             lead = None
-        payloads = build_flex_payloads(results_for_line, today_str, lead_bubble=lead)
+        new_ent = build_family_new_entries_bubble(family_new_entries, today_str)
+        payloads = build_flex_payloads(
+            results_for_line,
+            today_str,
+            lead_bubble=lead,
+            new_entries_bubble=new_ent,
+        )
         send_flex_messages(payloads)
     elif LINE_TOKEN:
         headers = {"Authorization": f"Bearer {LINE_TOKEN}", "Content-Type": "application/json"}
