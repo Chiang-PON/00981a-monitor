@@ -28,6 +28,7 @@ def main() -> int:
         or "__META_JSON__" in index
         or "__DIGEST_JSON__" in index
         or "__HOLDINGS_TREND_JSON__" in index
+        or "__DAILY_PRICES_JSON__" in index
     ):
         print("[FAIL] index.html 仍含占位符（__DB_JSON__ 等），請執行 python3 generate_web.py")
         return 1
@@ -41,6 +42,7 @@ def main() -> int:
         or "__META_JSON__" in trend
         or "__BROKER_JSON__" in trend
         or "__HOLDINGS_TREND_JSON__" in trend
+        or "__DAILY_PRICES_JSON__" in trend
     ):
         print("[FAIL] trend.html 仍含占位符，請執行 python3 generate_web.py")
         return 1

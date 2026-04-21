@@ -103,6 +103,7 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --bg-base: #f4f4f5; --bg-nav: #ffffff; --bg-panel: #ffffff; --bg-panel-hover: #fafafa; --bg-row-even: #ffffff; --bg-row-odd: #eef1f6;
@@ -401,7 +402,7 @@
             font-size: 1rem !important;
             min-height: 48px;
         }
-        html.elder-mode p[role="note"] {
+        html.elder-mode p[role="note"]:not(#site-footer-disclaimer) {
             font-size: 0.8125rem !important;
             line-height: 1.55;
             padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
@@ -846,6 +847,16 @@
             font-size: 0.72rem;
             padding: 0.25rem 0.55rem;
         }
+        #rank-table-context-market {
+            font-size: 0.7rem;
+            line-height: 1.45;
+            margin-top: 0.35rem;
+        }
+        @media (min-width: 640px) {
+            #rank-table-context-market {
+                font-size: 0.75rem;
+            }
+        }
 
         /* 頂欄：家裡狗狗圓形 logo（截圖／書籤辨識用） */
         .site-logo-mark {
@@ -885,8 +896,8 @@
             }
         }
 
-        /* 首頁「近 1 日買／賣超」：對齊主排行 rank-table；不加 sticky（雙欄小表避免首欄底色與斑馬紋錯位） */
-        #home-hot-out .home-hot-wrap {
+        /* 首頁「近 1 日買／賣超」＋新進場：同一斑馬紋；寬度由 .home-dash-tight 限制，避免 table-fixed 拉開名稱與金額 */
+        .home-hot-section .home-hot-wrap {
             --home-hot-stripe-even: var(--bg-panel);
             --home-hot-stripe-odd: color-mix(in srgb, var(--bg-base) 58%, var(--border-dim) 42%);
             border-radius: 0.5rem;
@@ -895,41 +906,366 @@
             box-shadow: 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
             overflow: hidden;
         }
-        [data-theme="dark"] #home-hot-out .home-hot-wrap {
+        [data-theme="dark"] .home-hot-section .home-hot-wrap {
             --home-hot-stripe-odd: color-mix(in srgb, var(--bg-panel) 52%, #27272a 48%);
             box-shadow: 0 1px 0 color-mix(in srgb, #fff 3%, transparent);
         }
-        #home-hot-out .home-hot-table {
-            border-collapse: collapse;
+        .home-hot-section .home-dash-tight {
+            max-width: min(100%, 42rem);
+            margin-left: auto;
+            margin-right: auto;
         }
-        #home-hot-out .home-hot-table tbody tr.row-even td {
+        /* 與「新進場」並排時，各欄用滿寬，避免仍像單欄一樣置中變扁 */
+        @media (min-width: 1024px) {
+            .home-hot-section .home-dash-tight {
+                max-width: none;
+                margin-left: 0;
+                margin-right: 0;
+                width: 100%;
+            }
+        }
+        .home-hot-section .home-hot-table {
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+        .home-hot-section .home-hot-table tbody tr.row-even td {
             background-color: var(--home-hot-stripe-even) !important;
         }
-        #home-hot-out .home-hot-table tbody tr.row-odd td {
+        .home-hot-section .home-hot-table tbody tr.row-odd td {
             background-color: var(--home-hot-stripe-odd) !important;
         }
-        #home-hot-out .home-hot-table tbody tr.row-hover:hover td {
+        .home-hot-section .home-hot-table tbody tr.row-hover:hover td {
             background-color: var(--bg-panel-hover) !important;
         }
-        #home-hot-out .home-hot-table thead th {
+        .home-hot-section .home-hot-table thead th {
             color: var(--text-main);
-            font-weight: 800;
+            font-weight: 800 !important;
             font-size: 0.7rem;
             letter-spacing: 0.1em;
             text-transform: uppercase;
             border-bottom: 2px solid var(--border-dim);
         }
-        #home-hot-out .home-hot-table thead tr {
+        .home-hot-section .home-hot-table thead tr {
             background: var(--bg-panel);
         }
-        #home-hot-out .home-hot-table thead th:nth-child(1),
-        #home-hot-out .home-hot-table thead th:nth-child(2) {
+        .home-hot-section .home-hot-table thead th:nth-child(1),
+        .home-hot-section .home-hot-table thead th:nth-child(2),
+        .home-hot-section .home-hot-table thead th:nth-child(3),
+        .home-hot-section .home-hot-table thead th:nth-child(4),
+        .home-hot-section .home-hot-table thead th:nth-child(5),
+        .home-hot-section .home-hot-table thead th:nth-child(6) {
             background-color: var(--bg-panel) !important;
+        }
+        .home-hot-section .home-hot-table td.home-hot-num,
+        .home-hot-section .home-hot-table td.home-hot-pct {
+            width: 1%;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        .home-hot-section .home-hot-table td.home-hot-name {
+            vertical-align: middle;
+            min-width: 0;
+        }
+        .home-hot-section #home-new-entries-out .home-ne-name {
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-height: 1.35;
+        }
+
+        /* —— 總覽「本機／新進場／凱基」：長輩閱讀友善（留白、字級、重點加粗） —— */
+        #home-anchor-local.home-reading-comfort {
+            padding-left: max(1rem, env(safe-area-inset-left, 0px));
+            padding-right: max(1rem, env(safe-area-inset-right, 0px));
+        }
+        #home-anchor-local.home-reading-comfort .home-local-h {
+            font-size: 1rem;
+            line-height: 1.45;
+            letter-spacing: 0.02em;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-local-h {
+                font-size: 1.0625rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-local-h-sm {
+            font-size: 0.875rem;
+            line-height: 1.45;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-local-h-sm {
+                font-size: 0.9375rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-local-caption {
+            font-size: 0.8125rem;
+            line-height: 1.65;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-local-caption {
+                font-size: 0.875rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-local-hint {
+            font-size: 0.8125rem !important;
+            line-height: 1.55;
+        }
+        #home-anchor-local.home-reading-comfort .home-local-footer {
+            font-size: 0.8125rem !important;
+            line-height: 1.6;
+            padding-top: 1rem !important;
+            margin-top: 0.5rem;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-local-footer {
+                font-size: 0.875rem !important;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-wrap {
+            padding: 0.45rem 0.45rem 0.55rem;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-hot-wrap {
+                padding: 0.55rem 0.6rem 0.65rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table {
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table thead th {
+            font-size: 0.75rem !important;
+            line-height: 1.45;
+            padding-top: 0.85rem !important;
+            padding-bottom: 0.85rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table tbody td {
+            padding-top: 0.8rem !important;
+            padding-bottom: 0.8rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-hot-table thead th {
+                font-size: 0.8125rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+            #home-anchor-local.home-reading-comfort .home-hot-table tbody td {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-name .theme-text.font-medium,
+        #home-anchor-local.home-reading-comfort .home-hot-table .home-ne-name .theme-text.font-medium {
+            font-weight: 600;
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-num {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-num {
+                font-size: 1rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-pct {
+            font-size: 0.9375rem;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-pct {
+                font-size: 1rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-pct .font-mono {
+            font-weight: 600;
+        }
+        #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-name .home-local-code {
+            font-size: 0.8125rem !important;
+            font-weight: 600;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-name .home-local-code {
+                font-size: 0.875rem !important;
+            }
+        }
+
+        /* 本機買／賣超、新進場、凱基：同字級與密度（text-xs／sm:text-sm 等級） */
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table,
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table {
+            font-size: 0.875rem;
+            line-height: 1.45;
+        }
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table thead th,
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table thead th,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table thead th {
+            font-size: 0.6875rem !important;
+            padding-top: 0.55rem !important;
+            padding-bottom: 0.55rem !important;
+            padding-left: 0.55rem !important;
+            padding-right: 0.55rem !important;
+        }
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table tbody td,
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table tbody td,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td {
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+            padding-left: 0.55rem !important;
+            padding-right: 0.55rem !important;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table thead th,
+            #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table thead th,
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table thead th {
+                font-size: 0.75rem !important;
+                padding-top: 0.6rem !important;
+                padding-bottom: 0.6rem !important;
+                padding-left: 0.65rem !important;
+                padding-right: 0.65rem !important;
+            }
+            #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table tbody td,
+            #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table tbody td,
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td {
+                padding-top: 0.55rem !important;
+                padding-bottom: 0.55rem !important;
+                padding-left: 0.65rem !important;
+                padding-right: 0.65rem !important;
+            }
+        }
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-num,
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-pct,
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.home-hot-num,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-num {
+            font-size: 0.75rem !important;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-num,
+            #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-pct,
+            #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.home-hot-num,
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-num {
+                font-size: 0.875rem !important;
+            }
+        }
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-name .home-local-code,
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.home-hot-name .home-local-code,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-name .home-local-code {
+            font-size: 0.6875rem !important;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-name .home-local-code,
+            #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.home-hot-name .home-local-code,
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-name .home-local-code {
+                font-size: 0.75rem !important;
+            }
+        }
+        #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-name .theme-text.font-medium,
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table .home-ne-name .theme-text.font-medium,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-name .theme-text.font-medium {
+            font-size: 0.8125rem;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-name .theme-text.font-medium,
+            #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table .home-ne-name .theme-text.font-medium,
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-name .theme-text.font-medium {
+                font-size: 0.875rem;
+            }
+        }
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.font-mono.font-bold {
+            font-size: 0.75rem !important;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.font-mono.font-bold {
+                font-size: 0.875rem !important;
+            }
+        }
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:first-child,
+        #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:last-child {
+            font-size: 0.75rem !important;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+        @media (min-width: 640px) {
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:first-child,
+            #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:last-child {
+                font-size: 0.875rem !important;
+            }
+        }
+
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .text-buy {
+            font-weight: 600;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort .home-hot-table {
+            font-size: 1rem;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort .home-hot-table thead th {
+            font-size: 0.875rem !important;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-num,
+        html.elder-mode #home-anchor-local.home-reading-comfort .home-hot-table td.home-hot-pct {
+            font-size: 1.0625rem !important;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort .home-local-caption,
+        html.elder-mode #home-anchor-local.home-reading-comfort .home-local-footer {
+            font-size: 0.9375rem !important;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table,
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table,
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table {
+            font-size: 0.9375rem;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-num,
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-pct,
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.home-hot-num,
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-num {
+            font-size: 0.9375rem !important;
+        }
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:first-child,
+        html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:last-child {
+            font-size: 0.9375rem !important;
+        }
+        @media (min-width: 640px) {
+            html.elder-mode #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-num,
+            html.elder-mode #home-anchor-local.home-reading-comfort #home-hot-out .home-hot-table td.home-hot-pct,
+            html.elder-mode #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table td.home-hot-num,
+            html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table td.home-hot-num {
+                font-size: 1rem !important;
+            }
+            html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:first-child,
+            html.elder-mode #home-anchor-local.home-reading-comfort #home-kaiji-out .home-hot-table tbody td:last-child {
+                font-size: 1rem !important;
+            }
+        }
+
+        #site-footer-disclaimer {
+            font-size: 0.8125rem;
+            line-height: 1.55;
+            padding-top: 0.65rem;
+            padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
+            padding-left: max(1rem, env(safe-area-inset-left, 0px));
+            padding-right: max(1rem, env(safe-area-inset-right, 0px));
+        }
+        @media (min-width: 640px) {
+            #site-footer-disclaimer {
+                font-size: 0.875rem;
+                padding-top: 0.75rem;
+                padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+            }
+        }
+        html.elder-mode #site-footer-disclaimer {
+            font-size: 0.9375rem !important;
+            line-height: 1.6;
         }
 
         /*
          * 窄螢幕（一般模式）：用 clamp 訂舒適下限，擠版靠行高；勿壓成蠅頭小字。
          * 大字模式：不覆寫字級，沿用 html.elder-mode 對表格的放大。
+         * 總覽本機區 (#home-anchor-local) 另有一套較大字級，下述規則對該區不套用。
          */
         @media (max-width: 640px) {
             html:not(.elder-mode) #data-table-container .rank-table tbody td,
@@ -937,8 +1273,8 @@
                 font-size: clamp(0.9375rem, 0.88rem + 0.35vw, 1.0625rem);
                 line-height: 1.42;
             }
-            html:not(.elder-mode) #home-hot-out .home-hot-table tbody td,
-            html:not(.elder-mode) #home-hot-out .home-hot-table thead th {
+            html:not(.elder-mode) .home-hot-section .home-hot-table tbody td,
+            html:not(.elder-mode) .home-hot-section .home-hot-table thead th {
                 font-size: clamp(0.9375rem, 0.88rem + 0.35vw, 1.0625rem);
                 line-height: 1.42;
             }
@@ -996,6 +1332,88 @@
         [data-theme="dark"] .news-kw-highlight {
             background-color: rgba(250, 204, 21, 0.22);
         }
+
+        /* 錨點捲動時保留頂部導覽列高度 */
+        #home-markets-ticker-wrap,
+        #home-anchor-sector,
+        #home-anchor-news,
+        #home-anchor-local,
+        #sector-flow-container {
+            scroll-margin-top: 5.5rem;
+        }
+        .home-jump-link {
+            display: inline-flex;
+            align-items: center;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.06em;
+            padding: 0.35rem 0.6rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-dim);
+            background: var(--bg-panel);
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+        .home-jump-link:hover {
+            color: var(--text-main);
+            border-color: var(--border-focus);
+            background: var(--bg-panel-hover);
+        }
+        .mode-tab-caption {
+            display: block;
+            max-width: 7rem;
+        }
+        @media (min-width: 640px) {
+            .mode-tab-caption {
+                max-width: none;
+            }
+        }
+        /* 右上角設定選單 */
+        #nav-settings-panel {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        }
+        [data-theme="dark"] #nav-settings-panel {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+        }
+        #btn-elder-mode[aria-pressed="true"] {
+            background: color-mix(in srgb, var(--color-accent) 18%, var(--bg-input));
+            border-color: color-mix(in srgb, var(--color-accent) 50%, var(--border-dim));
+            color: var(--color-accent);
+        }
+        #nav-settings-panel .nav-settings-icon-btn {
+            width: 2.875rem;
+            height: 2.875rem;
+            min-width: 2.875rem;
+            min-height: 2.875rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.85rem;
+            border: 1px solid var(--border-dim);
+            background: color-mix(in srgb, var(--bg-base) 70%, var(--bg-input));
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+        }
+        #nav-settings-panel .nav-settings-icon-btn:hover:not(:disabled) {
+            background: var(--bg-panel-hover);
+            border-color: var(--border-focus);
+        }
+        #nav-settings-panel .nav-settings-icon-btn:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+        #nav-settings-panel .nav-settings-icon-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        #nav-settings-panel .nav-settings-icon-btn svg {
+            flex-shrink: 0;
+        }
+        #btn-screen-record-start.nav-settings-icon-btn {
+            color: var(--color-buy);
+        }
     </style>
 </head>
 <body class="pb-[max(6rem,env(safe-area-inset-bottom,0px))] pt-6">
@@ -1008,15 +1426,39 @@
             <span class="theme-text-dim hidden md:inline shrink-0">|</span>
             <h1 class="text-base sm:text-lg font-black tracking-[0.15em] sm:tracking-[0.2em] theme-text truncate max-w-[38vw] sm:max-w-none min-w-0">戰情室 <span class="theme-text-dim font-mono text-xs">v8.0</span></h1>
         </div>
-        <div class="flex items-center gap-4 font-mono text-xs theme-text-dim">
+        <div class="flex items-center gap-2 sm:gap-3 font-mono text-xs theme-text-dim shrink-0">
             <span id="live-clock" class="hidden md:inline">Loading...</span>
-            <button type="button" onclick="toggleElderMode()" class="min-h-[44px] min-w-[44px] px-3 rounded-lg theme-border border hover:theme-text transition-colors flex items-center justify-center shrink-0" title="大字模式（較易閱讀）" id="btn-elder-mode" aria-pressed="false">
-                <span class="text-sm font-mono font-medium theme-text">大字</span>
-            </button>
-            <button type="button" onclick="toggleTheme()" class="min-h-[44px] min-w-[44px] rounded-lg theme-border border hover:theme-text transition-colors flex items-center justify-center shrink-0" title="切換深淺模式">
-                <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            </button>
+            <div class="relative" id="nav-settings-wrap">
+                <button type="button" id="btn-nav-settings" class="min-h-[44px] min-w-[44px] sm:px-3 rounded-lg theme-border border hover:theme-text transition-colors flex items-center justify-center gap-2 shrink-0 theme-bg-input" title="設定" aria-expanded="false" aria-controls="nav-settings-panel" aria-haspopup="menu">
+                    <svg class="w-5 h-5 theme-text shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="hidden sm:inline text-sm font-mono font-medium theme-text">設定</span>
+                </button>
+                <div id="nav-settings-panel" class="hidden absolute right-0 top-full mt-1.5 z-[60] w-[min(16.5rem,calc(100vw-1rem))] rounded-2xl border theme-border theme-bg-input py-3 px-3 shadow-xl" role="menu" aria-labelledby="btn-nav-settings">
+                    <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+                        <button type="button" role="menuitem" onclick="toggleElderMode()" id="btn-elder-mode" class="nav-settings-icon-btn" title="大字模式（較易閱讀）" aria-pressed="false" aria-label="大字模式">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" aria-hidden="true">
+                                <text x="5" y="16.5" font-size="13" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="700" fill="currentColor">A</text>
+                                <text x="14" y="15" font-size="9" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="600" fill="currentColor">a</text>
+                            </svg>
+                        </button>
+                        <button type="button" role="menuitem" onclick="toggleTheme()" id="btn-nav-theme" class="nav-settings-icon-btn" title="淺色／深色主題" aria-label="淺色或深色主題">
+                            <span class="relative inline-flex w-6 h-6 items-center justify-center">
+                                <svg id="icon-sun" class="w-6 h-6 absolute inset-0 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                <svg id="icon-moon" class="w-6 h-6 absolute inset-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                            </span>
+                        </button>
+                        <button type="button" role="menuitem" id="btn-capture-rank-png" class="nav-settings-icon-btn" title="下載主表排行截圖（PNG）" aria-label="截圖 PNG">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </button>
+                        <button type="button" role="menuitem" id="btn-screen-record-start" class="nav-settings-icon-btn" title="開始螢幕錄影" aria-label="開始錄影">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg>
+                        </button>
+                        <button type="button" role="menuitem" id="btn-screen-record-stop" class="nav-settings-icon-btn hidden" disabled title="停止錄影並下載" aria-label="停止錄影">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -1030,30 +1472,67 @@
         <p id="home-sector-disclaimer-overlay" class="text-[11px] theme-text-dim px-4 py-2.5 border-t theme-border bg-[var(--bg-panel)] shrink-0 leading-relaxed hidden"></p>
     </div>
 
-    <button type="button" id="btn-scroll-top" class="fixed z-50 bottom-[4.25rem] right-4 sm:right-6 w-12 h-12 rounded-full border theme-border theme-bg-input theme-text shadow-lg opacity-0 pointer-events-none transition-opacity flex items-center justify-center text-xl font-bold hover:border-[var(--border-focus)]" aria-label="回到頂部" title="回到頂部">↑</button>
+    <button type="button" id="btn-scroll-top" class="fixed z-50 bottom-[5.25rem] sm:bottom-[5.5rem] right-4 sm:right-6 w-12 h-12 rounded-full border theme-border theme-bg-input theme-text shadow-lg opacity-0 pointer-events-none transition-opacity flex items-center justify-center text-xl font-bold hover:border-[var(--border-focus)]" aria-label="回到頂部" title="回到頂部">↑</button>
 
-    <p class="fixed bottom-0 left-0 right-0 z-40 text-center text-[10px] sm:text-[11px] font-mono theme-text-dim bg-[var(--bg-base)]/95 backdrop-blur-sm border-t theme-border py-1.5 px-2 pointer-events-none" role="note">
+    <p id="site-footer-disclaimer" class="fixed bottom-0 left-0 right-0 z-40 text-center font-mono theme-text-dim bg-[var(--bg-base)]/95 backdrop-blur-sm border-t theme-border pointer-events-none" role="note">
         資料為批次快照、非即時行情；僅供研究參考，不構成投資建議。
     </p>
 
-    <div id="main-layout" class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 mt-20 min-w-0 pb-10">
+    <div id="main-layout" class="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 mt-20 min-w-0 pb-24 sm:pb-28">
 
         <div class="theme-panel border rounded-xl p-4 sm:p-5 md:p-8 transition-colors min-w-0">
 
             <div id="data-freshness-bar" class="text-xs font-mono theme-text-dim border-b theme-border pb-3 mb-4 leading-relaxed"></div>
 
             <div id="control-panel" class="mb-6 min-w-0">
-                <div class="-mx-1 px-1 mb-4 flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-x-visible pb-1 hide-scrollbar scroll-smooth">
-                    <button type="button" id="mode-tab-home" onclick="setMode('HOME')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">台灣總覽</button>
-                    <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active">ETF 模式</button>
-                    <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">分點模式</button>
-                    <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">個股搜尋</button>
-                    <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">連續買賣</button>
-                    <button type="button" id="mode-tab-trend" onclick="setMode('TREND')" class="tab-btn shrink-0 px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive">走勢圖</button>
+                <div class="-mx-1 px-1 mb-2 flex flex-nowrap sm:flex-wrap gap-x-2 gap-y-3 overflow-x-auto sm:overflow-x-visible pb-1 hide-scrollbar scroll-smooth justify-start sm:justify-center">
+                    <div class="flex flex-col items-center shrink-0">
+                        <button type="button" id="mode-tab-home" onclick="setMode('HOME')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive w-full min-w-[5.5rem]">台灣總覽</button>
+                        <span class="mode-tab-caption text-[10px] theme-text-dim text-center leading-tight mt-1 px-0.5">指數·產業·快訊</span>
+                    </div>
+                    <div class="flex flex-col items-center shrink-0">
+                        <button type="button" id="mode-tab-etf" onclick="setMode('ETF')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-active w-full min-w-[5.5rem]">ETF 模式</button>
+                        <span class="mode-tab-caption text-[10px] theme-text-dim text-center leading-tight mt-1 px-0.5">持股買賣超排行</span>
+                    </div>
+                    <div class="flex flex-col items-center shrink-0">
+                        <button type="button" id="mode-tab-broker" onclick="setMode('BROKER')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive w-full min-w-[5.5rem]">分點模式</button>
+                        <span class="mode-tab-caption text-[10px] theme-text-dim text-center leading-tight mt-1 px-0.5">凱基分點明細</span>
+                    </div>
+                    <div class="flex flex-col items-center shrink-0">
+                        <button type="button" id="mode-tab-search" onclick="setMode('SEARCH')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive w-full min-w-[5.5rem]">個股搜尋</button>
+                        <span class="mode-tab-caption text-[10px] theme-text-dim text-center leading-tight mt-1 px-0.5">進出區間還原</span>
+                    </div>
+                    <div class="flex flex-col items-center shrink-0">
+                        <button type="button" id="mode-tab-momentum" onclick="setMode('MOMENTUM')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive w-full min-w-[5.5rem]">連續買賣</button>
+                        <span class="mode-tab-caption text-[10px] theme-text-dim text-center leading-tight mt-1 px-0.5">連續天數掃描</span>
+                    </div>
+                    <div class="flex flex-col items-center shrink-0">
+                        <button type="button" id="mode-tab-trend" onclick="setMode('TREND')" class="tab-btn px-4 py-2.5 font-mono rounded-lg border transition-colors tab-inactive w-full min-w-[5.5rem]">走勢圖</button>
+                        <span class="mode-tab-caption text-[10px] theme-text-dim text-center leading-tight mt-1 px-0.5">千張／權重曲線</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="first-visit-guide" class="hidden mb-4 rounded-xl border border-dashed theme-border bg-[var(--bg-panel)] p-3 sm:p-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                    <div class="min-w-0">
+                        <p class="font-mono text-xs font-bold theme-text mb-1.5 tracking-wide">第一次使用戰情室？</p>
+                        <ul class="text-[11px] sm:text-xs theme-text-dim leading-relaxed space-y-1 list-disc list-inside pl-0.5">
+                            <li>上方分頁切換總覽與 ETF／分點排行；總覽可看大盤、產業方塊與本機 ETF 異動。</li>
+                            <li>頁尾為固定免責提示；資料新鮮度見上方灰字列。</li>
+                        </ul>
+                    </div>
+                    <button type="button" id="btn-dismiss-first-guide" class="tab-btn px-4 py-2 font-mono rounded-lg border theme-border text-xs shrink-0 self-end sm:self-start min-h-[44px]">知道了</button>
                 </div>
             </div>
 
             <div id="home-panel" class="hidden mb-6 space-y-6">
+                <nav class="flex flex-wrap gap-2 gap-y-2 mb-1" aria-label="總覽段落捷徑">
+                    <a href="#home-markets-ticker-wrap" class="home-jump-link">指數</a>
+                    <a href="#home-anchor-sector" class="home-jump-link">產業方塊</a>
+                    <a href="#home-anchor-news" class="home-jump-link">財經快訊</a>
+                    <a href="#home-anchor-local" class="home-jump-link">本機資料</a>
+                </nav>
                 <div id="home-markets-ticker-wrap" class="hidden rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 shadow-[var(--shadow-panel)]">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-1">台灣與美股 · 指數快照</h3>
                     <p class="text-xs theme-text-dim mb-3 leading-relaxed">加權與 S&amp;P、Nasdaq、道瓊；卡片格式與 digest 指數欄位一致。</p>
@@ -1061,7 +1540,7 @@
                     <p id="home-index-cards-foot" class="gw-idx-board__foot mt-3 mb-0 hidden"></p>
                 </div>
 
-                <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
+                <div id="home-anchor-sector" class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-2">臺股產業／類股指數方塊圖</h3>
                     <p class="text-xs theme-text-dim mb-2 leading-relaxed">證交所各類指數：<span class="text-buy font-semibold">紅＝漲</span>、<span class="text-sell font-semibold">綠＝跌</span>（相對前一交易日）；方塊愈大表示 |漲跌幅| 愈大。</p>
                     <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -1072,7 +1551,7 @@
                     <p id="home-sector-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
                 </div>
 
-                    <div class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
+                    <div id="home-anchor-news" class="rounded-xl border theme-border bg-[var(--bg-panel)] p-5 md:p-6">
                         <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-3">財經快訊（RSS）</h3>
                         <div id="home-news-filter-wrap" class="hidden mb-3 space-y-2">
                             <div>
@@ -1085,15 +1564,28 @@
                         <p id="home-news-disclaimer" class="text-[11px] theme-text-dim mt-3 leading-relaxed hidden"></p>
                 </div>
 
-                    <div class="home-hot-section rounded-xl border theme-border bg-[var(--bg-panel)] p-3 sm:p-4 md:p-5">
-                    <h3 class="font-mono text-sm font-bold theme-text mb-1 leading-snug">本機資料 · 近 1 交易日買／賣超（金額）</h3>
-                    <p class="text-[10px] sm:text-[11px] theme-text-dim mb-2 leading-snug">合併本機內<strong class="theme-text font-semibold">已追蹤之各檔 ETF</strong>持倉變化加總（不含凱基分點、大聯盟、AI 等聚合列）。</p>
-                        <div id="home-hot-out" class="text-sm overflow-x-auto"></div>
-                        <div id="home-new-entries-wrap" class="mt-2 pt-2 border-t theme-border">
-                            <h4 class="font-mono text-xs font-bold theme-text mb-1">新進場名單</h4>
-                            <p class="text-[10px] theme-text-dim mb-1.5 leading-snug">各檔 ETF 較前一交易日<strong class="theme-text font-semibold">新納入</strong>之成分（與各檔明細「新進場」相同來源）；同一標的可能多檔 ETF 各列一行。</p>
-                            <div id="home-new-entries-out" class="text-xs overflow-x-auto"></div>
+                    <div id="home-anchor-local" class="home-hot-section home-reading-comfort rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6 lg:p-7">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6 xl:gap-7 items-start">
+                        <div class="min-w-0 space-y-3">
+                            <h3 class="font-mono home-local-h font-extrabold theme-text mb-0 leading-snug">本機資料 · 近 1 交易日買／賣超（金額）</h3>
+                            <p class="home-local-caption theme-text-dim">合併本機內<strong class="theme-text font-semibold">已追蹤之各檔 ETF</strong>持倉變化加總（不含凱基分點、大聯盟、AI 等聚合列）。<strong class="theme-text font-semibold">淨張</strong>為千張加總；<strong class="theme-text font-semibold">ETF 數</strong>為該交易日至少一檔有顯著淨流向之家數；<strong class="theme-text font-semibold">日漲跌</strong>依持股 CSV 前後交易日收盤價推算。</p>
+                            <p id="home-digest-index-hint" class="home-local-hint theme-text-dim hidden mb-1" role="note"></p>
+                            <div id="home-hot-out" class="text-base overflow-x-auto py-0.5"></div>
                         </div>
+                        <div id="home-new-entries-wrap" class="min-w-0 space-y-3 border-t theme-border pt-4 mt-1 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-6 xl:pl-7">
+                            <h4 class="font-mono home-local-h-sm font-extrabold theme-text mb-0 tracking-tight">新進場名單</h4>
+                            <p class="home-local-caption theme-text-dim">各檔 ETF 較前一交易日<strong class="theme-text font-semibold">新納入</strong>之成分（與各檔明細「新進場」相同來源）；同一標的可能多檔 ETF 各列一行。</p>
+                            <div id="home-new-entries-out" class="text-base overflow-x-auto py-0.5"></div>
+                        </div>
+                        <div class="lg:col-span-2 space-y-5 mt-4 pt-5 border-t theme-border">
+                            <div id="home-kaiji-wrap" class="hidden space-y-3">
+                                <h4 class="font-mono home-local-h-sm font-extrabold theme-text mb-0 tracking-tight">凱基大聯盟 · 分點一致性（近 1 日）</h4>
+                                <p class="home-local-caption theme-text-dim mb-0">各標的於已追蹤分點中：淨買超家數 ↑、淨賣超家數 ↓、其餘為平；該交易日無該分點檔計入「無列」。</p>
+                                <div id="home-kaiji-out" class="text-base overflow-x-auto py-0.5"></div>
+                            </div>
+                        </div>
+                        <p class="lg:col-span-2 home-local-footer theme-text-dim mt-1 pt-4 border-t theme-border">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>
+                    </div>
                 </div>
             </div>
 
@@ -1256,6 +1748,7 @@
                         <h2 id="current-etf-title" class="page-asset-title">---</h2>
                         <span id="dashboard-title-date-range" class="hidden text-sm font-normal text-gray-500 dark:text-gray-400 ml-0 sm:ml-2 tracking-normal whitespace-nowrap" aria-label="資料日期區間"></span>
                     </div>
+                    <a href="#sector-flow-container" class="text-[11px] font-mono theme-text-dim hover:theme-text underline underline-offset-2 decoration-dotted w-fit">↓ 跳至產業列／主表</a>
                 </div>
             </div>
 
@@ -1293,6 +1786,7 @@
                                 <p id="rank-table-context-sub" class="text-[11px] sm:text-xs font-mono theme-text-dim mt-0.5 leading-snug">—</p>
                             </div>
                         </div>
+                        <p id="rank-table-context-market" class="theme-text-dim hidden" role="note" title="與下方 digest 快照同日；產業對照為概略對應，非即時行情。"></p>
                         <p id="rank-table-context-meta" class="text-[11px] sm:text-xs font-mono theme-text-dim mt-2 pt-2 border-t theme-border border-dashed leading-relaxed">—</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1392,6 +1886,7 @@
         const db = __DB_JSON__;
         const holdingsTrend = __HOLDINGS_TREND_JSON__;
         const brokerLabels = __BROKER_JSON__ || {};
+        const dailyPrices = __DAILY_PRICES_JSON__;
         let holdingsTrendChartInstance = null;
         let trendViewMode = 'ETF';
         const availableDatesDesc = Object.keys(db).sort().reverse();
@@ -1514,6 +2009,13 @@
             const c = String(i.code || '').trim();
             const n = String(i.name || '').trim();
             return c ? (c + '\t' + n) : n;
+        }
+
+        /** 顯示用簡名（與 generate_web NAME_REPLACEMENTS 對齊；嵌入 db 為舊名時亦替換） */
+        function displayNameShort(name) {
+            let s = String(name || '').replace(/日月光投資控股/g, '日月光投控');
+            s = s.replace(/nan$/gi, '').replace(/NaN$/g, '').trim();
+            return s;
         }
 
         function aggregateData(etf, days, endDateOverride) {
@@ -1787,12 +2289,13 @@
             }
         }
 
-        function updateRankTableContextBar() {
+        function updateRankTableContextBar(buy, sell) {
             const bar = document.getElementById('rank-table-screenshot-bar');
             const badge = document.getElementById('rank-table-context-badge');
             const titleEl = document.getElementById('rank-table-context-title');
             const subEl = document.getElementById('rank-table-context-sub');
             const metaEl = document.getElementById('rank-table-context-meta');
+            const mktEl = document.getElementById('rank-table-context-market');
             if (!bar || !badge || !titleEl || !subEl || !metaEl) return;
             const isBroker = currentETF === KAIJI_TAB || brokerCodes.indexOf(currentETF) >= 0;
             badge.textContent = isBroker ? '凱基' : 'ETF';
@@ -1803,7 +2306,20 @@
             subEl.textContent = sub;
             subEl.classList.toggle('hidden', !sub);
             const unitLabel = currentUnit === 'amount' ? '金額（萬元）' : '張數';
-            metaEl.textContent = '結束日 ' + (currentDate || '—') + ' · 近 ' + currentDays + ' 交易日 · 排行依「' + unitLabel + '」';
+            let meta = '結束日 ' + (currentDate || '—') + ' · 近 ' + currentDays + ' 交易日 · 排行依「' + unitLabel + '」';
+            const digAt = typeof __DIGEST__ !== 'undefined' && __DIGEST__ && __DIGEST__.fetchedAt ? String(__DIGEST__.fetchedAt) : '';
+            if (digAt) meta += ' · digest 快照 ' + digAt;
+            metaEl.textContent = meta;
+            if (mktEl) {
+                const mh = buildRankTableMarketContextHtml(buy || [], sell || []);
+                if (mh) {
+                    mktEl.innerHTML = mh;
+                    mktEl.classList.remove('hidden');
+                } else {
+                    mktEl.innerHTML = '';
+                    mktEl.classList.add('hidden');
+                }
+            }
             bar.classList.remove('hidden');
             syncRankBannerHeight();
         }
@@ -1884,6 +2400,22 @@
                 return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-900/35 dark:text-amber-200 align-middle">約' + daysBehind + '天</span>';
             }
             return '<span class="inline-flex items-center ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 align-middle">已' + daysBehind + '天</span>';
+        }
+
+        function initFirstVisitGuide() {
+            const box = document.getElementById('first-visit-guide');
+            const btn = document.getElementById('btn-dismiss-first-guide');
+            if (!box || !btn) return;
+            try {
+                if (localStorage.getItem('guide_welcome_v1') === '1') return;
+            } catch (e) {}
+            box.classList.remove('hidden');
+            btn.addEventListener('click', function() {
+                box.classList.add('hidden');
+                try {
+                    localStorage.setItem('guide_welcome_v1', '1');
+                } catch (e) {}
+            });
         }
 
         function initDataFreshnessBar() {
@@ -2539,6 +3071,7 @@
 
         function syncDisplaysAfterDateChange() {
             updateDashboardTitleDateRange();
+            if (currentMode === 'HOME') refreshHomeDashboard();
             refreshTable();
             maybeRefreshStockReverseSearch();
         }
@@ -2763,6 +3296,7 @@
             if (titleEl) titleEl.textContent = currentETF === FAMILY_TAB ? 'GLOBAL_CONSENSUS' : (currentETF === AI_TAB ? 'AI_AGENT' : currentETF);
 
             initDataFreshnessBar();
+            initFirstVisitGuide();
             const hnf = document.getElementById('home-news-filter');
             if (hnf) {
                 hnf.addEventListener('input', applyHomeNewsFilter);
@@ -2799,6 +3333,9 @@
                     rankBannerResizeTimer = null;
                 }, 120);
             });
+
+            setupRankCaptureButtons();
+            setupNavSettingsPanel();
 
             window.addEventListener('popstate', function() {
                 hideSectorTreemapOverlayUi();
@@ -3138,35 +3675,213 @@
             return out;
         }
 
+        /** 與 generate_web collect_daily_real_prices 鍵相容（代號前導零） */
+        function dailyPriceLookup(code, dateStr) {
+            const m = dailyPrices[dateStr];
+            if (!m || typeof m !== 'object') return null;
+            const c = String(code || '').trim();
+            if (m[c] != null) {
+                const v = Number(m[c]);
+                return v > 0 ? v : null;
+            }
+            if (/^\d+$/.test(c)) {
+                const n = parseInt(c, 10);
+                const alts = [String(n), String(n).padStart(4, '0'), String(n).padStart(5, '0')];
+                for (let i = 0; i < alts.length; i++) {
+                    const x = m[alts[i]];
+                    if (x != null) {
+                        const v = Number(x);
+                        if (v > 0) return v;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /** 近一個交易日收盤相對前一交易日之漲跌幅（%）；無價則 null */
+        function stockPctChgVsPrevSession(code, endDate) {
+            const idx = availableDatesDesc.indexOf(endDate);
+            if (idx < 0 || idx + 1 >= availableDatesDesc.length) return null;
+            const prevD = availableDatesDesc[idx + 1];
+            const p0 = dailyPriceLookup(code, prevD);
+            const p1 = dailyPriceLookup(code, endDate);
+            if (p0 == null || p1 == null || p0 <= 0) return null;
+            return ((p1 - p0) / p0) * 100;
+        }
+
+        function formatPctCellHtml(code) {
+            const pct = stockPctChgVsPrevSession(code, currentDate);
+            if (pct == null) return '<span class="theme-text-dim">—</span>';
+            const cls = pct > 0 ? 'text-buy' : (pct < 0 ? 'text-sell' : 'theme-text-dim');
+            const sign = pct > 0 ? '+' : '';
+            return '<span class="' + cls + ' font-mono tabular-nums">' + sign + pct.toFixed(2) + '%</span>';
+        }
+
+        function countEtfWithNonZeroNet(code, name, endDate) {
+            const dataOfDay = db[endDate] || {};
+            let n = 0;
+            familyConsensusEtfKeys().forEach(function(etf) {
+                const dd = dataOfDay[etf];
+                if (!dd) return;
+                const flow = netFlowForStockInBucket(dd, code, name);
+                if (flow.netDiff !== 0 || Math.abs(flow.netAmount) > 1e-6) n++;
+            });
+            return n;
+        }
+
+        function brokerNetDirectionCounts(code, name, endDate) {
+            const day = db[endDate] || {};
+            let nBuy = 0;
+            let nSell = 0;
+            let nFlat = 0;
+            let nAbsent = 0;
+            const active = brokerCodes.filter(function(b) { return allKeys.has(b); });
+            active.forEach(function(b) {
+                const dd = day[b];
+                if (!dd) {
+                    nAbsent++;
+                    return;
+                }
+                const flow = netFlowForStockInBucket(dd, code, name);
+                const d = flow.netDiff;
+                if (d > 0) nBuy++;
+                else if (d < 0) nSell++;
+                else nFlat++;
+            });
+            return { nBuy: nBuy, nSell: nSell, nFlat: nFlat, nAbsent: nAbsent, n: active.length };
+        }
+
+        function updateHomeDigestIndexHint() {
+            const el = document.getElementById('home-digest-index-hint');
+            if (!el) return;
+            const mk = typeof __DIGEST__ !== 'undefined' && __DIGEST__ ? __DIGEST__.markets : null;
+            if (!mk || !mk.ok || !mk.items || !mk.items.length) {
+                el.classList.add('hidden');
+                el.textContent = '';
+                return;
+            }
+            const tw = mk.items.find(function(it) {
+                return it && (it.sym === 'TWSE' || (it.label && String(it.label).indexOf('加權') >= 0));
+            });
+            const pct = tw ? parseMarketPct(tw) : null;
+            if (pct == null) {
+                el.classList.add('hidden');
+                el.textContent = '';
+                return;
+            }
+            el.textContent = 'digest 加權指數日漲跌 ' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%（與上表同日對照）';
+            el.classList.remove('hidden');
+        }
+
+        function renderHomeKaijiBroker() {
+            const wrap = document.getElementById('home-kaiji-wrap');
+            const el = document.getElementById('home-kaiji-out');
+            if (!wrap || !el) return;
+            if (!brokerCodes.some(function(b) { return allKeys.has(b); })) {
+                wrap.classList.add('hidden');
+                return;
+            }
+            wrap.classList.remove('hidden');
+            if (!availableDatesDesc.length) {
+                el.innerHTML = '<p class="theme-text-dim py-1">尚無資料</p>';
+                return;
+            }
+            const agg = aggregateData(KAIJI_TAB, 1);
+            const buy = agg.buy.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 10);
+            const sell = agg.sell.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 10);
+            function oneRow(item, isBuy, idx) {
+                const nm = escapeHtmlText(displayNameShort(item.name || '—'));
+                const cd = item.code ? '<span class="font-mono home-local-code theme-text-dim shrink-0">' + escapeHtmlText(String(item.code)) + '</span>' : '';
+                const v = formatAmount(item.amount || 0);
+                const cls = isBuy ? 'text-buy' : 'text-sell';
+                const dirCls = isBuy ? 'text-buy' : 'text-sell';
+                const sideCls = cls;
+                const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
+                const diffZhang = (item.diff || 0);
+                const zhangStr = (isBuy ? '+' : '−') + Math.abs(diffZhang).toLocaleString();
+                const bc = brokerNetDirectionCounts(item.code, item.name, currentDate);
+                const side = '<span class="text-buy font-bold">' + bc.nBuy + '↑</span> <span class="text-sell font-bold">' + bc.nSell + '↓</span> <span class="theme-text-dim font-medium">' + bc.nFlat + '平</span>' +
+                    (bc.nAbsent ? ' <span class="theme-text-dim opacity-80">無列' + bc.nAbsent + '</span>' : '');
+                return '<tr class="border-b theme-border row-hover ' + stripe + '">' +
+                    '<td class="py-1.5 pl-2 pr-1 font-mono text-xs sm:text-sm ' + dirCls + '">' + (isBuy ? '買超' : '賣超') + '</td>' +
+                    '<td class="home-hot-name py-1.5 pl-2 pr-1 sm:pl-2.5 sm:pr-2"><div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5"><span class="theme-text font-medium">' + nm + '</span>' + cd + '</div></td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs ' + sideCls + '">' + zhangStr + '</td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs theme-text">' + bc.n + '</td>' +
+                    '<td class="py-1.5 pl-1 pr-2 text-right text-xs sm:text-sm font-mono whitespace-nowrap">' + side + '</td></tr>';
+            }
+            const th = '<div class="home-dash-tight"><div class="home-hot-wrap">' +
+                '<table class="w-full text-xs sm:text-sm min-w-[min(100%,28rem)] home-hot-table rank-table"><thead><tr>' +
+                '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">向</th>' +
+                '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">標的</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨額(萬)</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨張</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">分點數</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">分點</th>' +
+                '</tr></thead><tbody>';
+            const bHtml = buy.length ? buy.map(function(it, idx) { return oneRow(it, true, idx); }).join('') : '';
+            const sHtml = sell.length ? sell.map(function(it, idx) { return oneRow(it, false, idx + buy.length); }).join('') : '';
+            if (!bHtml && !sHtml) {
+                el.innerHTML = '<p class="theme-text-dim py-1">本日無凱基合併列</p>';
+                return;
+            }
+            el.innerHTML = th + bHtml + sHtml + '</tbody></table></div></div>';
+        }
+
         function renderHomeHotStocks() {
             const el = document.getElementById('home-hot-out');
             if (!el) return;
             if (!availableDatesDesc.length) {
                 el.innerHTML = '<p class="theme-text-dim text-sm">尚無本機交易日資料。</p>';
                 renderHomeNewEntries();
+                renderHomeKaijiBroker();
+                updateHomeDigestIndexHint();
                 return;
             }
             const agg = aggregateData(FAMILY_TAB, 1);
-            const buy = agg.buy.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 5);
-            const sell = agg.sell.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 5);
+            const buy = agg.buy.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 10);
+            const sell = agg.sell.slice().sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); }).slice(0, 10);
             function row(item, isBuy, idx) {
-                const nm = escapeHtmlText(item.name || '—');
-                const cd = item.code ? '<span class="font-mono text-[10px] theme-text-dim ml-1">' + escapeHtmlText(String(item.code)) + '</span>' : '';
+                const nm = escapeHtmlText(displayNameShort(item.name || '—'));
+                const cd = item.code ? '<span class="font-mono home-local-code theme-text-dim shrink-0">' + escapeHtmlText(String(item.code)) + '</span>' : '';
                 const v = formatAmount(item.amount || 0);
                 const cls = isBuy ? 'text-buy' : 'text-sell';
+                const sideCls = cls;
                 const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
-                return '<tr class="border-b theme-border row-hover ' + stripe + '"><td class="py-1.5 px-2 sm:px-2.5 align-middle">' + nm + cd + '</td><td class="py-1.5 px-2 sm:px-2.5 text-right font-mono tabular-nums text-xs ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td></tr>';
+                const diffZhang = (item.diff || 0);
+                const zhangStr = (isBuy ? '+' : '−') + Math.abs(diffZhang).toLocaleString();
+                const ec = countEtfWithNonZeroNet(item.code, item.name, currentDate);
+                return '<tr class="border-b theme-border row-hover ' + stripe + '">' +
+                    '<td class="home-hot-name py-1.5 pl-2 pr-1 sm:pl-2.5 sm:pr-2"><div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5"><span class="theme-text font-medium">' + nm + '</span>' + cd + '</div></td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs ' + cls + '">' + (isBuy ? '+ ' : '− ') + v + '</td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs ' + sideCls + '">' + zhangStr + '</td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs ' + sideCls + '">' + ec + '</td>' +
+                    '<td class="home-hot-pct py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right text-xs">' + formatPctCellHtml(item.code) + '</td></tr>';
             }
-            const head = '<table class="w-full text-xs sm:text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-1.5 px-2 sm:px-2.5 font-mono w-[55%]">買超</th><th class="text-right py-1.5 px-2 sm:px-2.5 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const head2 = '<table class="w-full text-xs sm:text-sm min-w-[240px] table-fixed home-hot-table rank-table"><thead><tr><th class="text-left py-1.5 px-2 sm:px-2.5 font-mono w-[55%]">賣超</th><th class="text-right py-1.5 px-2 sm:px-2.5 font-mono w-[45%]">淨額(萬)</th></tr></thead><tbody>';
-            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="2" class="py-2 px-2 theme-text-dim">無</td></tr>';
-            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="2" class="py-2 px-2 theme-text-dim">無</td></tr>';
-            el.innerHTML = '<div class="home-hot-wrap">' +
-                '<div class="grid grid-cols-1 sm:grid-cols-2 sm:divide-x theme-border">' +
-                '<div class="min-w-0 sm:pr-1">' + head + bHtml + '</tbody></table></div>' +
-                '<div class="min-w-0 sm:pl-1 pt-2 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div>' +
-                '<p class="text-[10px] theme-text-dim mt-2 px-0.5 leading-snug">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>';
+            const head = '<table class="w-full text-xs sm:text-sm min-w-[min(100%,22rem)] home-hot-table rank-table"><thead><tr>' +
+                '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">買超</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨額(萬)</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨張</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">ETF數</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">日漲跌</th>' +
+                '</tr></thead><tbody>';
+            const head2 = '<table class="w-full text-xs sm:text-sm min-w-[min(100%,22rem)] home-hot-table rank-table"><thead><tr>' +
+                '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">賣超</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨額(萬)</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨張</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">ETF數</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">日漲跌</th>' +
+                '</tr></thead><tbody>';
+            const bHtml = buy.length ? buy.map(function(it, idx) { return row(it, true, idx); }).join('') : '<tr><td colspan="5" class="py-2 px-2 theme-text-dim">無</td></tr>';
+            const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="5" class="py-2 px-2 theme-text-dim">無</td></tr>';
+            el.innerHTML = '<div class="home-dash-tight">' +
+                '<div class="home-hot-wrap">' +
+                '<div class="grid grid-cols-1 sm:grid-cols-2 sm:divide-x theme-border sm:gap-0">' +
+                '<div class="min-w-0 sm:pr-2">' + head + bHtml + '</tbody></table></div>' +
+                '<div class="min-w-0 sm:pl-2 pt-2 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div></div>';
             renderHomeNewEntries();
+            renderHomeKaijiBroker();
+            updateHomeDigestIndexHint();
         }
 
         function renderHomeNewEntries() {
@@ -3181,22 +3896,23 @@
                 el.innerHTML = '<p class="theme-text-dim py-1">本日無新進場</p>';
                 return;
             }
-            const th = '<table class="w-full min-w-[280px] table-fixed home-hot-table rank-table text-xs"><thead><tr>' +
-                '<th class="text-left py-1 px-2 font-mono w-[18%]">ETF</th>' +
-                '<th class="text-left py-1 px-2 font-mono w-[52%]">標的</th>' +
-                '<th class="text-right py-1 px-2 font-mono w-[30%]">張數</th>' +
+            const th = '<div class="home-dash-tight"><div class="home-hot-wrap">' +
+                '<table class="w-full text-xs sm:text-sm min-w-0 table-auto home-hot-table rank-table"><thead><tr>' +
+                '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">ETF</th>' +
+                '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold min-w-0">標的</th>' +
+                '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">張數</th>' +
                 '</tr></thead><tbody>';
             const body = rows.map(function(r, idx) {
-                const nm = escapeHtmlText(r.name);
-                const cd = r.code ? '<span class="font-mono text-[10px] theme-text-dim ml-0.5">' + escapeHtmlText(r.code) + '</span>' : '';
+                const nm = escapeHtmlText(displayNameShort(r.name));
+                const cd = r.code ? '<span class="font-mono home-local-code theme-text-dim shrink-0">' + escapeHtmlText(r.code) + '</span>' : '';
                 const stripe = idx % 2 === 0 ? 'row-even' : 'row-odd';
                 const zhang = (r.diff || 0).toLocaleString() + ' 張';
                 return '<tr class="border-b theme-border row-hover ' + stripe + '">' +
-                    '<td class="py-1 px-2 font-mono text-[11px] theme-text-dim align-top">' + escapeHtmlText(r.etf) + '</td>' +
-                    '<td class="py-1 px-2 align-top">' + nm + cd + '</td>' +
-                    '<td class="py-1 px-2 text-right font-mono tabular-nums text-buy align-top">' + zhang + '</td></tr>';
+                    '<td class="py-1.5 pl-2 pr-1 sm:pl-2.5 sm:pr-2 font-mono font-bold text-xs sm:text-sm theme-text align-middle whitespace-nowrap">' + escapeHtmlText(r.etf) + '</td>' +
+                    '<td class="home-hot-name home-ne-name py-1.5 pl-2 pr-1 sm:pl-2.5 sm:pr-2 align-middle"><div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5"><span class="theme-text font-medium">' + nm + '</span>' + cd + '</div></td>' +
+                    '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs sm:text-sm text-buy align-middle font-semibold">' + zhang + '</td></tr>';
             }).join('');
-            el.innerHTML = th + body + '</tbody></table>';
+            el.innerHTML = th + body + '</tbody></table></div></div>';
         }
 
         function syncMarketsTickerVisibility() {
@@ -3232,6 +3948,212 @@
             const raw = String(it.changePercent || '').replace(/,/g, '').trim();
             const n = parseFloat(raw);
             return isNaN(n) ? null : n;
+        }
+
+        /** 本機 coarse 產業 → digest 類股指數 shortName 對應（概略，避免誤會請以官方分類為準） */
+        var COARSE_SECTOR_TO_DIGEST_SHORT = {
+            '半導體': '電子工業',
+            '電腦週邊': '電腦及週邊設備',
+            '電子零組件': '電子零組件',
+            '通信網路': '通信網路',
+            '金融保險': null,
+            '電機機械': '電機機械',
+            '航運': '航運',
+            '貿易百貨': null,
+            '文化創意': null,
+            '鋼鐵': '鋼鐵',
+            '紡織纖維': '紡織纖維',
+            '化學': '化學',
+            '其他': null
+        };
+
+        function getDigestTwsePctRow() {
+            const mk = typeof __DIGEST__ !== 'undefined' && __DIGEST__ ? __DIGEST__.markets : null;
+            if (!mk || !mk.ok || !mk.items || !mk.items.length) return null;
+            const tw = mk.items.find(function(it) {
+                return it && (it.sym === 'TWSE' || (it.label && String(it.label).indexOf('加權') >= 0));
+            });
+            if (!tw) return null;
+            const pct = parseMarketPct(tw);
+            if (pct == null) return null;
+            return { label: '加權', pct: pct };
+        }
+
+        function findDigestSectorItemByHint(hint) {
+            if (!hint) return null;
+            const sec = typeof __DIGEST__ !== 'undefined' && __DIGEST__ ? __DIGEST__.sectors : null;
+            if (!sec || !sec.ok || !sec.items || !sec.items.length) return null;
+            const pref = String(hint);
+            let it = sec.items.find(function(d) { return d && d.shortName === pref; });
+            if (it) return it;
+            it = sec.items.find(function(d) {
+                return d && d.shortName && (d.shortName.indexOf(pref) >= 0 || pref.indexOf(d.shortName) >= 0);
+            });
+            if (it) return it;
+            return sec.items.find(function(d) { return d && d.name && d.name.indexOf(pref) >= 0; });
+        }
+
+        function dominantSectorFromRanks(buy, sell, unitField) {
+            if (!buy || !sell) return null;
+            const sectorTotals = {};
+            buy.forEach(function(i) {
+                const s = i.sector || '其他';
+                if (!sectorTotals[s]) sectorTotals[s] = 0;
+                sectorTotals[s] += unitField === 'amount' ? (i.amount || 0) : (i.diff || 0);
+            });
+            sell.forEach(function(i) {
+                const s = i.sector || '其他';
+                if (!sectorTotals[s]) sectorTotals[s] = 0;
+                sectorTotals[s] -= unitField === 'amount' ? (i.amount || 0) : (i.diff || 0);
+            });
+            const tops = Object.entries(sectorTotals).filter(function(x) { return x[1] !== 0; })
+                .sort(function(a, b) { return Math.abs(b[1]) - Math.abs(a[1]); });
+            return tops.length ? tops[0][0] : null;
+        }
+
+        function buildRankTableMarketContextHtml(buy, sell) {
+            const u = currentUnit === 'amount' ? 'amount' : 'diff';
+            const parts = [];
+            const tw = getDigestTwsePctRow();
+            if (tw) {
+                const sign = tw.pct >= 0 ? '+' : '';
+                const cls = tw.pct > 0 ? 'text-buy' : (tw.pct < 0 ? 'text-sell' : 'theme-text-dim');
+                parts.push('<span class="font-mono font-semibold theme-text">大盤（digest）</span> <span class="font-mono ' + cls + '">' + tw.label + ' ' + sign + tw.pct.toFixed(2) + '%</span>');
+            }
+            const domSec = dominantSectorFromRanks(buy, sell, u);
+            if (domSec) {
+                const mapped = Object.prototype.hasOwnProperty.call(COARSE_SECTOR_TO_DIGEST_SHORT, domSec)
+                    ? COARSE_SECTOR_TO_DIGEST_SHORT[domSec] : null;
+                const sIt = (mapped ? findDigestSectorItemByHint(mapped) : null) || findDigestSectorItemByHint(domSec);
+                if (sIt && sIt.changePct != null) {
+                    const sign = sIt.changePct >= 0 ? '+' : '';
+                    const cls = sIt.changePct > 0 ? 'text-buy' : (sIt.changePct < 0 ? 'text-sell' : 'theme-text-dim');
+                    const sn = escapeHtmlText(String(sIt.shortName || sIt.name || '').trim() || '類股');
+                    parts.push('<span class="font-mono font-semibold theme-text ml-0 sm:ml-2">本表主力產業</span> <span class="theme-text">' + escapeHtmlText(domSec) + '</span> · <span class="font-mono ' + cls + '">' + sn + ' ' + sign + sIt.changePct + '%</span>');
+                } else {
+                    parts.push('<span class="font-mono font-semibold theme-text ml-0 sm:ml-2">本表主力產業</span> <span class="theme-text">' + escapeHtmlText(domSec) + '</span><span class="theme-text-dim">（無對應類股指數）</span>');
+                }
+            }
+            if (!parts.length) return '';
+            return parts.join('<span class="theme-text-dim mx-1">｜</span>');
+        }
+
+        var screenRecordMediaRecorder = null;
+        var screenRecordChunks = [];
+        var screenRecordStream = null;
+
+        function captureRankTablePng() {
+            const el = document.getElementById('data-table-container');
+            if (!el || typeof html2canvas === 'undefined') {
+                alert('無法截圖：請確認網路可載入 html2canvas 函式庫。');
+                return;
+            }
+            const btn = document.getElementById('btn-capture-rank-png');
+            if (btn) btn.disabled = true;
+            const bg = getComputedStyle(document.body).backgroundColor || '#f4f4f5';
+            html2canvas(el, { scale: Math.min(2, window.devicePixelRatio || 2), useCORS: true, logging: false, backgroundColor: bg }).then(function(canvas) {
+                canvas.toBlob(function(blob) {
+                    if (btn) btn.disabled = false;
+                    if (!blob) {
+                        alert('截圖失敗');
+                        return;
+                    }
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'rank_' + String(currentETF || 'x').replace(/[^\w\-.]/g, '_') + '_' + (currentDate || 'nodate') + '.png';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
+            }).catch(function() {
+                if (btn) btn.disabled = false;
+                alert('截圖失敗');
+            });
+        }
+
+        function startScreenRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                alert('此瀏覽器不支援螢幕錄製。');
+                return;
+            }
+            navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false }).then(function(stream) {
+                screenRecordStream = stream;
+                screenRecordChunks = [];
+                var opts = {};
+                if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) opts.mimeType = 'video/webm;codecs=vp9';
+                else if (MediaRecorder.isTypeSupported('video/webm')) opts.mimeType = 'video/webm';
+                screenRecordMediaRecorder = new MediaRecorder(stream, opts);
+                screenRecordMediaRecorder.ondataavailable = function(e) {
+                    if (e.data && e.data.size) screenRecordChunks.push(e.data);
+                };
+                screenRecordMediaRecorder.onstop = function() {
+                    var blob = new Blob(screenRecordChunks, { type: (screenRecordMediaRecorder && screenRecordMediaRecorder.mimeType) || 'video/webm' });
+                    screenRecordChunks = [];
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'screen_' + (currentDate || 'rec') + '_' + Date.now() + '.webm';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    if (screenRecordStream) {
+                        screenRecordStream.getTracks().forEach(function(t) { t.stop(); });
+                        screenRecordStream = null;
+                    }
+                    var st = document.getElementById('btn-screen-record-start');
+                    var sp = document.getElementById('btn-screen-record-stop');
+                    if (st) { st.classList.remove('hidden'); st.disabled = false; }
+                    if (sp) { sp.classList.add('hidden'); sp.disabled = true; }
+                    screenRecordMediaRecorder = null;
+                };
+                var vt = stream.getVideoTracks()[0];
+                if (vt) vt.onended = function() {
+                    if (screenRecordMediaRecorder && screenRecordMediaRecorder.state === 'recording') screenRecordMediaRecorder.stop();
+                };
+                screenRecordMediaRecorder.start(250);
+                var st = document.getElementById('btn-screen-record-start');
+                var sp = document.getElementById('btn-screen-record-stop');
+                if (st) { st.classList.add('hidden'); st.disabled = true; }
+                if (sp) { sp.classList.remove('hidden'); sp.disabled = false; }
+            }).catch(function() { });
+        }
+
+        function stopScreenRecording() {
+            if (screenRecordMediaRecorder && screenRecordMediaRecorder.state === 'recording') screenRecordMediaRecorder.stop();
+        }
+
+        function setupRankCaptureButtons() {
+            var cap = document.getElementById('btn-capture-rank-png');
+            var st = document.getElementById('btn-screen-record-start');
+            var sp = document.getElementById('btn-screen-record-stop');
+            if (cap) cap.addEventListener('click', captureRankTablePng);
+            if (st) st.addEventListener('click', startScreenRecording);
+            if (sp) sp.addEventListener('click', stopScreenRecording);
+        }
+
+        function setNavSettingsOpen(open) {
+            var panel = document.getElementById('nav-settings-panel');
+            var btn = document.getElementById('btn-nav-settings');
+            if (!panel || !btn) return;
+            panel.classList.toggle('hidden', !open);
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        function setupNavSettingsPanel() {
+            var wrap = document.getElementById('nav-settings-wrap');
+            var btn = document.getElementById('btn-nav-settings');
+            var panel = document.getElementById('nav-settings-panel');
+            if (!wrap || !btn || !panel) return;
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                setNavSettingsOpen(panel.classList.contains('hidden'));
+            });
+            document.addEventListener('click', function(e) {
+                if (wrap.contains(e.target)) return;
+                setNavSettingsOpen(false);
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') setNavSettingsOpen(false);
+            });
         }
 
         function formatGwIdxPctDisplay(it) {
@@ -4334,7 +5256,7 @@
             }
             emptyState.classList.add('hidden');
             dataContainer.classList.remove('hidden');
-            updateRankTableContextBar();
+            updateRankTableContextBar(buy, sell);
 
             const sfContainer = document.getElementById('sector-flow-container');
             const sectorTotals = {};

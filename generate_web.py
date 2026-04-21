@@ -38,7 +38,8 @@ SECTOR_MAP = {
 }
 
 NAME_REPLACEMENTS = {
-    "台灣積體電路製造": "台積電", "鴻海精密工業": "鴻海", "台達電子工業": "台達電", "緯穎科技服務": "緯穎", "聯發科技": "聯發科", "金像電子（股）公司": "金像電", "金像電子": "金像電", "廣達電腦": "廣達", "智邦科技": "智邦", "奇鋐科技": "奇鋐", "鴻勁精密": "鴻勁", "台燿科技": "台燿", "群聯電子": "群聯", "健策精密工業": "健策", "旺矽科技": "旺矽", "勤誠興業": "勤誠", "中國信託金融控股": "中信金", "京元電子": "京元電", "緯創資通": "緯創", "文曄科技": "文曄", "欣銓科技": "欣銓", "致伸科技": "致伸", "南亞科技": "南亞科", "健鼎科技": "健鼎", "凡甲科技": "凡甲", "崇越科技": "崇越", "瑞昱半導體": "瑞昱", "致茂電子": "致茂", "鈊象電子": "鈊象", "高力熱處理工業": "高力", "台光電子材料": "台光電", "華城電機": "華城", "穎崴科技": "穎崴", "中華精測科技": "精測", "川湖科技": "川湖", "亞德客國際集團": "亞德客-KY", "玉山金融控股": "玉山金", "富邦金融控股": "富邦金", "華邦電子": "華邦電", "大成不銹鋼工業": "大成鋼", "聚陽實業": "聚陽", "達興材料": "達興材", "技嘉科技": "技嘉", "貿聯控股（BizLink Holding In": "貿聯-KY", "寶雅國際": "寶雅", "創意電子": "創意", "光紅建聖": "光紅建聖", "亞德客": "亞德客-KY"
+    "台灣積體電路製造": "台積電", "鴻海精密工業": "鴻海", "台達電子工業": "台達電", "緯穎科技服務": "緯穎", "聯發科技": "聯發科", "金像電子（股）公司": "金像電", "金像電子": "金像電", "廣達電腦": "廣達", "智邦科技": "智邦", "奇鋐科技": "奇鋐", "鴻勁精密": "鴻勁", "台燿科技": "台燿", "群聯電子": "群聯", "健策精密工業": "健策", "旺矽科技": "旺矽", "勤誠興業": "勤誠", "中國信託金融控股": "中信金", "京元電子": "京元電", "緯創資通": "緯創", "文曄科技": "文曄", "欣銓科技": "欣銓", "致伸科技": "致伸", "南亞科技": "南亞科", "健鼎科技": "健鼎", "凡甲科技": "凡甲", "崇越科技": "崇越", "瑞昱半導體": "瑞昱", "致茂電子": "致茂", "鈊象電子": "鈊象", "高力熱處理工業": "高力", "台光電子材料": "台光電", "華城電機": "華城", "穎崴科技": "穎崴", "中華精測科技": "精測", "川湖科技": "川湖", "亞德客國際集團": "亞德客-KY", "玉山金融控股": "玉山金", "富邦金融控股": "富邦金", "華邦電子": "華邦電", "大成不銹鋼工業": "大成鋼", "聚陽實業": "聚陽", "達興材料": "達興材", "技嘉科技": "技嘉", "貿聯控股（BizLink Holding In": "貿聯-KY", "寶雅國際": "寶雅", "創意電子": "創意", "光紅建聖": "光紅建聖", "亞德客": "亞德客-KY",
+    "日月光投資控股": "日月光投控",
 }
 STRIP_PATTERN = re.compile(r"（股）公司|\(股\)公司|股份有限公司|有限公司|科技|工業|電子|電腦")
 
@@ -706,6 +707,10 @@ def main() -> None:
     db = process_all_data()
     file_map = collect_file_map()
     trend_obj = build_holdings_trend_series(file_map) if file_map else {"etf": {}, "broker": {}}
+    daily_prices = collect_daily_real_prices(file_map) if file_map else {}
+    if daily_prices and db:
+        dk = set(db.keys())
+        daily_prices = {d: daily_prices[d] for d in daily_prices if d in dk}
     template = load_template()
     trend_template = load_trend_template()
     script_dir = Path(__file__).resolve().parent
@@ -718,6 +723,7 @@ def main() -> None:
         "data_through": max(db.keys()) if db else None,
     }
     meta_str = json.dumps(meta, ensure_ascii=False)
+    daily_prices_str = json.dumps(daily_prices, ensure_ascii=False)
     digest = load_digest(script_dir)
     if digest.get("fetchedAt"):
         print(f"[INFO] 嵌入 digest.json（快照 {digest['fetchedAt']}）")
@@ -730,6 +736,7 @@ def main() -> None:
         .replace("__BROKER_JSON__", broker_str)
         .replace("__META_JSON__", meta_str)
         .replace("__HOLDINGS_TREND_JSON__", trend_str)
+        .replace("__DAILY_PRICES_JSON__", daily_prices_str)
     )
     trend_path = script_dir / TREND_OUTPUT_FILE
     with open(trend_path, "w", encoding="utf-8") as f:
@@ -741,6 +748,7 @@ def main() -> None:
         .replace("__META_JSON__", meta_str)
         .replace("__DIGEST_JSON__", digest_str)
         .replace("__HOLDINGS_TREND_JSON__", trend_str)
+        .replace("__DAILY_PRICES_JSON__", daily_prices_str)
     )
 
     output_path = script_dir / OUTPUT_FILE
