@@ -896,6 +896,13 @@
             }
         }
 
+        /* 手機可左右滑：寬表不壓扁；iOS 慣性捲動、減少與頁面捲動搶手勢 */
+        .rank-table-scroll-shell,
+        .home-hot-section .home-hot-wrap {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+
         /* 首頁「近 1 日買／賣超」＋新進場：同一斑馬紋；寬度由 .home-dash-tight 限制，避免 table-fixed 拉開名稱與金額 */
         .home-hot-section .home-hot-wrap {
             --home-hot-stripe-even: var(--bg-panel);
@@ -904,7 +911,8 @@
             border: 1px solid var(--border-dim);
             background: var(--bg-base);
             box-shadow: 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         [data-theme="dark"] .home-hot-section .home-hot-wrap {
             --home-hot-stripe-odd: color-mix(in srgb, var(--bg-panel) 52%, #27272a 48%);
@@ -1570,18 +1578,18 @@
                             <h3 class="font-mono home-local-h font-extrabold theme-text mb-0 leading-snug">本機資料 · 近 1 交易日買／賣超（金額）</h3>
                             <p class="home-local-caption theme-text-dim">合併本機內<strong class="theme-text font-semibold">已追蹤之各檔 ETF</strong>持倉變化加總（不含凱基分點、大聯盟、AI 等聚合列）。<strong class="theme-text font-semibold">淨張</strong>為千張加總；<strong class="theme-text font-semibold">ETF 數</strong>為該交易日至少一檔有顯著淨流向之家數；<strong class="theme-text font-semibold">日漲跌</strong>依持股 CSV 前後交易日收盤價推算。</p>
                             <p id="home-digest-index-hint" class="home-local-hint theme-text-dim hidden mb-1" role="note"></p>
-                            <div id="home-hot-out" class="text-base overflow-x-auto py-0.5"></div>
+                            <div id="home-hot-out" class="text-base py-0.5 min-w-0"></div>
                         </div>
                         <div id="home-new-entries-wrap" class="min-w-0 space-y-3 border-t theme-border pt-4 mt-1 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-6 xl:pl-7">
                             <h4 class="font-mono home-local-h-sm font-extrabold theme-text mb-0 tracking-tight">新進場名單</h4>
                             <p class="home-local-caption theme-text-dim">各檔 ETF 較前一交易日<strong class="theme-text font-semibold">新納入</strong>之成分（與各檔明細「新進場」相同來源）；同一標的可能多檔 ETF 各列一行。</p>
-                            <div id="home-new-entries-out" class="text-base overflow-x-auto py-0.5"></div>
+                            <div id="home-new-entries-out" class="text-base py-0.5 min-w-0"></div>
                         </div>
                         <div class="lg:col-span-2 space-y-5 mt-4 pt-5 border-t theme-border">
                             <div id="home-kaiji-wrap" class="hidden space-y-3">
                                 <h4 class="font-mono home-local-h-sm font-extrabold theme-text mb-0 tracking-tight">凱基大聯盟 · 分點一致性（近 1 日）</h4>
                                 <p class="home-local-caption theme-text-dim mb-0">各標的於已追蹤分點中：淨買超家數 ↑、淨賣超家數 ↓、其餘為平；該交易日無該分點檔計入「無列」。</p>
-                                <div id="home-kaiji-out" class="text-base overflow-x-auto py-0.5"></div>
+                                <div id="home-kaiji-out" class="text-base py-0.5 min-w-0"></div>
                             </div>
                         </div>
                         <p class="lg:col-span-2 home-local-footer theme-text-dim mt-1 pt-4 border-t theme-border">資料來源：本機資料庫；為<strong class="theme-text font-semibold">多檔 ETF 合併加總</strong>之近 1 交易日彙總，非即時撮合，與實際成交可能不同。</p>
@@ -1792,8 +1800,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="min-w-0">
                             <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm">
-                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
+                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm rank-table-scroll-shell">
+                                <table class="w-full text-sm min-w-[360px] table-sticky-cols-2 rank-table">
                                     <thead>
                                         <tr class="border-b theme-border">
                                             <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
@@ -1807,8 +1815,8 @@
                         </div>
                         <div class="min-w-0">
                             <h4 class="rank-section-heading font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
-                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm">
-                                <table class="w-full text-sm min-w-[280px] table-sticky-cols-2 rank-table">
+                            <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm rank-table-scroll-shell">
+                                <table class="w-full text-sm min-w-[360px] table-sticky-cols-2 rank-table">
                                     <thead>
                                         <tr class="border-b theme-border">
                                             <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
@@ -3811,7 +3819,7 @@
                     '<td class="py-1.5 pl-1 pr-2 text-right text-xs sm:text-sm font-mono whitespace-nowrap">' + side + '</td></tr>';
             }
             const th = '<div class="home-dash-tight"><div class="home-hot-wrap">' +
-                '<table class="w-full text-xs sm:text-sm min-w-[min(100%,28rem)] home-hot-table rank-table"><thead><tr>' +
+                '<table class="w-full text-xs sm:text-sm min-w-[40rem] home-hot-table rank-table"><thead><tr>' +
                 '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">向</th>' +
                 '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">標的</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨額(萬)</th>' +
@@ -3858,14 +3866,14 @@
                     '<td class="home-hot-num py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right font-mono tabular-nums text-xs ' + sideCls + '">' + ec + '</td>' +
                     '<td class="home-hot-pct py-1.5 pl-1 pr-2 sm:pl-2 sm:pr-2.5 text-right text-xs">' + formatPctCellHtml(item.code) + '</td></tr>';
             }
-            const head = '<table class="w-full text-xs sm:text-sm min-w-[min(100%,22rem)] home-hot-table rank-table"><thead><tr>' +
+            const head = '<table class="w-full text-xs sm:text-sm min-w-[36rem] home-hot-table rank-table"><thead><tr>' +
                 '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">買超</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨額(萬)</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨張</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">ETF數</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">日漲跌</th>' +
                 '</tr></thead><tbody>';
-            const head2 = '<table class="w-full text-xs sm:text-sm min-w-[min(100%,22rem)] home-hot-table rank-table"><thead><tr>' +
+            const head2 = '<table class="w-full text-xs sm:text-sm min-w-[36rem] home-hot-table rank-table"><thead><tr>' +
                 '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold">賣超</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨額(萬)</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">淨張</th>' +
@@ -3876,9 +3884,9 @@
             const sHtml = sell.length ? sell.map(function(it, idx) { return row(it, false, idx); }).join('') : '<tr><td colspan="5" class="py-2 px-2 theme-text-dim">無</td></tr>';
             el.innerHTML = '<div class="home-dash-tight">' +
                 '<div class="home-hot-wrap">' +
-                '<div class="grid grid-cols-1 sm:grid-cols-2 sm:divide-x theme-border sm:gap-0">' +
-                '<div class="min-w-0 sm:pr-2">' + head + bHtml + '</tbody></table></div>' +
-                '<div class="min-w-0 sm:pl-2 pt-2 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div></div>';
+                '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-0 sm:divide-x theme-border">' +
+                '<div class="sm:pr-2">' + head + bHtml + '</tbody></table></div>' +
+                '<div class="sm:pl-2 pt-2 sm:pt-0 border-t sm:border-t-0 theme-border">' + head2 + sHtml + '</tbody></table></div></div></div></div>';
             renderHomeNewEntries();
             renderHomeKaijiBroker();
             updateHomeDigestIndexHint();
@@ -3897,7 +3905,7 @@
                 return;
             }
             const th = '<div class="home-dash-tight"><div class="home-hot-wrap">' +
-                '<table class="w-full text-xs sm:text-sm min-w-0 table-auto home-hot-table rank-table"><thead><tr>' +
+                '<table class="w-full text-xs sm:text-sm min-w-[22rem] table-auto home-hot-table rank-table"><thead><tr>' +
                 '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">ETF</th>' +
                 '<th class="text-left py-1.5 px-2 sm:px-2.5 font-mono font-extrabold min-w-0">標的</th>' +
                 '<th class="text-right py-1.5 px-2 sm:px-2.5 font-mono font-extrabold whitespace-nowrap">張數</th>' +
