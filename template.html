@@ -771,6 +771,21 @@
         #data-table-container .rank-table tbody td:nth-child(2) {
             box-shadow: 1px 0 0 0 var(--border-dim);
         }
+        #home-anchor-institutional .rank-table tbody tr.row-even td {
+            background-color: var(--bg-row-even) !important;
+        }
+        #home-anchor-institutional .rank-table tbody tr.row-odd td {
+            background-color: var(--bg-row-odd) !important;
+        }
+        #home-anchor-institutional .rank-table tbody tr.row-hover:hover td {
+            background-color: var(--bg-panel-hover) !important;
+        }
+        #home-anchor-institutional .rank-table tbody td:nth-child(1) {
+            box-shadow: none;
+        }
+        #home-anchor-institutional .rank-table tbody td:nth-child(2) {
+            box-shadow: 1px 0 0 0 var(--border-dim);
+        }
         :root {
             --nav-sticky-offset: 4.75rem;
             /* 預設 0：截圖列隱藏時不可回退成固定 rem，否則 rank-table 表頭 sticky top 會多算一截、蓋住資料列 */
@@ -1554,30 +1569,74 @@
                 <div id="home-anchor-institutional" class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-1">上市 · 外資／投信買賣超 TOP10</h3>
                     <p id="home-institutional-meta" class="text-xs theme-text-dim mb-3 leading-relaxed">載入中…</p>
-                    <div id="home-institutional-body" class="grid grid-cols-1 xl:grid-cols-2 gap-5 min-w-0">
-                        <div class="min-w-0 space-y-4">
-                            <p class="text-[11px] font-mono font-bold theme-text tracking-wide">外陸資（不含外資自營商）</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="min-w-0 rounded-lg border theme-border bg-[var(--bg-base)] p-3">
-                                    <p class="text-xs font-semibold text-buy mb-2">買超 TOP10</p>
-                                    <div id="home-inst-foreign-buy" class="min-w-0 overflow-x-auto"></div>
+                    <div id="home-institutional-body" class="space-y-8 min-w-0">
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-mono font-bold theme-text tracking-wide mb-3">外陸資（不含外資自營商）</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="min-w-0">
+                                    <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
+                                    <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm rank-table-scroll-shell">
+                                        <table class="w-full text-sm min-w-[360px] table-sticky-cols-2 rank-table">
+                                            <thead>
+                                                <tr class="border-b theme-border">
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono">股票</th>
+                                                    <th class="text-right py-3 px-3 sm:px-4 font-mono whitespace-nowrap">淨買超</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="home-inst-foreign-buy-tbody"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                <div class="min-w-0 rounded-lg border theme-border bg-[var(--bg-base)] p-3">
-                                    <p class="text-xs font-semibold text-sell mb-2">賣超 TOP10</p>
-                                    <div id="home-inst-foreign-sell" class="min-w-0 overflow-x-auto"></div>
+                                <div class="min-w-0">
+                                    <h4 class="rank-section-heading font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
+                                    <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm rank-table-scroll-shell">
+                                        <table class="w-full text-sm min-w-[360px] table-sticky-cols-2 rank-table">
+                                            <thead>
+                                                <tr class="border-b theme-border">
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono">股票</th>
+                                                    <th class="text-right py-3 px-3 sm:px-4 font-mono whitespace-nowrap">淨賣超</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="home-inst-foreign-sell-tbody"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="min-w-0 space-y-4">
-                            <p class="text-[11px] font-mono font-bold theme-text tracking-wide">投信</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="min-w-0 rounded-lg border theme-border bg-[var(--bg-base)] p-3">
-                                    <p class="text-xs font-semibold text-buy mb-2">買超 TOP10</p>
-                                    <div id="home-inst-it-buy" class="min-w-0 overflow-x-auto"></div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] font-mono font-bold theme-text tracking-wide mb-3">投信</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="min-w-0">
+                                    <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
+                                    <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm rank-table-scroll-shell">
+                                        <table class="w-full text-sm min-w-[360px] table-sticky-cols-2 rank-table">
+                                            <thead>
+                                                <tr class="border-b theme-border">
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono">股票</th>
+                                                    <th class="text-right py-3 px-3 sm:px-4 font-mono whitespace-nowrap">淨買超</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="home-inst-it-buy-tbody"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                <div class="min-w-0 rounded-lg border theme-border bg-[var(--bg-base)] p-3">
-                                    <p class="text-xs font-semibold text-sell mb-2">賣超 TOP10</p>
-                                    <div id="home-inst-it-sell" class="min-w-0 overflow-x-auto"></div>
+                                <div class="min-w-0">
+                                    <h4 class="rank-section-heading font-mono text-sell text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-sell pl-3 py-1">賣超排行</h4>
+                                    <div class="theme-bg-base border theme-border rounded-xl overflow-x-auto shadow-sm rank-table-scroll-shell">
+                                        <table class="w-full text-sm min-w-[360px] table-sticky-cols-2 rank-table">
+                                            <thead>
+                                                <tr class="border-b theme-border">
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono w-14 sm:w-16">排名</th>
+                                                    <th class="text-left py-3 px-3 sm:px-4 font-mono">股票</th>
+                                                    <th class="text-right py-3 px-3 sm:px-4 font-mono whitespace-nowrap">淨賣超</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="home-inst-it-sell-tbody"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3517,6 +3576,15 @@
                     openTrendForChart(btn.getAttribute('data-trend-code'));
                 });
             }
+            const homeInstPanel = document.getElementById('home-anchor-institutional');
+            if (homeInstPanel) {
+                homeInstPanel.addEventListener('click', function(e) {
+                    const btn = e.target.closest('[data-trend-code]');
+                    if (!btn) return;
+                    e.preventDefault();
+                    openTrendForChart(btn.getAttribute('data-trend-code'));
+                });
+            }
 
             let sectorTreemapResizeTimer;
             function onSectorTreemapResize() {
@@ -4800,42 +4868,50 @@
             applyHomeNewsFilter();
         }
 
-        function fmtInstNetZhang(netShares) {
-            if (netShares == null || isNaN(netShares)) return '—';
-            var zhang = netShares / 1000;
-            var abs = Math.abs(zhang);
-            if (abs >= 10000) {
-                return (zhang / 10000).toFixed(2) + ' 萬張';
+        function formatInstitutionalRankVal(netShares, isBuySideTable) {
+            var zhang = Number(netShares) / 1000;
+            if (isNaN(zhang)) return '—';
+            var mag = Math.abs(zhang);
+            var useWan = mag >= 10000;
+            if (isBuySideTable) {
+                if (useWan) return '+ ' + (zhang / 10000).toFixed(2) + ' 萬張';
+                return '+ ' + Math.round(zhang).toLocaleString() + ' 張';
             }
-            return Math.round(zhang).toLocaleString() + ' 張';
+            if (useWan) return '- ' + (mag / 10000).toFixed(2) + ' 萬張';
+            return '- ' + Math.round(mag).toLocaleString() + ' 張';
         }
 
-        function renderInstitutionalTopTable(list) {
+        function renderInstitutionalRankTbody(list, isBuySideTable) {
             if (!list || !list.length) {
-                return '<p class="text-[11px] theme-text-dim py-1">（無符合項目）</p>';
+                return '<tr><td colspan="3" class="py-6 text-center text-xs sm:text-sm theme-text-dim font-mono">無</td></tr>';
             }
-            var html = list.map(function(r, i) {
-                var isBuy = (r.netShares || 0) > 0;
-                var cls = isBuy ? 'text-buy' : 'text-sell';
-                var nm = String(r.name || '').trim().replace(/\s+/g, ' ');
-                if (nm.length > 11) nm = nm.slice(0, 10) + '…';
-                return '<tr class="border-b theme-border border-opacity-50 last:border-0">' +
-                    '<td class="py-1 pr-2 font-mono text-[10px] theme-text-dim align-top">' + (i + 1) + '</td>' +
-                    '<td class="py-1 pr-1 align-top min-w-0"><span class="font-mono text-xs font-bold theme-text">' + escapeHtmlText(r.code || '') + '</span>' +
-                    '<span class="block text-[11px] theme-text leading-snug break-words">' + escapeHtmlText(nm) + '</span></td>' +
-                    '<td class="py-1 text-right font-mono text-xs font-bold whitespace-nowrap ' + cls + '">' + fmtInstNetZhang(r.netShares) + '</td></tr>';
+            return list.map(function(item, i) {
+                var code = item.code != null ? String(item.code).trim() : '';
+                var codeHtml = code ? '<span class="font-mono text-[10px] theme-text-dim ml-1">' + escapeHtmlText(code) + '</span>' : '';
+                var trendBtn = code
+                    ? '<button type="button" class="rank-trend-btn shrink-0" data-trend-code="' + String(code).replace(/"/g, '&quot;') + '" title="切換至走勢圖並繪製">走勢</button>'
+                    : '';
+                var valStr = formatInstitutionalRankVal(item.netShares, isBuySideTable);
+                var valCls = isBuySideTable ? 'text-buy' : 'text-sell';
+                var stripe = i % 2 === 0 ? 'row-even' : 'row-odd';
+                return '<tr class="row-hover border-b theme-border last:border-0 ' + stripe + '">' +
+                    '<td class="py-3 px-3 sm:px-4 font-mono text-xs theme-text-dim align-top">' + (i + 1) + '</td>' +
+                    '<td class="py-3 px-3 sm:px-4 min-w-0 align-top"><div class="flex flex-wrap items-baseline gap-x-1 gap-y-1">' +
+                    '<span class="font-bold theme-text break-words leading-snug">' + escapeHtmlText(String(item.name || '').trim()) + '</span>' +
+                    codeHtml + trendBtn + '</div></td>' +
+                    '<td class="py-3 px-3 sm:px-4 text-right font-mono font-bold ' + valCls + ' table-num-cell align-top">' +
+                    '<div class="flex flex-col items-end gap-0.5 whitespace-nowrap"><span>' + valStr + '</span></div></td></tr>';
             }).join('');
-            return '<table class="w-full text-left border-collapse"><tbody>' + html + '</tbody></table>';
         }
 
         function renderInstitutionalFromJson(j) {
             var meta = document.getElementById('home-institutional-meta');
             var body = document.getElementById('home-institutional-body');
             var disc = document.getElementById('home-institutional-disclaimer');
-            var fBuy = document.getElementById('home-inst-foreign-buy');
-            var fSell = document.getElementById('home-inst-foreign-sell');
-            var itBuy = document.getElementById('home-inst-it-buy');
-            var itSell = document.getElementById('home-inst-it-sell');
+            var fBuy = document.getElementById('home-inst-foreign-buy-tbody');
+            var fSell = document.getElementById('home-inst-foreign-sell-tbody');
+            var itBuy = document.getElementById('home-inst-it-buy-tbody');
+            var itSell = document.getElementById('home-inst-it-sell-tbody');
             if (!meta || !fBuy || !fSell || !itBuy || !itSell) return;
             if (!j || !j.ok) {
                 meta.textContent = (j && j.error) ? j.error : '無法人買賣超資料（請執行 fetch_digest.py 後再 generate_web.py）。';
@@ -4850,13 +4926,15 @@
             if (body) body.classList.remove('hidden');
             var y = j.asOf ? String(j.asOf) : '';
             if (y.length === 8) y = y.slice(0, 4) + '-' + y.slice(4, 6) + '-' + y.slice(6, 8);
-            meta.textContent = '資料日（證交所 T86）：' + y + '　單位：張（1 張＝1,000 股）';
+            var dig = typeof __DIGEST__ !== 'undefined' ? __DIGEST__ : {};
+            var snap = dig.fetchedAt ? ('　·　digest 快照 ' + dig.fetchedAt) : '';
+            meta.textContent = '資料日（證交所 T86）：' + y + '　排行依法人買賣超股數；單位：張（1 張＝1,000 股）' + snap;
             var fr = j.foreign || {};
             var it = j.investmentTrust || {};
-            fBuy.innerHTML = renderInstitutionalTopTable(fr.buyTop10);
-            fSell.innerHTML = renderInstitutionalTopTable(fr.sellTop10);
-            itBuy.innerHTML = renderInstitutionalTopTable(it.buyTop10);
-            itSell.innerHTML = renderInstitutionalTopTable(it.sellTop10);
+            fBuy.innerHTML = renderInstitutionalRankTbody(fr.buyTop10, true);
+            fSell.innerHTML = renderInstitutionalRankTbody(fr.sellTop10, false);
+            itBuy.innerHTML = renderInstitutionalRankTbody(it.buyTop10, true);
+            itSell.innerHTML = renderInstitutionalRankTbody(it.sellTop10, false);
             if (disc) {
                 disc.textContent = j.disclaimer || '';
                 disc.classList.toggle('hidden', !j.disclaimer);
