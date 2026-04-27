@@ -1363,6 +1363,27 @@
         #sector-flow-container {
             scroll-margin-top: 5.5rem;
         }
+        /* 法人區：外資／投信大分組標題（層級需高於「買超排行」小標） */
+        .home-inst-group-title {
+            font-family: "Noto Sans TC", system-ui, sans-serif;
+            font-size: clamp(1.05rem, 3vw, 1.25rem);
+            font-weight: 800;
+            line-height: 1.35;
+            letter-spacing: 0.03em;
+            color: var(--text-main);
+            margin: 0 0 1rem 0;
+            padding: 0.7rem 1rem 0.7rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid color-mix(in srgb, var(--border-focus) 40%, var(--border-dim));
+            border-left-width: 5px;
+            border-left-color: var(--border-focus);
+            background: color-mix(in srgb, var(--bg-base) 88%, var(--border-focus) 9%);
+            box-shadow: 0 1px 2px color-mix(in srgb, #000 5%, transparent);
+        }
+        [data-theme="dark"] .home-inst-group-title {
+            background: color-mix(in srgb, var(--bg-panel) 82%, var(--border-focus) 14%);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+        }
         .home-jump-link {
             display: inline-flex;
             align-items: center;
@@ -1569,9 +1590,9 @@
                 <div id="home-anchor-institutional" class="rounded-xl border theme-border bg-[var(--bg-panel)] p-4 sm:p-5 md:p-6">
                     <h3 class="font-mono text-sm font-bold theme-text-dim uppercase tracking-wider mb-1">上市 · 外資／投信買賣超 TOP10</h3>
                     <p id="home-institutional-meta" class="text-xs theme-text-dim mb-3 leading-relaxed">載入中…</p>
-                    <div id="home-institutional-body" class="space-y-8 min-w-0">
+                    <div id="home-institutional-body" class="space-y-10 min-w-0">
                         <div class="min-w-0">
-                            <p class="text-[11px] font-mono font-bold theme-text tracking-wide mb-3">外陸資（不含外資自營商）</p>
+                            <h3 class="home-inst-group-title">外陸資（不含外資自營商）</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="min-w-0">
                                     <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
@@ -1606,7 +1627,7 @@
                             </div>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-[11px] font-mono font-bold theme-text tracking-wide mb-3">投信</p>
+                            <h3 class="home-inst-group-title">投信</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="min-w-0">
                                     <h4 class="rank-section-heading font-mono text-buy text-base font-extrabold tracking-wide mb-3 border-l-[3px] border-buy pl-3 py-1">買超排行</h4>
