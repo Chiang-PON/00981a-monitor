@@ -867,12 +867,12 @@ def build_single_bubble(res: dict, report_date: str) -> dict:
     header_box = {
         "type": "box",
         "layout": "vertical",
-        "backgroundColor": "#1e272e",
-        "paddingAll": "15px",
+        "backgroundColor": "#0f172a",
+        "paddingAll": "12px",
         "contents": [
-            {"type": "text", "text": report_date, "color": "#95a5a6", "size": "xs", "weight": "bold", "margin": "none"},
+            {"type": "text", "text": report_date, "color": "#94a3b8", "size": "xs", "weight": "bold", "margin": "none"},
             {"type": "text", "text": etf_code, "weight": "bold", "size": "lg", "color": "#ffffff", "margin": "sm"},
-            {"type": "text", "text": theme_text, "weight": "bold", "size": "xs", "color": "#2563eb", "margin": "xs"},
+            {"type": "text", "text": theme_text, "weight": "bold", "size": "xs", "color": "#38bdf8", "margin": "xs"},
         ],
     }
 
