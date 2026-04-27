@@ -1,9 +1,79 @@
 {
   "ok": true,
-  "fetchedAt": "2026-04-27T08:26:24",
+  "fetchedAt": "2026-04-27T08:36:26",
   "news": {
     "ok": true,
     "items": [
+      {
+        "title": "台灣無人機首季出口逾 1 億美元，捷克躍居最大市場",
+        "link": "https://technews.tw/2026/04/27/taiwan-drone-exports-q1-over-100-million-czech-republic-largest-market/",
+        "source": "科技新報",
+        "published": "2026-04-27T08:30:42+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "ESF reserves reach HK$3.75 billion, even as government subsidies shrink",
+        "link": "https://www.scmp.com/news/hong-kong/education/article/3351498/esf-reserves-reach-hk375-billion-even-government-subsidies-shrink?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-27T08:30:09+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "三星製造出首個 10 奈米以下製程 DRAM 工程裸晶，預計 2028 年量產",
+        "link": "https://technews.tw/2026/04/27/samsung-manufactures-its-first-sub-10nm-dram-engineering-die/",
+        "source": "科技新報",
+        "published": "2026-04-27T08:30:05+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-報稅＞報稅省錢術！聯邦銀分期 0 利率 一卡通新戶加碼送綠點",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5416812",
+        "source": "自由時報財經",
+        "published": "2026-04-27T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-報稅＞三代同堂租屋族年收破 218 萬才要繳 滿 18 歲子女「這樣報」更節稅",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5416806",
+        "source": "自由時報財經",
+        "published": "2026-04-27T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-報稅＞報稅省錢攻略 善用「特別扣除額」讓稅金再降一階！",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5416808",
+        "source": "自由時報財經",
+        "published": "2026-04-27T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-報稅＞手機報稅預估衝破275萬件 再抽5萬元頭獎",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5416811",
+        "source": "自由時報財經",
+        "published": "2026-04-27T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "＜財經週報-報稅＞綜所稅新制上路 4口之家最高可省4800元",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5416802",
+        "source": "自由時報財經",
+        "published": "2026-04-27T08:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "川普受訪還原槍擊！自爆1原因「不想離開現場」稱家屬曾通報警方",
+        "link": "https://money.udn.com/money/story/5599/9466132",
+        "source": "經濟日報",
+        "published": "2026-04-27T08:28:10+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "聯準會料續凍利率 中東衝突推升物價成本成主因",
+        "link": "https://tw.stock.yahoo.com/news/%E8%81%AF%E6%BA%96%E6%9C%83%E6%96%99%E7%BA%8C%E5%87%8D%E5%88%A9%E7%8E%87-%E4%B8%AD%E6%9D%B1%E8%A1%9D%E7%AA%81%E6%8E%A8%E5%8D%87%E7%89%A9%E5%83%B9%E6%88%90%E6%9C%AC%E6%88%90%E4%B8%BB%E5%9B%A0-002333409.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-27T08:23:33+08:00",
+        "country": "TW"
+      },
       {
         "title": "數學解開「六度分隔」之謎，每兩人中間只隔六步是自利行為的必然結果",
         "link": "https://technews.tw/2026/04/27/scientists-prove-there-are-just-six-degrees-of-separation-in-a-social-network/",
@@ -23,6 +93,13 @@
         "link": "https://tw.stock.yahoo.com/news/jane-street%E4%BA%A4%E6%98%93%E6%94%B6%E5%85%A5%E7%A8%B1%E9%9C%B8%E8%8F%AF%E7%88%BE%E8%A1%97-%E5%93%A1%E5%B7%A5%E4%BA%BA%E5%9D%87%E5%89%B5%E6%94%B6%E9%80%BE1100%E8%90%AC%E7%BE%8E%E5%85%83-001911673.html",
         "source": "Yahoo 股市",
         "published": "2026-04-27T08:19:11+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "孤狼槍手闖白宮記者晚宴　目標可能包含川普",
+        "link": "https://tw.news.yahoo.com/%E5%AD%A4%E7%8B%BC%E6%A7%8D%E6%89%8B%E9%97%96%E7%99%BD%E5%AE%AE%E8%A8%98%E8%80%85%E6%99%9A%E5%AE%B4-%E7%9B%AE%E6%A8%99%E5%8F%AF%E8%83%BD%E5%8C%85%E5%90%AB%E5%B7%9D%E6%99%AE-001901937.html",
+        "source": "Yahoo 股市",
+        "published": "2026-04-27T08:19:01+08:00",
         "country": "TW"
       },
       {
@@ -107,20 +184,6 @@
         "link": "https://tw.stock.yahoo.com/news/%E6%AD%8C%E7%A6%AE%E5%AE%A3%E5%B8%83%E5%8F%A3%E6%9C%8D%E5%B0%8F%E5%88%86%E5%AD%90glp-1r%E6%BF%80%E5%8B%95%E5%8A%91asc30%E6%B2%BB%E7%99%82%E7%B3%96%E5%B0%BF%E7%97%85%E7%9A%84%E7%BE%8E%E5%9C%8Bii%E6%9C%9F%E7%A0%94%E7%A9%B6%E5%AE%8C%E6%88%90%E5%85%A5%E7%B5%84-001000508.html",
         "source": "Yahoo 股市",
         "published": "2026-04-27T08:10:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "谷歌重押Anthropic最高400億美元，AI算力軍備競賽再升級",
-        "link": "https://tw.stock.yahoo.com/news/%E8%B0%B7%E6%AD%8C%E9%87%8D%E6%8A%BCanthropic%E6%9C%80%E9%AB%98400%E5%84%84%E7%BE%8E%E5%85%83-ai%E7%AE%97%E5%8A%9B%E8%BB%8D%E5%82%99%E7%AB%B6%E8%B3%BD%E5%86%8D%E5%8D%87%E7%B4%9A-000906750.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-27T08:09:06+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "美股屢創新高，高盛示警市場漲勢與宏觀現實已全面脫節",
-        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%82%A1%E5%B1%A2%E5%89%B5%E6%96%B0%E9%AB%98-%E9%AB%98%E7%9B%9B%E7%A4%BA%E8%AD%A6%E5%B8%82%E5%A0%B4%E6%BC%B2%E5%8B%A2%E8%88%87%E5%AE%8F%E8%A7%80%E7%8F%BE%E5%AF%A6%E5%B7%B2%E5%85%A8%E9%9D%A2%E8%84%AB%E7%AF%80-000721577.html",
-        "source": "Yahoo 股市",
-        "published": "2026-04-27T08:07:21+08:00",
         "country": "TW"
       },
       {
@@ -215,20 +278,6 @@
         "country": "TW"
       },
       {
-        "title": "標靶藥物新方向，PAK1「活化劑」改寫藥物設計邏輯",
-        "link": "https://technews.tw/2026/04/27/rational-discovery-of-therapeutic-pak1-allosteric-activators/",
-        "source": "科技新報",
-        "published": "2026-04-27T07:21:11+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Meta 前工程師創辦 Sooth Labs 募資 5,000 萬美元，要做企業版「事件預測引擎」",
-        "link": "https://technews.tw/2026/04/27/ai-pioneers-back-startup-building-models-to-predict-events/",
-        "source": "科技新報",
-        "published": "2026-04-27T07:20:15+08:00",
-        "country": "TW"
-      },
-      {
         "title": "How climate change threatens the economic backbone of the Pacific",
         "link": "https://www.bbc.com/news/articles/cq57vxjvdy4o?at_medium=RSS&at_campaign=rss",
         "source": "BBC Business",
@@ -306,46 +355,11 @@
         "country": "TW"
       },
       {
-        "title": "下流老人全集！79歲阿嬤淚訴什麼都願意做   淒涼晚年曝光了",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5416797",
-        "source": "自由時報財經",
-        "published": "2026-04-27T06:11:17+08:00",
-        "country": "TW"
-      },
-      {
         "title": "Syria begins first trial of Bashar al-Assad and allies after his ouster",
         "link": "https://www.france24.com/en/middle-east/20260426-syria-first-trial-bashar-al-assad-allies-ouster",
         "source": "France 24",
         "published": "2026-04-27T05:52:07+08:00",
         "country": "FR"
-      },
-      {
-        "title": "中國青年失業居高不下還有年齡歧視 AI創辦1人公司成新潮流",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5416823",
-        "source": "自由時報財經",
-        "published": "2026-04-27T05:51:41+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "台股氣勢旺 法人看好挑戰4萬大關",
-        "link": "https://ec.ltn.com.tw/article/paper/1752485",
-        "source": "自由時報財經",
-        "published": "2026-04-27T05:30:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "台日產業政策鏈結 聚焦5領域合作",
-        "link": "https://ec.ltn.com.tw/article/paper/1752487",
-        "source": "自由時報財經",
-        "published": "2026-04-27T05:30:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "戰事波及中國義烏 中東訂單砍半",
-        "link": "https://ec.ltn.com.tw/article/paper/1752488",
-        "source": "自由時報財經",
-        "published": "2026-04-27T05:30:00+08:00",
-        "country": "TW"
       },
       {
         "title": "白宮記協晚宴槍嫌寫反基督教宣言 川普稱心中充滿仇恨",
@@ -432,13 +446,6 @@
         "country": "FR"
       },
       {
-        "title": "淡江大橋通車倒數！5米巨型氣球領軍、30組在地團體齊聚",
-        "link": "https://money.udn.com/money/story/122328/9466020",
-        "source": "經濟日報",
-        "published": "2026-04-27T03:27:28+08:00",
-        "country": "TW"
-      },
-      {
         "title": "川普兩年三次遇刺！槍手背景曝光：高學歷且曾是模範教師",
         "link": "https://www.gvm.com.tw/article/129656",
         "source": "遠見",
@@ -495,52 +502,24 @@
         "country": "FR"
       },
       {
+        "title": "谷歌重押Anthropic最高400億美元，AI算力軍備競賽再升級",
+        "link": "https://tw.stock.yahoo.com/news/%E8%B0%B7%E6%AD%8C%E9%87%8D%E6%8A%BCanthropic%E6%9C%80%E9%AB%98400%E5%84%84%E7%BE%8E%E5%85%83-ai%E7%AE%97%E5%8A%9B%E8%BB%8D%E5%82%99%E7%AB%B6%E8%B3%BD%E5%86%8D%E5%8D%87%E7%B4%9A-000906750.html",
+        "source": "Yahoo 財經",
+        "published": "2026-04-27T00:09:06+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "美股屢創新高，高盛示警市場漲勢與宏觀現實已全面脫節",
+        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%82%A1%E5%B1%A2%E5%89%B5%E6%96%B0%E9%AB%98-%E9%AB%98%E7%9B%9B%E7%A4%BA%E8%AD%A6%E5%B8%82%E5%A0%B4%E6%BC%B2%E5%8B%A2%E8%88%87%E5%AE%8F%E8%A7%80%E7%8F%BE%E5%AF%A6%E5%B7%B2%E5%85%A8%E9%9D%A2%E8%84%AB%E7%AF%80-000721577.html",
+        "source": "Yahoo 財經",
+        "published": "2026-04-27T00:07:21+08:00",
+        "country": "TW"
+      },
+      {
         "title": "台灣太危險？2023因「這4字」賣光台積電　他曝股神翻車證明1事",
         "link": "https://tw.news.yahoo.com/%E5%8F%B0%E7%81%A3%E5%A4%AA%E5%8D%B1%E9%9A%AA-2023%E5%9B%A0-%E9%80%994%E5%AD%97-%E8%B3%A3%E5%85%89%E5%8F%B0%E7%A9%8D%E9%9B%BB-%E4%BB%96%E6%9B%9D%E8%82%A1%E7%A5%9E%E7%BF%BB%E8%BB%8A%E8%AD%89%E6%98%8E1%E4%BA%8B-000700749.html",
         "source": "Yahoo 財經",
         "published": "2026-04-27T00:07:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "甲骨文AI數據中心擬發債140億美元，投資人索高溢價揭債務泡沫疑慮",
-        "link": "https://tw.stock.yahoo.com/news/%E7%94%B2%E9%AA%A8%E6%96%87ai%E6%95%B8%E6%93%9A%E4%B8%AD%E5%BF%83%E6%93%AC%E7%99%BC%E5%82%B5140%E5%84%84%E7%BE%8E%E5%85%83-%E6%8A%95%E8%B3%87%E4%BA%BA%E7%B4%A2%E9%AB%98%E6%BA%A2%E5%83%B9%E6%8F%AD%E5%82%B5%E5%8B%99%E6%B3%A1%E6%B2%AB%E7%96%91%E6%85%AE-000618611.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-27T00:06:18+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "私募信貸警報大響，黑石、KKR與阿波羅捲入44億美元違約風暴",
-        "link": "https://tw.stock.yahoo.com/news/%E7%A7%81%E5%8B%9F%E4%BF%A1%E8%B2%B8%E8%AD%A6%E5%A0%B1%E5%A4%A7%E9%9F%BF-%E9%BB%91%E7%9F%B3-kkr%E8%88%87%E9%98%BF%E6%B3%A2%E7%BE%85%E6%8D%B2%E5%85%A544%E5%84%84%E7%BE%8E%E5%85%83%E9%81%95%E7%B4%84%E9%A2%A8%E6%9A%B4-000551429.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-27T00:05:51+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "全球原油大缺10%！荷莫海峽封鎖　油價衝破107美元",
-        "link": "https://tw.news.yahoo.com/%E5%85%A8%E7%90%83%E5%8E%9F%E6%B2%B9%E5%A4%A7%E7%BC%BA10-%E8%8D%B7%E8%8E%AB%E6%B5%B7%E5%B3%BD%E5%B0%81%E9%8E%96-%E6%B2%B9%E5%83%B9%E8%A1%9D%E7%A0%B4107%E7%BE%8E%E5%85%83-000456552.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-27T00:04:56+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "X-Energy上週五那斯達克首秀暴衝30%，AI電力荒引爆核能IPO熱潮",
-        "link": "https://tw.stock.yahoo.com/news/x-energy%E4%B8%8A%E9%80%B1%E4%BA%94%E9%82%A3%E6%96%AF%E9%81%94%E5%85%8B%E9%A6%96%E7%A7%80%E6%9A%B4%E8%A1%9D30-ai%E9%9B%BB%E5%8A%9B%E8%8D%92%E5%BC%95%E7%88%86%E6%A0%B8%E8%83%BDipo%E7%86%B1%E6%BD%AE-000346857.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-27T00:03:46+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "安達保險財報報喜 富國銀行、公民金融集團雙雙上修目標價",
-        "link": "https://tw.stock.yahoo.com/news/%E5%AE%89%E9%81%94%E4%BF%9D%E9%9A%AA%E8%B2%A1%E5%A0%B1%E5%A0%B1%E5%96%9C-%E5%AF%8C%E5%9C%8B%E9%8A%80%E8%A1%8C-%E5%85%AC%E6%B0%91%E9%87%91%E8%9E%8D%E9%9B%86%E5%9C%98%E9%9B%99%E9%9B%99%E4%B8%8A%E4%BF%AE%E7%9B%AE%E6%A8%99%E5%83%B9-000345418.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-27T00:03:45+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "思科推出通用量子交換器，引領量子網路新里程碑",
-        "link": "https://tw.stock.yahoo.com/news/%E6%80%9D%E7%A7%91%E6%8E%A8%E5%87%BA%E9%80%9A%E7%94%A8%E9%87%8F%E5%AD%90%E4%BA%A4%E6%8F%9B%E5%99%A8-%E5%BC%95%E9%A0%98%E9%87%8F%E5%AD%90%E7%B6%B2%E8%B7%AF%E6%96%B0%E9%87%8C%E7%A8%8B%E7%A2%91-000150719.html",
-        "source": "Yahoo 財經",
-        "published": "2026-04-27T00:01:50+08:00",
         "country": "TW"
       },
       {
@@ -675,6 +654,27 @@
         "source": "Japan Times",
         "published": "2026-04-26T17:19:00+08:00",
         "country": "JP"
+      },
+      {
+        "title": "Cinema Day attracted 201,000 film-goers. How does it stack up against last year?",
+        "link": "https://www.scmp.com/news/hong-kong/hong-kong-economy/article/3351470/cinema-day-attracted-201000-film-goers-how-does-it-stack-against-last-year?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-26T16:43:46+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "Over 5,000 Guangdong motorists sign up for Hong Kong’s southbound travel scheme",
+        "link": "https://www.scmp.com/news/hong-kong/transport/article/3351467/over-5000-guangdong-motorists-sign-hong-kongs-southbound-travel-scheme?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-04-26T16:01:09+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "Anderson Espinoza leading early-season charge for first-place Buffaloes",
+        "link": "https://www.japantimes.co.jp/sports/2026/04/26/baseball/japanese-baseball/anderson-espinoza-hot-start-orix/",
+        "source": "Japan Times",
+        "published": "2026-04-26T15:54:00+08:00",
+        "country": "JP"
       }
     ],
     "disclaimer": "新聞標題與連結來自公開 RSS，版權歸各媒體；僅供參考。部分稿件含 country 欄位（依訂閱來源標註國別），未標者於全球戰情仍以標題關鍵字歸類。"
@@ -745,13 +745,13 @@
         "symbol": "^HSI",
         "label": "恆生指數",
         "price": "25978.07",
-        "change": "+62.87",
-        "changePercent": "0.24",
+        "change": "+0.00",
+        "changePercent": "0.00",
         "changeNote": "開→收",
         "currency": "HKD",
         "region": "亞洲",
         "source": "stooq",
-        "asOf": "2026-04-24 10:08:52"
+        "asOf": "2026-04-27 02:36:02"
       },
       {
         "symbol": "^STI",
@@ -768,14 +768,14 @@
       {
         "symbol": "^KOSPI",
         "label": "韓國 KOSPI",
-        "price": "6541.21",
-        "change": "+7.61",
-        "changePercent": "0.12",
+        "price": "6545.58",
+        "change": "+11.98",
+        "changePercent": "0.18",
         "changeNote": "開→收",
         "currency": "KRW",
         "region": "亞洲",
         "source": "stooq",
-        "asOf": "2026-04-27 02:06:20"
+        "asOf": "2026-04-27 02:16:00"
       },
       {
         "symbol": "^N225",
@@ -1159,25 +1159,242 @@
     "asOf": "20260424",
     "disclaimer": "證交所「價格指數」表：各類指數漲跌%為相對前一交易日；方塊面積 ∝ |漲跌幅|，紅漲綠跌。僅供參考。"
   },
+  "institutional": {
+    "ok": true,
+    "asOf": "20260424",
+    "foreign": {
+      "buyTop10": [
+        {
+          "code": "00992A",
+          "name": "主動群益科技創新",
+          "netShares": 37151093
+        },
+        {
+          "code": "2887",
+          "name": "台新新光金",
+          "netShares": 37141363
+        },
+        {
+          "code": "0050",
+          "name": "元大台灣50",
+          "netShares": 31238205
+        },
+        {
+          "code": "2367",
+          "name": "燿華",
+          "netShares": 25265127
+        },
+        {
+          "code": "2313",
+          "name": "華通",
+          "netShares": 20204585
+        },
+        {
+          "code": "2356",
+          "name": "英業達",
+          "netShares": 15936116
+        },
+        {
+          "code": "2890",
+          "name": "永豐金",
+          "netShares": 15450629
+        },
+        {
+          "code": "00631L",
+          "name": "元大台灣50正2",
+          "netShares": 14070975
+        },
+        {
+          "code": "2485",
+          "name": "兆赫",
+          "netShares": 12401426
+        },
+        {
+          "code": "2884",
+          "name": "玉山金",
+          "netShares": 11577053
+        }
+      ],
+      "sellTop10": [
+        {
+          "code": "2002",
+          "name": "中鋼",
+          "netShares": -28571446
+        },
+        {
+          "code": "1802",
+          "name": "台玻",
+          "netShares": -18407424
+        },
+        {
+          "code": "00929",
+          "name": "復華台灣科技優息",
+          "netShares": -17873049
+        },
+        {
+          "code": "2409",
+          "name": "友達",
+          "netShares": -17788941
+        },
+        {
+          "code": "00940",
+          "name": "元大台灣價值高息",
+          "netShares": -16057900
+        },
+        {
+          "code": "3481",
+          "name": "群創",
+          "netShares": -15386655
+        },
+        {
+          "code": "2882",
+          "name": "國泰金",
+          "netShares": -14645532
+        },
+        {
+          "code": "2408",
+          "name": "南亞科",
+          "netShares": -13360803
+        },
+        {
+          "code": "1101",
+          "name": "台泥",
+          "netShares": -12473044
+        },
+        {
+          "code": "00981A",
+          "name": "主動統一台股增長",
+          "netShares": -10755894
+        }
+      ]
+    },
+    "investmentTrust": {
+      "buyTop10": [
+        {
+          "code": "2618",
+          "name": "長榮航",
+          "netShares": 5684267
+        },
+        {
+          "code": "5876",
+          "name": "上海商銀",
+          "netShares": 4153422
+        },
+        {
+          "code": "2356",
+          "name": "英業達",
+          "netShares": 3358522
+        },
+        {
+          "code": "9904",
+          "name": "寶成",
+          "netShares": 3182041
+        },
+        {
+          "code": "2885",
+          "name": "元大金",
+          "netShares": 3145755
+        },
+        {
+          "code": "2105",
+          "name": "正新",
+          "netShares": 3138600
+        },
+        {
+          "code": "8046",
+          "name": "南電",
+          "netShares": 2891000
+        },
+        {
+          "code": "2344",
+          "name": "華邦電",
+          "netShares": 2663867
+        },
+        {
+          "code": "3189",
+          "name": "景碩",
+          "netShares": 2534000
+        },
+        {
+          "code": "2347",
+          "name": "聯強",
+          "netShares": 1946970
+        }
+      ],
+      "sellTop10": [
+        {
+          "code": "2887",
+          "name": "台新新光金",
+          "netShares": -31109124
+        },
+        {
+          "code": "2890",
+          "name": "永豐金",
+          "netShares": -10403601
+        },
+        {
+          "code": "2880",
+          "name": "華南金",
+          "netShares": -9400613
+        },
+        {
+          "code": "3702",
+          "name": "大聯大",
+          "netShares": -9166000
+        },
+        {
+          "code": "2884",
+          "name": "玉山金",
+          "netShares": -8816941
+        },
+        {
+          "code": "2886",
+          "name": "兆豐金",
+          "netShares": -7511703
+        },
+        {
+          "code": "2891",
+          "name": "中信金",
+          "netShares": -6191822
+        },
+        {
+          "code": "2313",
+          "name": "華通",
+          "netShares": -6114001
+        },
+        {
+          "code": "2449",
+          "name": "京元電子",
+          "netShares": -5100002
+        },
+        {
+          "code": "4763",
+          "name": "材料*-KY",
+          "netShares": -4520688
+        }
+      ]
+    },
+    "disclaimer": "僅含證交所上市普通股等標的；外陸資為不含外資自營商之買賣超股數。資料日為證交所 T86 日報（收盤後彙總，非即時撮合）。"
+  },
   "globalWarAi": {
     "ok": true,
-    "generatedAt": "2026-04-27T08:26:34",
+    "generatedAt": "2026-04-27T08:36:36",
     "model": "gpt-4o-mini",
     "disclaimer": "以下為 AI 依本日快照與新聞標題生成之摘要，僅供參考，非投資建議，亦不構成股價預測。",
     "summaries": {
-      "TW": "台灣加權指數今日上漲1,218.25點，漲幅為3.23%，報38,932.40點。半導體、電子零組件及資訊科技指數分別上漲4.89%、4.79%及4.66%。市場情緒受到台積電創新高及費半指數連續上漲的影響，整體盤勢堅挺。",
-      "US": "美國股市方面，S&P 500指數上漲28.60點，漲幅為0.40%；Nasdaq 100指數上漲221.25點，漲幅為0.82%；道瓊指數則下跌89.60點，跌幅為0.18%。市場在即將到來的財報季前，對主要科技公司的表現保持關注。",
-      "CA": "本稿池資料有限，暫無加拿大市場的報價或新聞內容。",
-      "HK": "香港恆生指數今日上漲62.87點，漲幅為0.24%，報25,978.07點。市場在多項本地新聞影響下，整體表現穩定。",
-      "SG": "本稿池資料有限，暫無新加坡市場的報價或新聞內容。",
-      "KR": "本稿池資料有限，暫無南韓市場的報價或新聞內容。",
-      "JP": "本稿池資料有限，暫無日本市場的報價或新聞內容。",
-      "AU": "本稿池資料有限，暫無澳洲市場的報價或新聞內容。",
-      "IN": "本稿池資料有限，暫無印度市場的報價或新聞內容。",
-      "CN": "本稿池資料有限，暫無中國市場的報價或新聞內容。",
-      "DE": "德國DAX指數今日下跌88.72點，跌幅為0.37%，報24,128.98點。市場情緒受到多重因素影響，整體表現偏弱。",
-      "GB": "英國富時100指數下跌78.60點，跌幅為0.75%，報10,379.10點。近期氣候變遷及國際局勢的影響，讓市場面臨壓力。",
-      "FR": "法國CAC 40指數下跌9.24點，跌幅為0.11%，報8,157.82點。市場在全球軍事支出上升的背景下，表現相對平穩。"
+      "TW": "台灣加權指數今日上漲1,218.25點，漲幅為3.23%，收在38,932.40點。半導體、電子零組件及資訊科技類股表現亮眼，分別上漲4.89%、4.79%及4.66%。台灣無人機出口表現強勁，捷克成為最大市場，顯示出國際需求的增長。",
+      "US": "美國股市今日小幅波動，S&P 500指數上漲28.60點，漲幅為0.40%；Nasdaq 100則上漲221.25點，漲幅為0.82%。道瓊指數輕微下跌89.60點，跌幅為0.18%。市場在即將到來的企業財報季前持平，投資者對於油價上漲表現謹慎。",
+      "CA": "加拿大市場目前暫無報價，可能因休市或延遲。本稿池資料有限。",
+      "HK": "香港恆生指數今日持平，報25978.07點，變化為0.00%。市場對於政府補貼減少的擔憂持續，ESF儲備達到HK$3.75億。其他新聞顯示社會活動仍在進行中。",
+      "SG": "新加坡STI指數今日小幅下跌7.30點，跌幅為0.15%。市場動態相對平穩，本稿池資料有限。",
+      "KR": "南韓KOSPI指數今日上漲11.98點，漲幅為0.18%。市場表現穩定，投資者對於經濟前景持謹慎樂觀態度。",
+      "JP": "日本市場目前暫無報價，可能因休市或延遲。新聞報導中提到槍擊事件及地震，可能影響市場情緒。本稿池資料有限。",
+      "AU": "澳洲市場目前暫無報價，可能因休市或延遲。本稿池資料有限。",
+      "IN": "印度市場目前暫無報價，可能因休市或延遲。本稿池資料有限。",
+      "CN": "中國市場目前暫無報價，可能因休市或延遲。本稿池資料有限。",
+      "DE": "德國DAX指數今日下跌88.72點，跌幅為0.37%，報24128.98點。市場面臨不確定性，投資者對全球經濟情勢保持警覺。",
+      "GB": "英國富時100指數今日下跌78.60點，跌幅為0.75%，報10379.10點。市場受到氣候變遷及價格上漲的影響，投資者情緒謹慎。",
+      "FR": "法國CAC 40指數今日小幅下跌9.24點，跌幅為0.11%，報8157.82點。全球軍事開支上升及地緣政治緊張局勢可能影響市場情緒。"
     }
   }
 }

@@ -248,6 +248,79 @@ def parse_twse_pct_cell(raw: str) -> float | None:
         return None
 
 
+def parse_t86_shares_cell(raw: str) -> int:
+    """T86 表格股數欄位（含千分位逗號）轉 int；無效為 0。"""
+    s = strip_tags_text(str(raw)).replace(",", "").strip()
+    if not s or s in ("--", "-", "nan"):
+        return 0
+    try:
+        return int(float(s))
+    except ValueError:
+        return 0
+
+
+def fetch_twse_t86_institutional(top_n: int = 10) -> dict:
+    """證交所 T86 三大法人買賣超（上市 ALL）；外資為欄位「外陸資買賣超股數(不含外資自營商)」、投信為「投信買賣超股數」。
+
+    取最近有資料的交易日；與 MI_INDEX 相同可能需回溯非交易日。
+    """
+    for i in range(14):
+        d = (datetime.now() - timedelta(days=i)).strftime("%Y%m%d")
+        url = f"https://www.twse.com.tw/rwd/zh/fund/T86?response=json&date={d}&selectType=ALL"
+        body = http_get(url, 38)
+        if not body:
+            continue
+        try:
+            j = json.loads(body)
+        except json.JSONDecodeError:
+            continue
+        if j.get("stat") != "OK":
+            continue
+        data = j.get("data") or []
+        if not data:
+            continue
+        rows: list[dict[str, str | int]] = []
+        for row in data:
+            if not isinstance(row, (list, tuple)) or len(row) < 11:
+                continue
+            code = strip_tags_text(str(row[0])).strip()
+            name = strip_tags_text(str(row[1])).strip()
+            if not code:
+                continue
+            fn = parse_t86_shares_cell(row[4])
+            itn = parse_t86_shares_cell(row[10])
+            rows.append({"code": code, "name": name, "foreignNet": fn, "itNet": itn})
+
+        def top_buy_sell(key: str) -> dict:
+            buy = [r for r in rows if int(r[key]) > 0]
+            buy.sort(key=lambda x: -int(x[key]))
+            buy = buy[:top_n]
+            sell = [r for r in rows if int(r[key]) < 0]
+            sell.sort(key=lambda x: int(x[key]))
+            sell = sell[:top_n]
+            return {
+                "buyTop10": [{"code": r["code"], "name": r["name"], "netShares": int(r[key])} for r in buy],
+                "sellTop10": [{"code": r["code"], "name": r["name"], "netShares": int(r[key])} for r in sell],
+            }
+
+        return {
+            "ok": True,
+            "asOf": d,
+            "foreign": top_buy_sell("foreignNet"),
+            "investmentTrust": top_buy_sell("itNet"),
+            "disclaimer": "僅含證交所上市普通股等標的；外陸資為不含外資自營商之買賣超股數。資料日為證交所 T86 日報（收盤後彙總，非即時撮合）。",
+        }
+
+    return {
+        "ok": False,
+        "asOf": None,
+        "foreign": {"buyTop10": [], "sellTop10": []},
+        "investmentTrust": {"buyTop10": [], "sellTop10": []},
+        "error": "無法取得證交所 T86（可能皆為休市或連線失敗）",
+        "disclaimer": "",
+    }
+
+
 def fetch_twse_mi_table() -> tuple[str | None, list | None]:
     """證交所 MI_INDEX 最近有資料的交易日；回傳 (date_yyyymmdd, data_rows)。"""
     for i in range(12):
@@ -457,12 +530,15 @@ def main() -> None:
             "error": "無法取得證交所 MI_INDEX",
             "disclaimer": "產業方塊圖需證交所資料。",
         }
+    print("[INFO] 抓取上市外資／投信買賣超 TOP10（證交所 T86）…")
+    institutional = fetch_twse_t86_institutional(10)
     digest = {
         "ok": True,
         "fetchedAt": datetime.now().isoformat(timespec="seconds"),
         "news": news,
         "markets": markets,
         "sectors": sectors,
+        "institutional": institutional,
     }
     print("[INFO] 全球戰情 AI 總結（可選，需 OPENAI_API_KEY）…")
     digest = enrich_digest_with_global_war_ai(digest)
@@ -475,8 +551,13 @@ def main() -> None:
         print(f"[WARN] globalWarAi 失敗：{gw['error']}")
 
     OUTPUT_FILE.write_text(json.dumps(digest, ensure_ascii=False, indent=2), encoding="utf-8")
+    inst_note = ""
+    if institutional.get("ok") and institutional.get("asOf"):
+        inst_note = f"，法人 T86 資料日 {institutional['asOf']}"
+    elif institutional.get("error"):
+        inst_note = "，法人 T86 未取得"
     print(
-        f"[OK] 已寫入 {OUTPUT_FILE.name}（新聞 {len(news['items'])} 則，指數 {len(markets['items'])} 筆，產業類 {len(sectors.get('items') or [])} 筆）"
+        f"[OK] 已寫入 {OUTPUT_FILE.name}（新聞 {len(news['items'])} 則，指數 {len(markets['items'])} 筆，產業類 {len(sectors.get('items') or [])} 筆{inst_note}）"
     )
     print("[INFO] 請執行 python3 generate_web.py 將 digest 嵌入 index.html")
 

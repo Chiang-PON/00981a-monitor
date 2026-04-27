@@ -688,6 +688,13 @@ def load_digest(script_dir: Path) -> dict:
                 "items": [],
                 "error": "尚未產生：請先執行 python3 fetch_digest.py 再產生網頁",
             },
+            "institutional": {
+                "ok": False,
+                "asOf": None,
+                "foreign": {"buyTop10": [], "sellTop10": []},
+                "investmentTrust": {"buyTop10": [], "sellTop10": []},
+                "error": "尚未產生：請先執行 python3 fetch_digest.py 再產生網頁",
+            },
         }
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -699,6 +706,13 @@ def load_digest(script_dir: Path) -> dict:
             "news": {"ok": False, "items": [], "error": "digest.json 讀取失敗"},
             "markets": {"ok": False, "items": [], "error": "digest.json 讀取失敗"},
             "sectors": {"ok": False, "items": [], "error": "digest.json 讀取失敗"},
+            "institutional": {
+                "ok": False,
+                "asOf": None,
+                "foreign": {"buyTop10": [], "sellTop10": []},
+                "investmentTrust": {"buyTop10": [], "sellTop10": []},
+                "error": "digest.json 讀取失敗",
+            },
         }
 
 
