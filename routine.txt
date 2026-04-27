@@ -2,6 +2,7 @@
 # 週一執行 → TARGET=上週五（date -v-3d）；週二～週五 → TARGET=昨天（-1d）。
 # 若有安裝 node + package.json：自動 npm run build:css，再產頁（GitHub Pages 才會帶到 tailwind-built.css）。
 # 可選：執行前 export OPENAI_API_KEY，fetch_digest 會寫入各國 AI 總結（globalWarAi）。
+# LINE：main.py 會主動向證交所抓 T86，與「新進場」同一批 Flex 多一則「外資／投信 TOP10」（需 LINE_TOKEN）。
 TODAY=$(date +%Y-%m-%d) && \
 DOW=$(date +%u) && \
 if [ "$DOW" -eq 1 ]; then TARGET=$(date -v-3d +%Y-%m-%d); else TARGET=$(date -v-1d +%Y-%m-%d); fi && \

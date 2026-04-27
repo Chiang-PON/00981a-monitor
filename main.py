@@ -3,7 +3,7 @@
 主動式 ETF 家族監控系統 + 凱基大聯盟 18 主力分點監控
 - 雲端/本機雙軌：GitHub Actions 自動略過券商爬蟲，本機解除 Headless 突破 Cloudflare
 - 凱基大聯盟：18 間凱基證券核心主力分點 (wantgoo 券商買賣超)
-- LINE 專屬推播：首則為全家族 ETF 合併近 1 日買／賣超前五（金額），第二則為全家族新進場名單，其餘為 LINE_NOTIFY_LIST 各檔
+- LINE 專屬推播：首則為全家族 ETF 合併近 1 日買／賣超前五（金額），第二則為全家族新進場名單，第三則為上市外資／投信買賣超 TOP10（證交所 T86，與網頁同源），其餘為 LINE_NOTIFY_LIST 各檔
 """
 
 import argparse
@@ -28,6 +28,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 from broker_config import BROKER_LIST
+from fetch_digest import fetch_twse_t86_institutional
 from generate_web import family_consensus_top5_for_date
 
 logging.basicConfig(
@@ -743,6 +744,120 @@ def build_family_new_entries_bubble(
     }
 
 
+def _format_t86_zhang_for_line(net_shares: int, is_buy_section: bool) -> str:
+    """與網頁法人表一致：張／萬張；買超段用 +、賣超段用 −。"""
+    zhang = float(net_shares) / 1000.0
+    mag = abs(zhang)
+    if mag >= 10000:
+        num = f"{mag / 10000:.2f}萬張"
+    else:
+        num = f"{round(mag):,}張"
+    return ("+ " if is_buy_section else "− ") + num
+
+
+def build_institutional_t86_bubble(inst: dict, report_date: str) -> dict | None:
+    """證交所 T86 外資／投信買賣超 TOP10，置於新進場 bubble 之後。"""
+    if not inst or not inst.get("ok"):
+        return None
+    as_of = str(inst.get("asOf") or "").strip()
+    if len(as_of) == 8:
+        as_of_disp = f"{as_of[:4]}-{as_of[4:6]}-{as_of[6:8]}"
+    else:
+        as_of_disp = as_of or report_date
+    sz = "xs"
+    header_box = {
+        "type": "box",
+        "layout": "vertical",
+        "backgroundColor": "#0f172a",
+        "paddingAll": "12px",
+        "contents": [
+            {"type": "text", "text": report_date, "color": "#94a3b8", "size": "xs", "weight": "bold", "margin": "none"},
+            {
+                "type": "text",
+                "text": "上市｜外資／投信 TOP10",
+                "weight": "bold",
+                "size": "sm",
+                "color": "#ffffff",
+                "margin": "xs",
+            },
+            {
+                "type": "text",
+                "text": f"證交所 T86 資料日 {as_of_disp}（收盤後彙總）",
+                "size": sz,
+                "color": "#a78bfa",
+                "wrap": True,
+                "margin": "xs",
+            },
+        ],
+    }
+
+    def subsection(title: str, accent: str, buy_list: list, sell_list: list) -> list:
+        contents: list = [
+            {"type": "text", "text": title, "color": accent, "weight": "bold", "size": sz, "margin": "md"},
+        ]
+
+        def rows(label: str, color: str, items: list, is_buy: bool) -> None:
+            contents.append({"type": "text", "text": label, "color": color, "weight": "bold", "size": sz, "margin": "sm"})
+            if not items:
+                contents.append({"type": "text", "text": "（無）", "color": "#94a3b8", "size": sz, "margin": "xs"})
+                return
+            for i, it in enumerate(items, start=1):
+                nm = str(it.get("name") or "—").strip()
+                cd = str(it.get("code") or "").strip()
+                ns = int(it.get("netShares") or 0)
+                left = f"{i}. {nm}" + (f" ({cd})" if cd else "")
+                val = _format_t86_zhang_for_line(ns, is_buy)
+                contents.append(
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "spacing": "sm",
+                        "margin": "xs",
+                        "contents": [
+                            {"type": "text", "text": left, "size": sz, "color": "#334155", "flex": 6, "wrap": True},
+                            {
+                                "type": "text",
+                                "text": val,
+                                "size": sz,
+                                "color": color,
+                                "flex": 4,
+                                "align": "end",
+                                "wrap": False,
+                            },
+                        ],
+                    }
+                )
+
+        rows("買超", "#dc2626", buy_list, True)
+        contents.append({"type": "separator", "margin": "sm", "color": "#e2e8f0"})
+        rows("賣超", "#059669", sell_list, False)
+        return contents
+
+    body_contents: list = []
+    fr = inst.get("foreign") or {}
+    it = inst.get("investmentTrust") or {}
+    body_contents.extend(subsection("外陸資（不含外資自營商）", "#38bdf8", fr.get("buyTop10") or [], fr.get("sellTop10") or []))
+    body_contents.append({"type": "separator", "margin": "md", "color": "#cbd5e1"})
+    body_contents.extend(subsection("投信", "#f97316", it.get("buyTop10") or [], it.get("sellTop10") or []))
+    body_contents.append(
+        {
+            "type": "text",
+            "text": "僅上市；股數換算張（1張=1000股）。與決策終端 digest 同源邏輯。",
+            "color": "#94a3b8",
+            "size": "xs",
+            "wrap": True,
+            "margin": "md",
+        }
+    )
+
+    return {
+        "type": "bubble",
+        "size": "kilo",
+        "header": header_box,
+        "body": {"type": "box", "layout": "vertical", "paddingAll": "12px", "contents": body_contents},
+    }
+
+
 def build_single_bubble(res: dict, report_date: str) -> dict:
     etf_code = res["etf"]
     body_contents = []
@@ -833,12 +948,15 @@ def build_flex_payloads(
     report_date: str,
     lead_bubble: dict | None = None,
     new_entries_bubble: dict | None = None,
+    institutional_bubble: dict | None = None,
 ) -> list[dict]:
     bubbles: list[dict] = []
     if lead_bubble is not None:
         bubbles.append(lead_bubble)
     if new_entries_bubble is not None:
         bubbles.append(new_entries_bubble)
+    if institutional_bubble is not None:
+        bubbles.append(institutional_bubble)
     bubbles.extend([build_single_bubble(res, report_date) for res in results])
     flex_messages = []
     current_bubbles = []
@@ -932,11 +1050,22 @@ def main() -> None:
             logger.warning("全家族合併前五計算失敗，略過首則 bubble: %s", e)
             lead = None
         new_ent = build_family_new_entries_bubble(family_new_entries, today_str)
+        inst_bubble = None
+        try:
+            inst_raw = fetch_twse_t86_institutional(10)
+            if inst_raw.get("ok"):
+                inst_bubble = build_institutional_t86_bubble(inst_raw, today_str)
+                logger.info("已準備法人 T86 LINE bubble（資料日 %s）", inst_raw.get("asOf", ""))
+            else:
+                logger.warning("法人 T86 未取得，LINE 略過該則: %s", inst_raw.get("error", ""))
+        except Exception as e:
+            logger.warning("法人 T86 抓取失敗，LINE 略過該則: %s", e)
         payloads = build_flex_payloads(
             results_for_line,
             today_str,
             lead_bubble=lead,
             new_entries_bubble=new_ent,
+            institutional_bubble=inst_bubble,
         )
         send_flex_messages(payloads)
     elif LINE_TOKEN:
