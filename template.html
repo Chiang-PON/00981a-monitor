@@ -991,6 +991,10 @@
             overflow-wrap: anywhere;
             line-height: 1.35;
         }
+        /* 新進場名單：<tr border-b> 在 border-collapse 下常不會畫線，改由 td 底部畫分隔 */
+        #home-anchor-local.home-reading-comfort #home-new-entries-out .home-hot-table tbody tr:not(:last-child) td {
+            border-bottom: 1px solid var(--border-dim);
+        }
 
         /* —— 總覽「本機／新進場／凱基」：長輩閱讀友善（留白、字級、重點加粗） —— */
         #home-anchor-local.home-reading-comfort {
