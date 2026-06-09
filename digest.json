@@ -1,680 +1,680 @@
 {
   "ok": true,
-  "fetchedAt": "2026-06-05T09:12:26",
+  "fetchedAt": "2026-06-09T08:39:32",
   "news": {
     "ok": true,
     "items": [
       {
-        "title": "Lululemon 逆風未止、下修財測  盤後崩 11%",
-        "link": "https://finance.technews.tw/2026/06/05/lululemon-athletica-inc-announces-first-quarter-fiscal-2026-results/",
+        "title": "輝達攜手 LG，開發人型機器人和資料中心",
+        "link": "https://technews.tw/2026/06/09/nvidia-and-lg-group-build-an-ai-factory-to-advance-physical-ai-mobility-and-ai-infrastructure/",
         "source": "科技新報",
-        "published": "2026-06-05T09:10:38+08:00",
+        "published": "2026-06-09T08:30:52+08:00",
         "country": "TW"
       },
       {
-        "title": "川普點名汽車產業自主維修權爭議，車廠股週四表現分歧",
-        "link": "https://tw.stock.yahoo.com/news/%E5%B7%9D%E6%99%AE%E9%BB%9E%E5%90%8D%E6%B1%BD%E8%BB%8A%E7%94%A2%E6%A5%AD%E8%87%AA%E4%B8%BB%E7%B6%AD%E4%BF%AE%E6%AC%8A%E7%88%AD%E8%AD%B0-%E8%BB%8A%E5%BB%A0%E8%82%A1%E9%80%B1%E5%9B%9B%E8%A1%A8%E7%8F%BE%E5%88%86%E6%AD%A7-010049869.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T09:00:49+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "均熱片大廠利機喜納併購效應，2026 年營收成長力拚達三成",
-        "link": "https://finance.technews.tw/2026/06/05/merger-effects-of-heatsink-manufacturer-ligis-xena/",
-        "source": "科技新報",
-        "published": "2026-06-05T09:00:47+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Anthropic示警AI恐自我進化，籲全球前沿模型研發踩煞車",
-        "link": "https://tw.stock.yahoo.com/news/anthropic%E7%A4%BA%E8%AD%A6ai%E6%81%90%E8%87%AA%E6%88%91%E9%80%B2%E5%8C%96-%E7%B1%B2%E5%85%A8%E7%90%83%E5%89%8D%E6%B2%BF%E6%A8%A1%E5%9E%8B%E7%A0%94%E7%99%BC%E8%B8%A9%E7%85%9E%E8%BB%8A-010011782.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T09:00:11+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "K-Startup Grand Challenge 2026：針對全球新創企業的韓國全週期創業育成平台",
-        "link": "https://tw.stock.yahoo.com/news/k-startup-grand-challenge-2026-010000629.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T09:00:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Jane Street計畫興建數據中心，滿足AI算力需求",
-        "link": "https://tw.stock.yahoo.com/news/jane-street%E8%A8%88%E7%95%AB%E8%88%88%E5%BB%BA%E6%95%B8%E6%93%9A%E4%B8%AD%E5%BF%83-%E6%BB%BF%E8%B6%B3ai%E7%AE%97%E5%8A%9B%E9%9C%80%E6%B1%82-005924297.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:59:24+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Japan ditch pre-World Cup pitch in Monterrey due to poor conditions",
-        "link": "https://www.japantimes.co.jp/sports/2026/06/05/soccer/world-cup/samurai-blue-training-pitch/",
-        "source": "Japan Times",
-        "published": "2026-06-05T08:59:00+08:00",
-        "country": "JP"
-      },
-      {
-        "title": "鈊象5月營收創歷史次高，也登同期最佳表現",
-        "link": "https://tw.stock.yahoo.com/news/%E9%88%8A%E8%B1%A15%E6%9C%88%E7%87%9F%E6%94%B6%E5%89%B5%E6%AD%B7%E5%8F%B2%E6%AC%A1%E9%AB%98-%E4%B9%9F%E7%99%BB%E5%90%8C%E6%9C%9F%E6%9C%80%E4%BD%B3%E8%A1%A8%E7%8F%BE-005833077.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:58:33+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Warren invites Nvidia CEO Jensen Huang to Senate hearing on China AI chip sales",
-        "link": "https://www.cnbc.com/2026/06/04/nvidia-ceo-jensen-huang-warren-senate-hearing-china-ai-chips.html",
-        "source": "CNBC",
-        "published": "2026-06-05T08:58:02+08:00",
-        "country": "US"
-      },
-      {
-        "title": "邁威爾股價短線氣勢如虹，週四再抽高4.9%續破頂，成費半最猛AI股",
-        "link": "https://tw.stock.yahoo.com/news/%E9%82%81%E5%A8%81%E7%88%BE%E8%82%A1%E5%83%B9%E7%9F%AD%E7%B7%9A%E6%B0%A3%E5%8B%A2%E5%A6%82%E8%99%B9-%E9%80%B1%E5%9B%9B%E5%86%8D%E6%8A%BD%E9%AB%984-9-%E7%BA%8C%E7%A0%B4%E9%A0%82-%E6%88%90%E8%B2%BB%E5%8D%8A%E6%9C%80%E7%8C%9Bai%E8%82%A1-005639463.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:56:39+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "矽谷震撼彈 ! 傳美政府要求AI公司分股權  美國版「全民分紅」來了",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461381",
-        "source": "自由時報財經",
-        "published": "2026-06-05T08:55:19+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "韓股盤中暴跌逾6%觸發熔斷 兩大記憶體巨頭跟進美光重摔",
-        "link": "https://money.udn.com/money/story/5599/9547224",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:55:09+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "SpaceX 估值指標 PSR 逾90 遠高於輝達！專家：故事動人 未必是好股票",
-        "link": "https://money.udn.com/money/story/5599/9547219",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:53:22+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "瑞銀：美元強勢料趨緩 亞洲匯市宜聚焦選擇性機會",
-        "link": "https://money.udn.com/money/story/5612/9547218",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:52:38+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "道瓊創歷史新高 油價回落 美股資金轉向非AI類股",
-        "link": "https://tw.stock.yahoo.com/news/%E9%81%93%E7%93%8A%E5%89%B5%E6%AD%B7%E5%8F%B2%E6%96%B0%E9%AB%98-%E6%B2%B9%E5%83%B9%E5%9B%9E%E8%90%BD-%E7%BE%8E%E8%82%A1%E8%B3%87%E9%87%91%E8%BD%89%E5%90%91%E9%9D%9Eai%E9%A1%9E%E8%82%A1-005155696.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:51:55+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "博通財報績優難敵市場超高期待，週四股價瀉近13%，引爆概念股賣壓",
-        "link": "https://tw.stock.yahoo.com/news/%E5%8D%9A%E9%80%9A%E8%B2%A1%E5%A0%B1%E7%B8%BE%E5%84%AA%E9%9B%A3%E6%95%B5%E5%B8%82%E5%A0%B4%E8%B6%85%E9%AB%98%E6%9C%9F%E5%BE%85-%E9%80%B1%E5%9B%9B%E8%82%A1%E5%83%B9%E7%80%89%E8%BF%9113-%E5%BC%95%E7%88%86%E6%A6%82%E5%BF%B5%E8%82%A1%E8%B3%A3%E5%A3%93-005144556.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:51:44+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "國泰投信張雍川：擁多元債增資產配置彈性才是王道",
-        "link": "https://money.udn.com/money/story/5612/9547217",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:51:43+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "亞馬遜Prime登陸南非，低價會員戰火燒向非洲電商市場",
-        "link": "https://tw.stock.yahoo.com/news/%E4%BA%9E%E9%A6%AC%E9%81%9Cprime%E7%99%BB%E9%99%B8%E5%8D%97%E9%9D%9E-%E4%BD%8E%E5%83%B9%E6%9C%83%E5%93%A1%E6%88%B0%E7%81%AB%E7%87%92%E5%90%91%E9%9D%9E%E6%B4%B2%E9%9B%BB%E5%95%86%E5%B8%82%E5%A0%B4-005121375.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:51:21+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "美光週四股價急殺近8%、跌破千美元，記憶體四雄齊自高檔回落",
-        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%85%89%E9%80%B1%E5%9B%9B%E8%82%A1%E5%83%B9%E6%80%A5%E6%AE%BA%E8%BF%918-%E8%B7%8C%E7%A0%B4%E5%8D%83%E7%BE%8E%E5%85%83-%E8%A8%98%E6%86%B6%E9%AB%94%E5%9B%9B%E9%9B%84%E9%BD%8A%E8%87%AA%E9%AB%98%E6%AA%94%E5%9B%9E%E8%90%BD-005111135.html",
-        "source": "Yahoo 股市",
-        "published": "2026-06-05T08:51:11+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "中國低價競爭衝擊，晶片商安森美捷克廠將裁 300 員工",
-        "link": "https://technews.tw/2026/06/05/onsemi-czech-plant-lay-off-300-china-low-price-competition/",
-        "source": "科技新報",
-        "published": "2026-06-05T08:51:03+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "六檔跨國平衡型基金 近一、二、三年累積報酬率皆達三位數",
-        "link": "https://money.udn.com/money/story/5612/9547211",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:50:22+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "美國小企業招聘計畫降至2020年5月以來最低",
-        "link": "https://money.udn.com/money/story/10511/9547098",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:48:04+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "SpaceX維持每股135美元IPO發行價　投資人詢問度熱烈",
-        "link": "https://money.udn.com/money/story/5599/9547208",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:46:06+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "劉美賢父親：中國民主化之前 美國不可能安全",
-        "link": "https://money.udn.com/money/story/5599/9547206",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:45:48+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "長崎原爆館將日本被投原子彈的原因 表述為日本在中國推進了「侵略」",
-        "link": "https://money.udn.com/money/story/5603/9547207",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:45:46+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "國中教育會考成績揭曉 心測中心上午公布統計數據",
-        "link": "https://money.udn.com/money/story/7307/9547205",
-        "source": "經濟日報",
-        "published": "2026-06-05T08:45:29+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "How Trump’s ceasefires are failing to stop Middle East violence",
-        "link": "https://www.japantimes.co.jp/news/2026/06/05/world/politics/trump-middle-east-ceasefire-failures/",
-        "source": "Japan Times",
-        "published": "2026-06-05T08:41:00+08:00",
-        "country": "JP"
-      },
-      {
-        "title": "隆銘公告與宏昇營造和解",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461386",
-        "source": "自由時報財經",
-        "published": "2026-06-05T08:39:46+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "Mirra Andreeva and Maja Chwalinska set up unlikely French Open final",
-        "link": "https://www.japantimes.co.jp/sports/2026/06/05/tennis/andreeva-chwalinska-win-french-open-semifinals/",
-        "source": "Japan Times",
-        "published": "2026-06-05T08:32:00+08:00",
-        "country": "JP"
-      },
-      {
-        "title": "韓媒：樂金集團將採用 1 萬顆輝達 GPU",
-        "link": "https://technews.tw/2026/06/05/south-koreas-lg-group-to-adopt-10000-nvidia-gpus/",
-        "source": "科技新報",
-        "published": "2026-06-05T08:30:39+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "With fewer public spaces for Hong Kong’s helpers, where can they go to unwind?",
-        "link": "https://www.scmp.com/news/hong-kong/society/article/3355956/fewer-public-spaces-hong-kongs-helpers-where-can-they-go-unwind?utm_source=rss_feed",
+        "title": "Sacking of school principal for Singapore row is ‘death sentence’, lawmaker says",
+        "link": "https://www.scmp.com/news/hong-kong/education/article/3356411/sacking-school-principal-singapore-row-death-sentence-lawmaker-says?utm_source=rss_feed",
         "source": "SCMP",
-        "published": "2026-06-05T08:30:07+08:00",
+        "published": "2026-06-09T08:30:14+08:00",
         "country": "HK"
       },
       {
-        "title": "台積電股東常會 3 小時，魏哲家金句連發重點一次看",
-        "link": "https://technews.tw/2026/06/05/tsmc-3-hour-agm-cc-wei-memorable-quotes-key-highlights/",
-        "source": "科技新報",
-        "published": "2026-06-05T08:20:21+08:00",
+        "title": "亞馬遜砸重金取得康寧光纖等解決方案，AI數據中心軍備賽再升溫",
+        "link": "https://tw.stock.yahoo.com/news/%E4%BA%9E%E9%A6%AC%E9%81%9C%E7%A0%B8%E9%87%8D%E9%87%91%E5%8F%96%E5%BE%97%E5%BA%B7%E5%AF%A7%E5%85%89%E7%BA%96%E7%AD%89%E8%A7%A3%E6%B1%BA%E6%96%B9%E6%A1%88-ai%E6%95%B8%E6%93%9A%E4%B8%AD%E5%BF%83%E8%BB%8D%E5%82%99%E8%B3%BD%E5%86%8D%E5%8D%87%E6%BA%AB-002946075.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:29:46+08:00",
         "country": "TW"
       },
       {
-        "title": "‘In the queue’: Busy with Iran, U.S. has little energy for Kyiv",
-        "link": "https://www.japantimes.co.jp/news/2026/06/05/world/politics/us-busy-kyiv-little-energy/",
+        "title": "伊以暫緩交火，倫敦期銅週一反彈0.71%，其他基本金屬漲跌互見",
+        "link": "https://tw.stock.yahoo.com/news/%E4%BC%8A%E4%BB%A5%E6%9A%AB%E7%B7%A9%E4%BA%A4%E7%81%AB-%E5%80%AB%E6%95%A6%E6%9C%9F%E9%8A%85%E9%80%B1-%E5%8F%8D%E5%BD%880-71-%E5%85%B6%E4%BB%96%E5%9F%BA%E6%9C%AC%E9%87%91%E5%B1%AC%E6%BC%B2%E8%B7%8C%E4%BA%92%E8%A6%8B-002937955.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:29:37+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Congo says Ebola deaths top 100 as armed groups threaten response",
+        "link": "https://www.japantimes.co.jp/news/2026/06/09/world/congo-ebola-deaths-armed-groups/",
         "source": "Japan Times",
-        "published": "2026-06-05T08:20:00+08:00",
+        "published": "2026-06-09T08:29:00+08:00",
         "country": "JP"
       },
       {
-        "title": "South Korea stocks fall 4% as tech heavyweights follow plunge in Wall Street's AI-linked names",
-        "link": "https://www.cnbc.com/2026/06/05/asia-markets-today-nikkei-225-kospi-hang-seng-index-csi-300-nifty50.html",
-        "source": "CNBC",
-        "published": "2026-06-05T08:14:09+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Perplexity CEO：AI 勝負不靠模型大小，每瓦 token 價值才是關鍵",
-        "link": "https://technews.tw/2026/06/05/perplexity-ceo-says-token-value-per-watt-is-the-key-to-winning-ai/",
-        "source": "科技新報",
-        "published": "2026-06-05T08:10:45+08:00",
+        "title": "美伊談判現況！伊朗曝「極度互疑」 川普：協議倒數中",
+        "link": "https://money.udn.com/money/story/5599/9554277",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:26:27+08:00",
         "country": "TW"
       },
       {
-        "title": "瑞昱5月營收月減1.5%",
-        "link": "https://finance.technews.tw/2026/06/05/rt-2379-202605-financial-report/",
-        "source": "科技新報",
-        "published": "2026-06-05T08:10:05+08:00",
+        "title": "谷歌TPU大單點火，英特爾股價週一飆逾11%，橫掃三大指數冠軍",
+        "link": "https://tw.stock.yahoo.com/news/%E8%B0%B7%E6%AD%8Ctpu%E5%A4%A7%E5%96%AE%E9%BB%9E%E7%81%AB-%E8%8B%B1%E7%89%B9%E7%88%BE%E8%82%A1%E5%83%B9%E9%80%B1-%E9%A3%86%E9%80%BE11-%E6%A9%AB%E6%8E%83%E4%B8%89%E5%A4%A7%E6%8C%87%E6%95%B8%E5%86%A0%E8%BB%8D-002625880.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:26:25+08:00",
         "country": "TW"
       },
       {
-        "title": "Trump announces $700m coal investment using wartime powers",
-        "link": "https://www.bbc.com/news/articles/cy0209r62k5o?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-06-05T08:03:36+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "缺工危機反成轉機？日本造船業加速擁抱 AI 與全球人才",
-        "link": "https://finance.technews.tw/2026/06/05/japan-shipbuilding-town-looks-to-foreign-workers-ai-amid-labor-crunch/",
-        "source": "科技新報",
-        "published": "2026-06-05T08:00:40+08:00",
+        "title": "SK海力士週一暴跌，槓桿ETF驚現錯價飆漲50%，流動性風險引關注",
+        "link": "https://tw.stock.yahoo.com/news/sk%E6%B5%B7%E5%8A%9B%E5%A3%AB%E9%80%B1-%E6%9A%B4%E8%B7%8C-%E6%A7%93%E6%A1%BFetf%E9%A9%9A%E7%8F%BE%E9%8C%AF%E5%83%B9%E9%A3%86%E6%BC%B250-%E6%B5%81%E5%8B%95%E6%80%A7%E9%A2%A8%E9%9A%AA%E5%BC%95%E9%97%9C%E6%B3%A8-002416251.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:24:16+08:00",
         "country": "TW"
       },
       {
-        "title": "J-pop group Arashi takes its final bow at Tokyo Dome",
-        "link": "https://www.japantimes.co.jp/culture/2026/06/05/entertainment-news/arashi-final-concert/",
+        "title": "開出1000萬元發票！雲林這小鎮全在問「是你嗎？」",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465488",
+        "source": "自由時報財經",
+        "published": "2026-06-09T08:24:13+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "美國公債週一報價走跌，以伊同意暫緩交火，跌幅收窄",
+        "link": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%9C%8B%E5%85%AC%E5%82%B5%E9%80%B1-%E5%A0%B1%E5%83%B9%E8%B5%B0%E8%B7%8C-%E4%BB%A5%E4%BC%8A%E5%90%8C%E6%84%8F%E6%9A%AB%E7%B7%A9%E4%BA%A4%E7%81%AB-%E8%B7%8C%E5%B9%85%E6%94%B6%E7%AA%84-002326079.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:23:26+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "【公告】燁興 2026年5月合併營收4.48億元 年增-6.91%",
+        "link": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E7%87%81%E8%88%88-2026%E5%B9%B45%E6%9C%88%E5%90%88%E4%BD%B5%E7%87%9F%E6%94%B64-48%E5%84%84%E5%85%83-%E5%B9%B4%E5%A2%9E-002240887.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:22:40+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "【台股盤前】美股多數收紅　投顧：台股有望跌深反彈",
+        "link": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%89%8D-%E7%BE%8E%E8%82%A1%E5%A4%9A%E6%95%B8%E6%94%B6%E7%B4%85-%E6%8A%95%E9%A1%A7-%E5%8F%B0%E8%82%A1%E6%9C%89%E6%9C%9B%E8%B7%8C%E6%B7%B1%E5%8F%8D%E5%BD%88-002138930.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:21:38+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "蘋果 WWDC 發表全新 Siri AI 智慧助理更個人化強化隱私",
+        "link": "https://tw.stock.yahoo.com/news/%E8%98%8B%E6%9E%9C-wwdc-%E7%99%BC%E8%A1%A8%E5%85%A8%E6%96%B0-siri-ai-002101913.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:21:01+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "只要微幅改動就能吃得更健康、錢包也輕鬆！美大學訓練 AI 擬減肥菜單成效頗佳",
+        "link": "https://technews.tw/2026/06/09/ai-reveals-simple-ways-to-make-your-meals-healthier-and-cheaper/",
+        "source": "科技新報",
+        "published": "2026-06-09T08:20:48+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "6月9日盤前／AI 基本面未變 但台股籌碼沉重仍須適度整理 操作保持資金彈性",
+        "link": "https://money.udn.com/money/story/5607/9554265",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:18:47+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "企業AI佈局緩慢恐失競爭力 日本大廠積極轉型台灣廠技術入列",
+        "link": "https://tw.stock.yahoo.com/news/%E4%BC%81%E6%A5%ADai%E4%BD%88%E5%B1%80%E7%B7%A9%E6%85%A2%E6%81%90%E5%A4%B1%E7%AB%B6%E7%88%AD%E5%8A%9B-%E6%97%A5%E6%9C%AC%E5%A4%A7%E5%BB%A0%E7%A9%8D%E6%A5%B5%E8%BD%89%E5%9E%8B%E5%8F%B0%E7%81%A3%E5%BB%A0%E6%8A%80%E8%A1%93%E5%85%A5%E5%88%97-001836562.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:18:36+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "雙引擎熱轉，浪凡5月及前5月營收創同期新高",
+        "link": "https://tw.stock.yahoo.com/news/%E9%9B%99%E5%BC%95%E6%93%8E%E7%86%B1%E8%BD%89-%E6%B5%AA%E5%87%A15%E6%9C%88%E5%8F%8A%E5%89%8D5%E6%9C%88%E7%87%9F%E6%94%B6%E5%89%B5%E5%90%8C%E6%9C%9F%E6%96%B0%E9%AB%98-001714502.html",
+        "source": "Yahoo 股市",
+        "published": "2026-06-09T08:17:14+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "亞股滿血復活！韓股飆近5％ 日股漲逾800點",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465490",
+        "source": "自由時報財經",
+        "published": "2026-06-09T08:16:19+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "防俄國特洛伊木馬網絡　瑞典擬修法強制徵收不動產",
+        "link": "https://money.udn.com/money/story/5599/9554260",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:12:39+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "聖保羅同志驕傲遊行30週年　街頭召喚展現多元包容",
+        "link": "https://money.udn.com/money/story/5599/9554259",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:12:24+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "中國稀土出口卡關，日本急尋澳洲、印度替代來源",
+        "link": "https://technews.tw/2026/06/09/china-rare-earth-export-curbs-japan-seeks-australia-india-alternative-sources/",
+        "source": "科技新報",
+        "published": "2026-06-09T08:10:58+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "蘋果 WWDC 重點一次看：全新 Siri AI 來了！新一代 AI 平台功能升級大盤點",
+        "link": "https://money.udn.com/money/story/5599/9554252",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:09:56+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "要打你自己打！以媒曝川普強力施壓 內唐亞胡喊停大規模攻伊行動",
+        "link": "https://money.udn.com/money/story/5599/9554251",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:07:39+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Fireaway 的 Stat‑X® 冷凝氣溶膠滅火系統於通過 MSC.1/Circ.1270 評估後，已獲得型式認可及歐盟 / 英國船用設備認證。",
+        "link": "https://money.udn.com/money/story/123828/9554247",
+        "source": "經濟日報",
+        "published": "2026-06-09T08:00:28+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "三星晶片主管與黃仁勳會面，討論次世代晶圓代工合作",
+        "link": "https://technews.tw/2026/06/09/samsung-elecs-chip-chief-says-he-discussed-next-generation-foundry-with-nvidia-ceo/",
+        "source": "科技新報",
+        "published": "2026-06-09T08:00:24+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "中國「靈活就業」飆至3.2億人 大學畢業就業難",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465354",
+        "source": "自由時報財經",
+        "published": "2026-06-09T07:55:54+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "川普關稅通路對手受創，沃爾瑪為何還能成長？",
+        "link": "https://finance.technews.tw/2026/06/09/how-walmart-keeps-growing-despite-trump-tariffs/",
+        "source": "科技新報",
+        "published": "2026-06-09T07:50:17+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "美晶片股收復部分失地　市場關注SpaceX上市吸金力",
+        "link": "https://money.udn.com/money/story/5599/9554236",
+        "source": "經濟日報",
+        "published": "2026-06-09T07:45:26+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "永豐期貨前進校園 推廣「投資新鮮人防詐計畫」",
+        "link": "https://money.udn.com/money/story/11112/9554233",
+        "source": "經濟日報",
+        "published": "2026-06-09T07:43:57+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "廣告封鎖突破瀏覽器限制，新工具 Filtr 將攔截範圍擴至全蘋果裝置 App",
+        "link": "https://technews.tw/2026/06/09/filtr-wants-to-wipe-ads-from-almost-every-app-on-your-iphone-and-mac/",
+        "source": "科技新報",
+        "published": "2026-06-09T07:40:41+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "馬斯克揭 AI 資料中心衛星設計為 IPO 造勢 SpaceX 獲大幅超額認購",
+        "link": "https://money.udn.com/money/story/5599/9554231",
+        "source": "經濟日報",
+        "published": "2026-06-09T07:40:25+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Peru’s diaspora emerges as tie-breaker in razor-edge presidential race",
+        "link": "https://www.japantimes.co.jp/news/2026/06/09/world/politics/peru-diaspora-tie-breaker-election/",
         "source": "Japan Times",
-        "published": "2026-06-05T08:00:00+08:00",
+        "published": "2026-06-09T07:38:00+08:00",
         "country": "JP"
       },
       {
-        "title": "牌很好但你不能看，拆解 AI 巨頭「祕密遞交 IPO」背後精心設計的資訊戰",
-        "link": "https://finance.technews.tw/2026/06/05/ai-giants-file-confidentially-in-succession/",
-        "source": "科技新報",
-        "published": "2026-06-05T07:50:37+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "老傳產翻身「2黑馬」享AI紅利 謝金河點名：百年一遇奇蹟現象",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461347",
-        "source": "自由時報財經",
-        "published": "2026-06-05T07:48:18+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "韓國釋出 2 兆韓圜公共需求，力挺無人機企業轉型",
-        "link": "https://technews.tw/2026/06/05/govt-to-create-2-tln-won-worth-of-public-sector-demand-for-drones/",
-        "source": "科技新報",
-        "published": "2026-06-05T07:40:35+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "The ancient trick making food waste useful and tasty",
-        "link": "https://www.bbc.com/news/articles/c78kmj2kyklo?at_medium=RSS&at_campaign=rss",
+        "title": "OpenAI plans to go public, intensifying investment race with Anthropic",
+        "link": "https://www.bbc.com/news/articles/cd958eqg1n5o?at_medium=RSS&at_campaign=rss",
         "source": "BBC Business",
-        "published": "2026-06-05T07:10:26+08:00",
+        "published": "2026-06-09T07:37:21+08:00",
         "country": "GB"
       },
       {
-        "title": "Lululemon cuts annual outlook, citing 'negative' media commentary and disappointing product launches",
-        "link": "https://www.cnbc.com/2026/06/04/lululemon-lulu-earnings-q1-2026.html",
+        "title": "從「輝達宅」到「輝達區」！AI 熱潮燒進房市，北投交易量年增 32.7%",
+        "link": "https://finance.technews.tw/2026/06/09/transaction-volume-in-beitou-increased-by-32-7-year-on-year/",
+        "source": "科技新報",
+        "published": "2026-06-09T07:30:58+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "父母幫子女存股  兩種情況要申報贈與稅",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465304",
+        "source": "自由時報財經",
+        "published": "2026-06-09T07:30:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "英特爾發爐了！傳獲Google 300萬個TPU訂單 輝達意願也很高",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465351",
+        "source": "自由時報財經",
+        "published": "2026-06-09T07:24:10+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "SpaceX's stock market blast-off could be Musk's biggest gamble yet",
+        "link": "https://www.bbc.com/news/articles/cy8d9e4lzv1o?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-06-09T07:22:17+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "獨家》蕭美琴訪帛琉  穿MIT自創品牌花洋裝出自這家",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465405",
+        "source": "自由時報財經",
+        "published": "2026-06-09T07:21:37+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "不靠爸、沒金湯匙怎麼翻身？答案就藏在這5條致富鐵律",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465329",
+        "source": "自由時報財經",
+        "published": "2026-06-09T07:21:17+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "宇宙最熱鬧的年代長什麼樣？HETDEX 全面開放 6 億筆資料讓人人可探索早期宇宙",
+        "link": "https://technews.tw/2026/06/09/covering-the-fastest-computers-in-the-world-and-the-people-who-run-them-3/",
+        "source": "科技新報",
+        "published": "2026-06-09T07:20:15+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Iran, Israel pledge to end attacks that threatened talks",
+        "link": "https://www.japantimes.co.jp/news/2026/06/09/world/politics/iran-israel-attacks-talks/",
+        "source": "Japan Times",
+        "published": "2026-06-09T07:18:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "U.S. says BYD, Baidu, Alibaba and other tech giants are aiding China’s military",
+        "link": "https://www.japantimes.co.jp/business/2026/06/09/companies/us-byd-baidu-alibaba-china-military/",
+        "source": "Japan Times",
+        "published": "2026-06-09T07:16:00+08:00",
+        "country": "JP"
+      },
+      {
+        "title": "USDA Secretary Rollins calls Texas ag chief 'unserious' amid screwworm threat",
+        "link": "https://www.cnbc.com/2026/06/08/rollins-miller-texas-ag-chief-unserious-screwworm-threat-trump.html",
         "source": "CNBC",
-        "published": "2026-06-05T07:09:14+08:00",
+        "published": "2026-06-09T07:15:57+08:00",
         "country": "US"
       },
       {
-        "title": "以為老爸開賓士遺產很補   55歲上班族一翻存摺剩20萬當場崩潰了",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461200",
-        "source": "自由時報財經",
-        "published": "2026-06-05T07:06:05+08:00",
+        "title": "Hong Kong’s national security law refinement aims to plug loopholes",
+        "link": "https://www.scmp.com/opinion/hong-kong-opinion/article/3356346/hong-kongs-national-security-law-refinement-aims-plug-loopholes?utm_source=rss_feed",
+        "source": "SCMP",
+        "published": "2026-06-09T07:15:11+08:00",
+        "country": "HK"
+      },
+      {
+        "title": "俄羅斯急速開發自家 Starlink，Rassvet 衛星寬頻 2027 年投入商用",
+        "link": "https://technews.tw/2026/06/09/russia-develops-rassvet-starlink-broadband-commercial-2027/",
+        "source": "科技新報",
+        "published": "2026-06-09T07:10:09+08:00",
         "country": "TW"
       },
       {
-        "title": "Single 20-somethings need AI to make first move on dating apps - Hinge boss",
-        "link": "https://www.bbc.com/news/articles/c052397y6ygo?at_medium=RSS&at_campaign=rss",
+        "title": "Could humanoid robots be heading for the battlefield?",
+        "link": "https://www.bbc.com/news/articles/cedpxwe26l1o?at_medium=RSS&at_campaign=rss",
         "source": "BBC Business",
-        "published": "2026-06-05T07:05:54+08:00",
+        "published": "2026-06-09T07:06:30+08:00",
         "country": "GB"
       },
       {
-        "title": "Mark Zuckerberg's longest-serving employee on AI, jobs - and her boss",
-        "link": "https://www.bbc.com/news/articles/c5y71106g07o?at_medium=RSS&at_campaign=rss",
+        "title": "How driving test booking is changing for learner drivers",
+        "link": "https://www.bbc.com/news/articles/ckgpl9zdw3po?at_medium=RSS&at_campaign=rss",
         "source": "BBC Business",
-        "published": "2026-06-05T07:05:39+08:00",
+        "published": "2026-06-09T07:06:07+08:00",
         "country": "GB"
       },
       {
-        "title": "不想賣中國了？櫻桃價格雪崩一肚子氣  智利業者揚言對中出口砍30％",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461246",
-        "source": "自由時報財經",
-        "published": "2026-06-05T07:04:58+08:00",
+        "title": "Driving test booking rules tightened after thousands of no shows",
+        "link": "https://www.bbc.com/news/articles/c4gyel9n02zo?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-06-09T07:05:32+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "颱風戰機歷史重演，德法官方證實將終止 FCAS 六代機計畫",
+        "link": "https://technews.tw/2026/06/09/german-and-france-annouced-the-fcas-project-has-terminated/",
+        "source": "科技新報",
+        "published": "2026-06-09T07:00:42+08:00",
         "country": "TW"
       },
       {
-        "title": "創業連敗5次快倒閉！工程師意外做出一款App  1年爽賺逾3千萬樂翻",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461279",
+        "title": "LTN經濟通》俄烏戰發動者 年輕時開私家車賺外快？",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5456195",
         "source": "自由時報財經",
-        "published": "2026-06-05T07:03:14+08:00",
+        "published": "2026-06-09T07:00:00+08:00",
         "country": "TW"
       },
       {
-        "title": "LTN經濟通》美國政治深層變化  對台政策新定位？",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5457961",
-        "source": "自由時報財經",
-        "published": "2026-06-05T07:00:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "This investing strategy digs deeper to find hidden stocks riding the AI wave",
-        "link": "https://www.marketwatch.com/story/this-investing-strategy-digs-deeper-to-find-hidden-stocks-riding-the-ai-wave-2cfcccd9?mod=mw_rss_topstories",
+        "title": "Elon Musk says SpaceX doesn’t need ‘magic’ to put AI data centers up in space",
+        "link": "https://www.marketwatch.com/story/elon-musk-says-spacex-doesnt-need-magic-to-put-ai-data-centers-up-in-space-30f2d564?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-06-05T06:56:00+08:00",
+        "published": "2026-06-09T06:59:00+08:00",
         "country": "US"
       },
       {
-        "title": "I’m 55, married and want a $1.5 million long-term care policy. Do I get a traditional or hybrid?",
-        "link": "https://www.marketwatch.com/story/im-55-married-and-want-a-1-5-million-long-term-care-policy-do-i-get-a-traditional-or-hybrid-f4338fc5?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-06-05T06:51:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "【科技早餐】鴻海聯手 Intel、台積電 CoPoS 最快兩年放量，AI 基建戰從機櫃燒到筆電",
-        "link": "https://techorange.com/2026/06/05/foxconn-teams-up-with-intel-tsmc-copos-scale-up-in-two-years/?utm_source=rss&utm_medium=feed&utm_campaign=techorange_rss",
+        "title": "【科技早餐】NVIDIA 把 AI 工廠接上韓國供應鏈，資料中心、公共持股與鏈上美元同步重排",
+        "link": "https://techorange.com/2026/06/09/nvidia-south-korea-supply-chain-for-ai-factories/?utm_source=rss&utm_medium=feed&utm_campaign=techorange_rss",
         "source": "科技報橘",
-        "published": "2026-06-05T06:50:00+08:00",
+        "published": "2026-06-09T06:50:00+08:00",
         "country": "TW"
       },
       {
-        "title": "Marvell looks poised to finally get a spot in the S&P 500 after explosive stock surge",
-        "link": "https://www.marketwatch.com/story/marvell-looks-poised-to-finally-get-a-spot-in-the-s-p-500-after-explosive-stock-surge-02d952c6?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-06-05T06:50:00+08:00",
-        "country": "US"
+        "title": "美股收盤》逢低買進助攻！費半強升逾5％ 台積電ADR漲2.80％",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465433",
+        "source": "自由時報財經",
+        "published": "2026-06-09T06:49:06+08:00",
+        "country": "TW"
       },
       {
-        "title": "South Korea is the ultimate backdoor tech play — but stock investors now face a looming threat",
-        "link": "https://www.marketwatch.com/story/south-korea-is-the-ultimate-backdoor-tech-play-but-stock-investors-now-face-a-looming-threat-25065699?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-06-05T06:40:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "I own a house with my sister, but the mortgage is in her name. Could this come back to bite me?",
-        "link": "https://www.marketwatch.com/story/my-older-sister-and-i-co-own-a-home-where-my-son-lives-what-happens-if-she-dies-2913b928?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-06-05T06:30:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Lululemon’s fight with its founder has been bad enough to hurt sales for the entire year",
-        "link": "https://www.marketwatch.com/story/lululemon-admits-far-more-work-is-needed-for-a-turnaround-and-its-stock-sinks-e28c5618?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-06-05T06:30:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Bitcoin’s sagging price has crypto bears taking a victory lap. Why it’s too soon to count it out.",
-        "link": "https://www.marketwatch.com/story/bitcoins-sagging-price-has-crypto-bears-taking-a-victory-lap-why-its-too-soon-to-count-it-out-edf1d8d8?mod=mw_rss_topstories",
-        "source": "MarketWatch",
-        "published": "2026-06-05T06:29:00+08:00",
-        "country": "US"
-      },
-      {
-        "title": "US sanctions Cuban president and Castro relatives in latest pressure campaign",
-        "link": "https://www.france24.com/en/americas/20260604-us-sanctions-cuban-president-and-castro-relatives-in-latest-pressure-campaign",
+        "title": "Israel and Iran step back from further strikes after renewed clashes",
+        "link": "https://www.france24.com/en/middle-east/20260608-israel-and-iran-step-back-from-further-strikes-after-renewed-clashes",
         "source": "France 24",
-        "published": "2026-06-05T06:26:10+08:00",
+        "published": "2026-06-09T06:36:54+08:00",
         "country": "FR"
       },
       {
-        "title": "悶了3年終於一吐怨氣！晶片價格暴漲  南韓有望終止對中貿易逆差",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461222",
-        "source": "自由時報財經",
-        "published": "2026-06-05T06:15:05+08:00",
-        "country": "TW"
+        "title": "Knicks ticket prices plunge more than 50% ahead of Game 3 at MSG — but not just because Trump’s going",
+        "link": "https://www.marketwatch.com/story/knicks-ticket-prices-plunge-more-than-50-ahead-of-game-3-at-msg-but-not-just-because-trumps-going-b7944acf?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-06-09T06:33:00+08:00",
+        "country": "US"
       },
       {
-        "title": "Jim Cramer says Thursday's rally shows investors' 'huge appetite' for stocks",
-        "link": "https://www.cnbc.com/2026/06/04/jim-cramer-says-thursdays-rally-shows-investors-huge-appetite-for-stocks.html",
+        "title": "Jim Cramer warns key pillars of the bull market are beginning to crumble",
+        "link": "https://www.cnbc.com/2026/06/08/jim-cramer-key-pillars-of-bull-market-beginning-to-crumble.html",
         "source": "CNBC",
-        "published": "2026-06-05T06:13:39+08:00",
+        "published": "2026-06-09T06:18:39+08:00",
         "country": "US"
       },
       {
-        "title": "美股收盤》道瓊漲874點！博通暴跌逾12％、台積電ADR漲近2％",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461329",
-        "source": "自由時報財經",
-        "published": "2026-06-05T06:02:01+08:00",
-        "country": "TW"
+        "title": "Zelensky says he had 'positive' talks with Trump envoys on Ukraine war",
+        "link": "https://www.france24.com/en/europe/20260608-zelensky-says-he-had-positive-talks-with-trump-envoys-on-ukraine-war",
+        "source": "France 24",
+        "published": "2026-06-09T06:09:25+08:00",
+        "country": "FR"
       },
       {
-        "title": "‘Fujiko’ transforms a mother’s resilience into festival gold",
-        "link": "https://www.japantimes.co.jp/culture/2026/06/05/film/taichi-kimura-interview-fujiko/",
-        "source": "Japan Times",
-        "published": "2026-06-05T06:00:00+08:00",
-        "country": "JP"
-      },
-      {
-        "title": "中東局勢進展提振投資信心　美股道瓊標普500指數收高",
-        "link": "https://ec.ltn.com.tw/article/breakingnews/5461327",
-        "source": "自由時報財經",
-        "published": "2026-06-05T05:54:03+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "AI needs a 'brake pedal', warns Anthropic co-founder",
-        "link": "https://www.bbc.com/news/articles/cx2124z7g45o?at_medium=RSS&at_campaign=rss",
-        "source": "BBC Business",
-        "published": "2026-06-05T05:53:25+08:00",
-        "country": "GB"
-      },
-      {
-        "title": "‘This is a tricky subject’: We’re in our 70s and our only child is 40. Do we reveal that we’re leaving her everything?",
-        "link": "https://www.marketwatch.com/story/it-makes-us-feel-uncomfortable-were-in-our-70s-and-our-only-child-is-40-do-we-tell-her-were-leaving-her-everything-28421776?mod=mw_rss_topstories",
+        "title": "OpenAI files confidentially for IPO — but there’s a catch",
+        "link": "https://www.marketwatch.com/story/openai-files-confidentially-for-ipo-but-theres-a-catch-3f13fc13?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-06-05T05:49:00+08:00",
+        "published": "2026-06-09T05:55:00+08:00",
         "country": "US"
       },
       {
-        "title": "Annual Jerusalem Pride parade marches to Knesset to demand legislative change, equal rights",
-        "link": "https://www.france24.com/en/annual-jerusalem-pride-parade-marches-to-knesset-to-demand-legislative-change-equal-rights",
-        "source": "France 24",
-        "published": "2026-06-05T05:41:22+08:00",
-        "country": "FR"
+        "title": "My golf buddy worked as a financial adviser. Here’s how I knew his friendship was fake.",
+        "link": "https://www.marketwatch.com/story/my-golf-buddy-worked-as-a-financial-adviser-heres-how-i-really-knew-his-friendship-was-fake-9e5695d5?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-06-09T05:45:00+08:00",
+        "country": "US"
       },
       {
-        "title": "Trump says Pulte won't be permanent national intelligence director",
-        "link": "https://www.cnbc.com/2026/06/04/pulte-intelligence-trump-dni-temporary.html",
+        "title": "Your tech portfolio could be on the wrong side of the AI boom",
+        "link": "https://www.marketwatch.com/story/your-next-videogame-console-could-cost-1-000-and-it-has-nothing-to-do-with-better-hardware-8cb180dd?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-06-09T05:44:00+08:00",
+        "country": "US"
+      },
+      {
+        "title": "OpenAI confidentially files for IPO, prepping Wall Street for mega AI debut",
+        "link": "https://www.cnbc.com/2026/06/08/openai-confidentially-files-for-ipo-prepping-wall-street-for-ai-debut.html",
         "source": "CNBC",
-        "published": "2026-06-05T05:35:59+08:00",
+        "published": "2026-06-09T05:39:02+08:00",
         "country": "US"
       },
       {
-        "title": "France stunned by Ivory Coast in World Cup warm-up defeat",
-        "link": "https://www.france24.com/en/sport/20260604-france-stunned-by-ivory-coast-in-world-cup-warm-up-defeat",
+        "title": "《失樂園》最惡少女掀熱議！李夢苡樺反派演出大受矚目",
+        "link": "https://www.gvm.com.tw/article/130711",
+        "source": "遠見",
+        "published": "2026-06-09T05:38:00+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "An inflation storm is brewing in the Pacific Ocean — and your portfolio isn’t ready",
+        "link": "https://www.marketwatch.com/story/an-inflation-storm-is-brewing-in-the-pacific-ocean-and-your-portfolio-isnt-ready-f200fc60?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-06-09T05:37:00+08:00",
+        "country": "US"
+      },
+      {
+        "title": "以色列與伊朗表態避免情勢升溫　國際油價小漲",
+        "link": "https://ec.ltn.com.tw/article/breakingnews/5465430",
+        "source": "自由時報財經",
+        "published": "2026-06-09T05:36:03+08:00",
+        "country": "TW"
+      },
+      {
+        "title": "Silicon Valley’s new buyout playbook is hitting Wall Street",
+        "link": "https://www.cnbc.com/2026/06/08/silicon-valleys-new-buyout-playbook-is-hitting-wall-street.html",
+        "source": "CNBC",
+        "published": "2026-06-09T05:32:38+08:00",
+        "country": "US"
+      },
+      {
+        "title": "EU Taliban invite 'the wrong signal to anyone that is using power as a means of suppression'",
+        "link": "https://www.france24.com/en/eu-taliban-invite-the-wrong-signal-to-anyone-that-is-using-power-as-a-means-of-suppression",
         "source": "France 24",
-        "published": "2026-06-05T05:35:37+08:00",
+        "published": "2026-06-09T05:31:34+08:00",
         "country": "FR"
       },
       {
-        "title": "A UK in decline needs to rediscover supply-side economics",
-        "link": "https://www.scmp.com/opinion/world-opinion/article/3355911/uk-decline-needs-rediscover-supply-side-economics?utm_source=rss_feed",
+        "title": "How Hong Kong’s strengths can help unlock Central Asia’s potential",
+        "link": "https://www.scmp.com/opinion/hong-kong-opinion/article/3356305/how-hong-kongs-strengths-can-help-unlock-central-asias-potential?utm_source=rss_feed",
         "source": "SCMP",
-        "published": "2026-06-05T05:30:06+08:00",
+        "published": "2026-06-09T05:30:06+08:00",
         "country": "HK"
       },
       {
-        "title": "You’re going to pay tax on RMDs — there’s no way around it. Or is there?",
-        "link": "https://www.marketwatch.com/story/youre-going-to-pay-tax-on-rmds-theres-no-way-around-it-or-is-there-26e864cf?mod=mw_rss_topstories",
+        "title": "Judge blocks Trump's $100,000 H-1B visa fee",
+        "link": "https://www.cnbc.com/2026/06/08/trump-h1b-visa-fee-blocks.html",
+        "source": "CNBC",
+        "published": "2026-06-09T05:20:45+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Apple partnering with Google and Nvidia for most advanced AI model",
+        "link": "https://www.cnbc.com/2026/06/08/apple-google-nvidia-ai-chips.html",
+        "source": "CNBC",
+        "published": "2026-06-09T05:12:45+08:00",
+        "country": "US"
+      },
+      {
+        "title": "‘I have no experience with investing’: I inherited $2,000. I’m 42 with two children. What should I do with this money?",
+        "link": "https://www.marketwatch.com/story/i-have-no-experience-with-investing-i-inherited-2-000-im-42-with-two-children-what-should-i-do-with-this-money-7b0de230?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-06-05T05:28:00+08:00",
+        "published": "2026-06-09T05:10:00+08:00",
         "country": "US"
       },
       {
-        "title": "Trump says he could meet Iran's supreme leader 'if it was to make a deal'",
-        "link": "https://www.cnbc.com/2026/06/04/trump-iran-supreme-leader.html",
-        "source": "CNBC",
-        "published": "2026-06-05T05:14:21+08:00",
-        "country": "US"
+        "title": "Trump 'can influence pace, scale and political boundaries of Israeli action', analyst says",
+        "link": "https://www.france24.com/en/tv-shows/a-propos/20260608-trump-can-influence-pace-scale-and-political-boundaries-of-israeli-action-analyst-says",
+        "source": "France 24",
+        "published": "2026-06-09T05:04:25+08:00",
+        "country": "FR"
       },
       {
-        "title": "Quantinuum’s buzzy IPO ends with a whimper as stock gives back early gains",
-        "link": "https://www.marketwatch.com/story/quantinuums-stock-set-to-pop-after-ipo-as-wall-street-buys-into-the-quantum-boom-8f2e83b9?mod=mw_rss_topstories",
+        "title": "Ebola cases reach more than 500",
+        "link": "https://www.france24.com/en/tv-shows/eye-on-africa/20260608-ebola-cases-reach-to-more-than-500",
+        "source": "France 24",
+        "published": "2026-06-09T05:02:33+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "Eli Lilly stock rises after late-stage trial of next-generation weight-loss drug",
+        "link": "https://www.marketwatch.com/story/eli-lilly-stock-jumps-after-late-stage-trial-of-next-generation-weight-loss-drug-edfae9a2?mod=mw_rss_topstories",
         "source": "MarketWatch",
-        "published": "2026-06-05T05:13:00+08:00",
+        "published": "2026-06-09T05:01:00+08:00",
         "country": "US"
       },
       {
-        "title": "'Judicial system should believe victims first', activist says as body found in missing girl case",
-        "link": "https://www.france24.com/en/tv-shows/a-propos/20260604-judicial-system-should-believe-victims-first-activist-says-as-body-found-in-missing-girl-case",
-        "source": "France 24",
-        "published": "2026-06-05T05:05:41+08:00",
-        "country": "FR"
+        "title": "Micron’s stock bounces back in a big way: ‘The memory trade is alive and well’",
+        "link": "https://www.marketwatch.com/story/microns-stock-bounces-back-in-a-big-way-the-memory-trade-is-alive-and-well-3466929f?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-06-09T04:55:00+08:00",
+        "country": "US"
       },
       {
-        "title": "Honeywell’s quantum company goes public. What investors should know about the IPO",
-        "link": "https://www.cnbc.com/2026/06/04/honeywells-quantum-company-goes-public-what-investors-should-know-about-the-ipo.html",
+        "title": "Nvidia CEO Jensen Huang declines Senate testimony on AI, China and exports",
+        "link": "https://www.cnbc.com/2026/06/08/nvidia-jensen-huang-senate-elizabeth-warren-ai-china-export-controls.html",
         "source": "CNBC",
-        "published": "2026-06-05T04:55:03+08:00",
+        "published": "2026-06-09T04:54:34+08:00",
         "country": "US"
       },
       {
-        "title": "Ships stranded in Persian Gulf quietly coordinate with U.S. Navy to exit Hormuz",
-        "link": "https://www.cnbc.com/2026/06/04/iran-war-strait-hormuz-persian-gulf-oil-tanker-transit.html",
-        "source": "CNBC",
-        "published": "2026-06-05T04:52:54+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Viral videos mislead as Albania erupts against Kushner-linked luxury resort",
-        "link": "https://www.france24.com/en/viral-videos-mislead-as-albania-erupts-against-kushner-linked-luxury-resort",
-        "source": "France 24",
-        "published": "2026-06-05T04:49:17+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "Bitcoin is weathering its ugliest week in months as narrative fades and liquidity rotates",
-        "link": "https://www.cnbc.com/2026/06/04/bitcoin-is-weathering-its-ugliest-week-in-months-as-narrative-fades-and-liquidity-rotates.html",
-        "source": "CNBC",
-        "published": "2026-06-05T04:35:21+08:00",
-        "country": "US"
-      },
-      {
-        "title": "Somalia's capital rocked by gunfire",
-        "link": "https://www.france24.com/en/somali-military-and-opposition-allied-militias-trade-fire",
-        "source": "France 24",
-        "published": "2026-06-05T04:33:21+08:00",
-        "country": "FR"
-      },
-      {
-        "title": "'Apocalyptic' Tata Steel fire sees 'substantial' damage to production line",
-        "link": "https://www.bbc.com/news/articles/cy826zjxdgvo?at_medium=RSS&at_campaign=rss",
+        "title": "Stock market jitters remain amid tech fears and renewed Middle East attacks",
+        "link": "https://www.bbc.com/news/articles/c78yd5g9qx0o?at_medium=RSS&at_campaign=rss",
         "source": "BBC Business",
-        "published": "2026-06-05T04:27:16+08:00",
+        "published": "2026-06-09T04:54:29+08:00",
         "country": "GB"
       },
       {
-        "title": "Quantinuum closes flat in Nasdaq debut, after upsized offering",
-        "link": "https://www.cnbc.com/2026/06/04/quantinuum-qnt-stock-first-trade-ipo.html",
-        "source": "CNBC",
-        "published": "2026-06-05T04:22:22+08:00",
+        "title": "Inflation could top 4% this week. The bond market wants Fed Chair Warsh to prove he’ll fight it.",
+        "link": "https://www.marketwatch.com/story/inflation-could-top-4-this-week-the-bond-market-wants-fed-chair-warsh-to-prove-hell-fight-it-fbb6b04b?mod=mw_rss_topstories",
+        "source": "MarketWatch",
+        "published": "2026-06-09T04:52:00+08:00",
         "country": "US"
       },
       {
-        "title": "Lebanon health ministry says Israeli strikes in south and east kill eight",
-        "link": "https://www.france24.com/en/lebanon-health-ministry-says-israeli-strikes-in-south-and-east-kill-eight",
+        "title": "Trump nominates Todd Blanche for attorney general amid controversy over DOJ fund",
+        "link": "https://www.cnbc.com/2026/06/08/todd-blanche-trump-nominates-attorney-general.html",
+        "source": "CNBC",
+        "published": "2026-06-09T04:43:04+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Corning strikes another multibillion-dollar AI deal. What the new Amazon pact means for the stock",
+        "link": "https://www.cnbc.com/2026/06/08/corning-strikes-another-big-ai-deal-what-the-new-amazon-pact-means-for-the-stock.html",
+        "source": "CNBC",
+        "published": "2026-06-09T04:33:32+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Trump storms out of NBC interview after denying his own “No War” promises",
+        "link": "https://www.france24.com/en/trump-storms-out-of-nbc-interview-after-denying-his-own-no-war-promises",
         "source": "France 24",
-        "published": "2026-06-05T04:20:19+08:00",
+        "published": "2026-06-09T03:51:07+08:00",
         "country": "FR"
       },
       {
-        "title": "Ukraine's Zelensky pledges clear timetable of talks on EU membership",
-        "link": "https://www.france24.com/en/ukraine-s-zelensky-pledges-clear-timetable-of-talks-on-eu-membership",
+        "title": "France's justice minister decision not to resign 'may well be taken out of his hands'",
+        "link": "https://www.france24.com/en/france-s-justice-minister-decision-not-to-resign-may-well-be-taken-out-of-his-hands",
         "source": "France 24",
-        "published": "2026-06-05T03:39:20+08:00",
+        "published": "2026-06-09T03:39:59+08:00",
         "country": "FR"
       },
       {
-        "title": "Ukraine war and risk of stagnation hang over St Petersburg economic conference",
-        "link": "https://www.france24.com/en/ukraine-war-and-risk-of-stagnation-hang-over-st-petersburg-economic-conference",
+        "title": "Congress moves toward approving $70 billion for ICE and CBP through Trump's presidency",
+        "link": "https://www.cnbc.com/2026/06/08/ice-cbp-immigration-funding-bill-congress-trump.html",
+        "source": "CNBC",
+        "published": "2026-06-09T03:25:46+08:00",
+        "country": "US"
+      },
+      {
+        "title": "Leftist Roberto Sanchez takes lead in Peru's razor-thin presidential runoff",
+        "link": "https://www.france24.com/en/americas/20260608-leftist-roberto-sanchez-takes-lead-in-peru-s-razor-thin-presidential-runoff",
         "source": "France 24",
-        "published": "2026-06-05T03:17:27+08:00",
+        "published": "2026-06-09T03:11:31+08:00",
         "country": "FR"
       },
       {
-        "title": "Massive disinformation campaign underway in Armenia ahead of elections, analysts warn",
-        "link": "https://www.france24.com/en/massive-disinformation-campaign-underway-in-armenia-ahead-of-elections-analysts-warn",
+        "title": "Blow to EU defence cooperation as France, Germany abandon joint fighter jet programme",
+        "link": "https://www.france24.com/en/france/20260608-france-germany-abandon-fighter-jet-project-due-to-diagreements-between-companies-involved",
         "source": "France 24",
-        "published": "2026-06-05T03:05:51+08:00",
+        "published": "2026-06-09T02:57:13+08:00",
         "country": "FR"
       },
       {
-        "title": "溝通高手都會「這樣做」！活用阿德勒心理學，讓談話變愉快",
-        "link": "https://www.gvm.com.tw/article/113186",
+        "title": "專家胡偉良3面向談台灣「土方之亂」：不是營建問題，而是國家治理問題",
+        "link": "https://www.gvm.com.tw/article/130709",
         "source": "遠見",
-        "published": "2026-06-05T03:00:00+08:00",
+        "published": "2026-06-09T02:41:00+08:00",
         "country": "TW"
       },
       {
-        "title": "有錢人與你的差距不只是錢：億萬富豪、百萬富翁與一般人的差異",
-        "link": "https://www.gvm.com.tw/article/113118",
+        "title": "Netanyahu says hostilities ceased after Israeli strikes made Iran stop attacks",
+        "link": "https://www.france24.com/en/netanyahu-says-hostilities-ceased-after-israeli-strikes-made-iran-stop-attacks",
+        "source": "France 24",
+        "published": "2026-06-09T02:21:55+08:00",
+        "country": "FR"
+      },
+      {
+        "title": "新青安「最強外掛」將退場！新青安2.0添緊箍咒，房市將大洗牌？",
+        "link": "https://www.gvm.com.tw/article/130705",
         "source": "遠見",
-        "published": "2026-06-05T02:50:00+08:00",
+        "published": "2026-06-09T02:09:00+08:00",
         "country": "TW"
       },
       {
-        "title": "台股漲翻、護國神山造就「勞工貴族」！台灣人為何仍不敢花錢？",
-        "link": "https://www.gvm.com.tw/article/130656",
+        "title": "黑色星期一！台股跌1568點、券商大當機，「這些ETF」成交量衝前5",
+        "link": "https://www.gvm.com.tw/article/130693",
         "source": "遠見",
-        "published": "2026-06-05T02:40:00+08:00",
+        "published": "2026-06-09T01:50:00+08:00",
         "country": "TW"
       },
       {
-        "title": "「早餐像皇帝，晚餐像乞丐」觀念過時？營養師：三餐應這樣吃",
-        "link": "https://www.gvm.com.tw/article/113749",
+        "title": "高金素梅涉貪遭起訴求刑12年6月！本人回應：黑夜一定會結束",
+        "link": "https://www.gvm.com.tw/article/130706",
         "source": "遠見",
-        "published": "2026-06-05T02:26:00+08:00",
+        "published": "2026-06-09T01:36:00+08:00",
         "country": "TW"
       },
       {
-        "title": "日圓驚見0.19元！一文看懂換匯攻略與產業衝擊",
-        "link": "https://www.gvm.com.tw/article/130637",
+        "title": "Jailed crypto founder Sam Bankman-Fried seeks Trump pardon",
+        "link": "https://www.bbc.com/news/articles/cjwgd6jqd5do?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-06-09T01:18:21+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "王品重返Uber Eats，19個品牌「主餐買1送1」，史上最大百萬會員串接背後盤算？",
+        "link": "https://www.gvm.com.tw/article/130702",
         "source": "遠見",
-        "published": "2026-06-05T02:20:00+08:00",
+        "published": "2026-06-09T01:03:00+08:00",
         "country": "TW"
       },
       {
-        "title": "特留分新制》單身、頂客族遺產可免分手足！但需做好兩件事才有效",
-        "link": "https://www.gvm.com.tw/article/130654",
+        "title": "攜手BMW，元太推「可變色車」！他們如何從電子紙跨界車用？",
+        "link": "https://www.gvm.com.tw/article/130704",
         "source": "遠見",
-        "published": "2026-06-05T02:20:00+08:00",
+        "published": "2026-06-09T00:57:00+08:00",
         "country": "TW"
       },
       {
-        "title": "有些東西變有錢也買不到？重新定義財富3用途，邁向人生真正富足",
-        "link": "https://www.gvm.com.tw/article/130653",
-        "source": "遠見",
-        "published": "2026-06-05T02:14:00+08:00",
+        "title": "Lib Dems propose energy price discounts for all households",
+        "link": "https://www.bbc.com/news/articles/ckg49qn38ezo?at_medium=RSS&at_campaign=rss",
+        "source": "BBC Business",
+        "published": "2026-06-09T00:48:55+08:00",
+        "country": "GB"
+      },
+      {
+        "title": "開出1000萬元發票！雲林這小鎮全在問「是你嗎？」",
+        "link": "https://tw.news.yahoo.com/%E9%96%8B%E5%87%BA1000%E8%90%AC%E5%85%83%E7%99%BC%E7%A5%A8-%E9%9B%B2%E6%9E%97%E9%80%99%E5%B0%8F%E9%8E%AE%E5%85%A8%E5%9C%A8%E5%95%8F-%E6%98%AF%E4%BD%A0%E5%97%8E-002413725.html",
+        "source": "Yahoo 財經",
+        "published": "2026-06-09T00:24:13+08:00",
         "country": "TW"
       },
       {
-        "title": "半導體陷荷蘭病隱憂！川習會後，台灣戰略地位再受考驗",
-        "link": "https://www.gvm.com.tw/article/130652",
+        "title": "大雨下不停淹水警戒！滯留鋒面、西南氣流影響，氣象署啟動大規模豪雨作業",
+        "link": "https://www.gvm.com.tw/article/130703",
         "source": "遠見",
-        "published": "2026-06-05T01:53:00+08:00",
+        "published": "2026-06-09T00:23:00+08:00",
         "country": "TW"
       },
       {
-        "title": "爸爸，我不想上學了！從一場蘭嶼休學之旅，體悟「學習」真實意義",
-        "link": "https://www.gvm.com.tw/article/130651",
-        "source": "遠見",
-        "published": "2026-06-05T01:40:00+08:00",
+        "title": "快訊／日經指數開盤大漲600點 南韓股市飆漲4%",
+        "link": "https://tw.news.yahoo.com/%E5%BF%AB%E8%A8%8A-%E6%97%A5%E7%B6%93%E6%8C%87%E6%95%B8%E9%96%8B%E7%9B%A4%E5%A4%A7%E6%BC%B2600%E9%BB%9E-%E5%8D%97%E9%9F%93%E8%82%A1%E5%B8%82%E9%A3%86%E6%BC%B24-002000456.html",
+        "source": "Yahoo 財經",
+        "published": "2026-06-09T00:20:00+08:00",
         "country": "TW"
-      },
-      {
-        "title": "輝達要找的人，不是只會做PPT！來談年薪650萬的簡報設計師",
-        "link": "https://www.gvm.com.tw/article/130650",
-        "source": "遠見",
-        "published": "2026-06-05T01:35:00+08:00",
-        "country": "TW"
-      },
-      {
-        "title": "7 taken away as police ramp up patrols around former site of Tiananmen vigil",
-        "link": "https://www.scmp.com/news/hong-kong/politics/article/3356009/7-taken-away-police-ramp-patrols-around-former-site-tiananmen-vigil?utm_source=rss_feed",
-        "source": "SCMP",
-        "published": "2026-06-05T01:10:13+08:00",
-        "country": "HK"
       }
     ],
     "disclaimer": "新聞標題與連結來自公開 RSS，版權歸各媒體；僅供參考。部分稿件含 country 欄位（依訂閱來源標註國別），未標者於全球戰情仍以標題關鍵字歸類。"
@@ -685,181 +685,13 @@
       {
         "symbol": "TWSE",
         "label": "加權指數",
-        "price": "45,677.46",
-        "change": "781.70",
-        "changePercent": "-1.68%",
+        "price": "43,502.78",
+        "change": "1,568.16",
+        "changePercent": "-3.48%",
         "currency": "TWD",
         "region": "台灣",
         "source": "twse",
-        "asOf": "20260604"
-      },
-      {
-        "symbol": "^SPX",
-        "label": "S&P 500",
-        "price": "7584.30",
-        "change": "+67.80",
-        "changePercent": "0.90",
-        "changeNote": "開→收",
-        "currency": "USD",
-        "region": "美洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 23:00:00"
-      },
-      {
-        "symbol": "^NDX",
-        "label": "Nasdaq 100",
-        "price": "30407.81",
-        "change": "+233.22",
-        "changePercent": "0.77",
-        "changeNote": "開→收",
-        "currency": "USD",
-        "region": "美洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 23:00:00"
-      },
-      {
-        "symbol": "^DJI",
-        "label": "道瓊",
-        "price": "51561.90",
-        "change": "+575.80",
-        "changePercent": "1.13",
-        "changeNote": "開→收",
-        "currency": "USD",
-        "region": "美洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 23:00:00"
-      },
-      {
-        "symbol": "^GSPTSE",
-        "label": "S&P/TSX 綜合",
-        "price": null,
-        "change": null,
-        "changePercent": null,
-        "currency": "CAD",
-        "region": "美洲",
-        "source": "stooq",
-        "asOf": null,
-        "note": "暫無報價（休市或延遲）"
-      },
-      {
-        "symbol": "^HSI",
-        "label": "恆生指數",
-        "price": "25253.40",
-        "change": "+0.00",
-        "changePercent": "0.00",
-        "changeNote": "開→收",
-        "currency": "HKD",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": "2026-06-05 02:35:56"
-      },
-      {
-        "symbol": "^STI",
-        "label": "新加坡 STI",
-        "price": "5067.53",
-        "change": "-40.49",
-        "changePercent": "-0.79",
-        "changeNote": "開→收",
-        "currency": "SGD",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 21:44:00"
-      },
-      {
-        "symbol": "^KOSPI",
-        "label": "韓國 KOSPI",
-        "price": "8077.11",
-        "change": "-246.09",
-        "changePercent": "-2.96",
-        "changeNote": "開→收",
-        "currency": "KRW",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": "2026-06-05 02:52:20"
-      },
-      {
-        "symbol": "^N225",
-        "label": "日經 225",
-        "price": null,
-        "change": null,
-        "changePercent": null,
-        "currency": "JPY",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": null,
-        "note": "暫無報價（休市或延遲）"
-      },
-      {
-        "symbol": "^AXJO",
-        "label": "S&P/ASX 200",
-        "price": null,
-        "change": null,
-        "changePercent": null,
-        "currency": "AUD",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": null,
-        "note": "暫無報價（休市或延遲）"
-      },
-      {
-        "symbol": "^BSESN",
-        "label": "BSE Sensex",
-        "price": null,
-        "change": null,
-        "changePercent": null,
-        "currency": "INR",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": null,
-        "note": "暫無報價（休市或延遲）"
-      },
-      {
-        "symbol": "^SSEC",
-        "label": "上證綜指",
-        "price": null,
-        "change": null,
-        "changePercent": null,
-        "currency": "CNY",
-        "region": "亞洲",
-        "source": "stooq",
-        "asOf": null,
-        "note": "暫無報價（休市或延遲）"
-      },
-      {
-        "symbol": "^DAX",
-        "label": "德國 DAX",
-        "price": "24944.95",
-        "change": "+95.52",
-        "changePercent": "0.38",
-        "changeNote": "開→收",
-        "currency": "EUR",
-        "region": "歐洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 23:00:00"
-      },
-      {
-        "symbol": "^UKX",
-        "label": "英國富時 100",
-        "price": "10360.30",
-        "change": "+27.80",
-        "changePercent": "0.27",
-        "changeNote": "開→收",
-        "currency": "GBP",
-        "region": "歐洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 23:00:00"
-      },
-      {
-        "symbol": "^CAC",
-        "label": "法國 CAC 40",
-        "price": "8244.29",
-        "change": "+92.74",
-        "changePercent": "1.14",
-        "changeNote": "開→收",
-        "currency": "EUR",
-        "region": "歐洲",
-        "source": "stooq",
-        "asOf": "2026-06-04 23:00:00"
+        "asOf": "20260608"
       }
     ],
     "disclaimer": "加權指數為證交所；其餘為 Stooq 延遲資料（多為開盤→收盤），與即時撮合不同。"
@@ -868,509 +700,509 @@
     "ok": true,
     "items": [
       {
-        "name": "造紙類指數",
-        "shortName": "造紙",
-        "changePct": 6.01,
-        "absPct": 6.01,
-        "up": true,
-        "close": "265.30",
-        "changePts": "15.04"
-      },
-      {
-        "name": "數位雲端類指數",
-        "shortName": "數位雲端",
-        "changePct": 5.2,
-        "absPct": 5.2,
-        "up": true,
-        "close": "47.72",
-        "changePts": "2.36"
-      },
-      {
-        "name": "電腦及週邊設備類指數",
-        "shortName": "電腦及週邊設備",
-        "changePct": -3.63,
-        "absPct": 3.63,
-        "up": false,
-        "close": "450.01",
-        "changePts": "16.95"
-      },
-      {
         "name": "玻璃陶瓷類指數",
         "shortName": "玻璃陶瓷",
-        "changePct": -3.43,
-        "absPct": 3.43,
+        "changePct": -7.99,
+        "absPct": 7.99,
         "up": false,
-        "close": "162.33",
-        "changePts": "5.76"
-      },
-      {
-        "name": "其他電子類指數",
-        "shortName": "其他電子",
-        "changePct": -3.0,
-        "absPct": 3.0,
-        "up": false,
-        "close": "316.22",
-        "changePts": "9.77"
-      },
-      {
-        "name": "光電類指數",
-        "shortName": "光電",
-        "changePct": -2.73,
-        "absPct": 2.73,
-        "up": false,
-        "close": "68.31",
-        "changePts": "1.92"
-      },
-      {
-        "name": "油電燃氣類指數",
-        "shortName": "油電燃氣",
-        "changePct": 2.67,
-        "absPct": 2.67,
-        "up": true,
-        "close": "82.59",
-        "changePts": "2.15"
-      },
-      {
-        "name": "生技醫療類指數",
-        "shortName": "生技醫療",
-        "changePct": 2.53,
-        "absPct": 2.53,
-        "up": true,
-        "close": "79.42",
-        "changePts": "1.96"
-      },
-      {
-        "name": "電子零組件類指數",
-        "shortName": "電子零組件",
-        "changePct": -2.48,
-        "absPct": 2.48,
-        "up": false,
-        "close": "972.04",
-        "changePts": "24.69"
-      },
-      {
-        "name": "綠能環保類指數",
-        "shortName": "綠能環保",
-        "changePct": 2.44,
-        "absPct": 2.44,
-        "up": true,
-        "close": "136.37",
-        "changePts": "3.25"
-      },
-      {
-        "name": "臺灣資訊科技指數",
-        "shortName": "資訊科技指數",
-        "changePct": -2.32,
-        "absPct": 2.32,
-        "up": false,
-        "close": "89,173.67",
-        "changePts": "2,119.51"
-      },
-      {
-        "name": "貿易百貨類指數",
-        "shortName": "貿易百貨",
-        "changePct": 2.32,
-        "absPct": 2.32,
-        "up": true,
-        "close": "248.25",
-        "changePts": "5.63"
-      },
-      {
-        "name": "電子工業類指數",
-        "shortName": "電子工業",
-        "changePct": -2.14,
-        "absPct": 2.14,
-        "up": false,
-        "close": "2,962.57",
-        "changePts": "64.68"
-      },
-      {
-        "name": "機電類指數",
-        "shortName": "機電",
-        "changePct": -2.1,
-        "absPct": 2.1,
-        "up": false,
-        "close": "16,324.10",
-        "changePts": "350.24"
-      },
-      {
-        "name": "居家生活類指數",
-        "shortName": "居家生活",
-        "changePct": 1.99,
-        "absPct": 1.99,
-        "up": true,
-        "close": "94.30",
-        "changePts": "1.84"
-      },
-      {
-        "name": "塑膠類指數",
-        "shortName": "塑膠",
-        "changePct": -1.93,
-        "absPct": 1.93,
-        "up": false,
-        "close": "231.29",
-        "changePts": "4.54"
-      },
-      {
-        "name": "半導體類指數",
-        "shortName": "半導體",
-        "changePct": -1.89,
-        "absPct": 1.89,
-        "up": false,
-        "close": "1,541.18",
-        "changePts": "29.67"
-      },
-      {
-        "name": "化學生技醫療類指數",
-        "shortName": "化學生技醫療",
-        "changePct": 1.78,
-        "absPct": 1.78,
-        "up": true,
-        "close": "150.55",
-        "changePts": "2.64"
-      },
-      {
-        "name": "水泥窯製類指數",
-        "shortName": "水泥窯製",
-        "changePct": -1.67,
-        "absPct": 1.67,
-        "up": false,
-        "close": "662.99",
-        "changePts": "11.26"
-      },
-      {
-        "name": "觀光餐旅類指數",
-        "shortName": "觀光餐旅",
-        "changePct": 1.46,
-        "absPct": 1.46,
-        "up": true,
-        "close": "104.18",
-        "changePts": "1.50"
-      },
-      {
-        "name": "電子通路類指數",
-        "shortName": "電子通路",
-        "changePct": -1.36,
-        "absPct": 1.36,
-        "up": false,
-        "close": "415.57",
-        "changePts": "5.73"
+        "close": "147.32",
+        "changePts": "12.80"
       },
       {
         "name": "電器電纜類指數",
         "shortName": "電器電纜",
-        "changePct": -1.35,
-        "absPct": 1.35,
+        "changePct": -7.11,
+        "absPct": 7.11,
         "up": false,
-        "close": "119.49",
-        "changePts": "1.63"
+        "close": "105.50",
+        "changePts": "8.07"
       },
       {
-        "name": "通信網路類指數",
-        "shortName": "通信網路",
-        "changePct": -1.09,
-        "absPct": 1.09,
+        "name": "電子通路類指數",
+        "shortName": "電子通路",
+        "changePct": -7.08,
+        "absPct": 7.08,
         "up": false,
-        "close": "259.32",
-        "changePts": "2.86"
+        "close": "380.74",
+        "changePts": "29.02"
       },
       {
-        "name": "資訊服務類指數",
-        "shortName": "資訊服務",
-        "changePct": -0.92,
-        "absPct": 0.92,
+        "name": "光電類指數",
+        "shortName": "光電",
+        "changePct": -6.87,
+        "absPct": 6.87,
         "up": false,
-        "close": "220.12",
-        "changePts": "2.04"
+        "close": "61.64",
+        "changePts": "4.55"
       },
       {
-        "name": "金融保險類指數",
-        "shortName": "金融保險",
-        "changePct": 0.9,
-        "absPct": 0.9,
+        "name": "塑膠類指數",
+        "shortName": "塑膠",
+        "changePct": -6.41,
+        "absPct": 6.41,
+        "up": false,
+        "close": "206.24",
+        "changePts": "14.13"
+      },
+      {
+        "name": "其他電子類指數",
+        "shortName": "其他電子",
+        "changePct": -5.25,
+        "absPct": 5.25,
+        "up": false,
+        "close": "293.29",
+        "changePts": "16.26"
+      },
+      {
+        "name": "電腦及週邊設備類指數",
+        "shortName": "電腦及週邊設備",
+        "changePct": -4.7,
+        "absPct": 4.7,
+        "up": false,
+        "close": "419.10",
+        "changePts": "20.65"
+      },
+      {
+        "name": "油電燃氣類指數",
+        "shortName": "油電燃氣",
+        "changePct": -4.43,
+        "absPct": 4.43,
+        "up": false,
+        "close": "76.13",
+        "changePts": "3.53"
+      },
+      {
+        "name": "數位雲端類指數",
+        "shortName": "數位雲端",
+        "changePct": 4.41,
+        "absPct": 4.41,
         "up": true,
-        "close": "2,907.52",
-        "changePts": "25.87"
+        "close": "53.24",
+        "changePts": "2.25"
       },
       {
-        "name": "紡織纖維類指數",
-        "shortName": "紡織纖維",
-        "changePct": -0.81,
-        "absPct": 0.81,
+        "name": "水泥窯製類指數",
+        "shortName": "水泥窯製",
+        "changePct": -4.37,
+        "absPct": 4.37,
         "up": false,
-        "close": "501.57",
-        "changePts": "4.08"
+        "close": "630.41",
+        "changePts": "28.80"
       },
       {
-        "name": "其他類指數",
-        "shortName": "其他",
-        "changePct": 0.66,
-        "absPct": 0.66,
-        "up": true,
-        "close": "277.96",
-        "changePts": "1.81"
-      },
-      {
-        "name": "建材營造類指數",
-        "shortName": "建材營造",
-        "changePct": 0.65,
-        "absPct": 0.65,
-        "up": true,
-        "close": "461.41",
-        "changePts": "2.99"
-      },
-      {
-        "name": "水泥類指數",
-        "shortName": "水泥",
-        "changePct": -0.54,
-        "absPct": 0.54,
+        "name": "塑膠化工類指數",
+        "shortName": "塑膠化工",
+        "changePct": -4.16,
+        "absPct": 4.16,
         "up": false,
-        "close": "122.72",
-        "changePts": "0.67"
+        "close": "789.15",
+        "changePts": "34.22"
       },
       {
-        "name": "橡膠類指數",
-        "shortName": "橡膠",
-        "changePct": 0.49,
-        "absPct": 0.49,
-        "up": true,
-        "close": "203.62",
-        "changePts": "1.00"
-      },
-      {
-        "name": "航運類指數",
-        "shortName": "航運",
-        "changePct": -0.47,
-        "absPct": 0.47,
+        "name": "電機機械類指數",
+        "shortName": "電機機械",
+        "changePct": -4.06,
+        "absPct": 4.06,
         "up": false,
-        "close": "191.10",
-        "changePts": "0.90"
+        "close": "549.00",
+        "changePts": "23.23"
+      },
+      {
+        "name": "半導體類指數",
+        "shortName": "半導體",
+        "changePct": -3.67,
+        "absPct": 3.67,
+        "up": false,
+        "close": "1,465.62",
+        "changePts": "55.87"
+      },
+      {
+        "name": "臺灣資訊科技指數",
+        "shortName": "資訊科技指數",
+        "changePct": -3.59,
+        "absPct": 3.59,
+        "up": false,
+        "close": "84,887.91",
+        "changePts": "3,163.84"
+      },
+      {
+        "name": "機電類指數",
+        "shortName": "機電",
+        "changePct": -3.59,
+        "absPct": 3.59,
+        "up": false,
+        "close": "15,493.12",
+        "changePts": "576.19"
       },
       {
         "name": "化學類指數",
         "shortName": "化學",
-        "changePct": 0.45,
-        "absPct": 0.45,
-        "up": true,
-        "close": "202.33",
-        "changePts": "0.90"
+        "changePct": -3.59,
+        "absPct": 3.59,
+        "up": false,
+        "close": "193.86",
+        "changePts": "7.21"
+      },
+      {
+        "name": "電子工業類指數",
+        "shortName": "電子工業",
+        "changePct": -3.57,
+        "absPct": 3.57,
+        "up": false,
+        "close": "2,813.53",
+        "changePts": "104.13"
+      },
+      {
+        "name": "貿易百貨類指數",
+        "shortName": "貿易百貨",
+        "changePct": -3.55,
+        "absPct": 3.55,
+        "up": false,
+        "close": "231.12",
+        "changePts": "8.51"
+      },
+      {
+        "name": "汽車類指數",
+        "shortName": "汽車",
+        "changePct": -3.28,
+        "absPct": 3.28,
+        "up": false,
+        "close": "291.47",
+        "changePts": "9.88"
+      },
+      {
+        "name": "鋼鐵類指數",
+        "shortName": "鋼鐵",
+        "changePct": -3.22,
+        "absPct": 3.22,
+        "up": false,
+        "close": "116.19",
+        "changePts": "3.86"
+      },
+      {
+        "name": "航運類指數",
+        "shortName": "航運",
+        "changePct": -3.21,
+        "absPct": 3.21,
+        "up": false,
+        "close": "185.58",
+        "changePts": "6.16"
+      },
+      {
+        "name": "紡織纖維類指數",
+        "shortName": "紡織纖維",
+        "changePct": -2.92,
+        "absPct": 2.92,
+        "up": false,
+        "close": "480.68",
+        "changePts": "14.48"
+      },
+      {
+        "name": "金融保險類指數",
+        "shortName": "金融保險",
+        "changePct": -2.83,
+        "absPct": 2.83,
+        "up": false,
+        "close": "2,847.48",
+        "changePts": "83.07"
+      },
+      {
+        "name": "通信網路類指數",
+        "shortName": "通信網路",
+        "changePct": -2.69,
+        "absPct": 2.69,
+        "up": false,
+        "close": "250.42",
+        "changePts": "6.91"
+      },
+      {
+        "name": "橡膠類指數",
+        "shortName": "橡膠",
+        "changePct": -2.38,
+        "absPct": 2.38,
+        "up": false,
+        "close": "196.84",
+        "changePts": "4.79"
+      },
+      {
+        "name": "建材營造類指數",
+        "shortName": "建材營造",
+        "changePct": -2.3,
+        "absPct": 2.3,
+        "up": false,
+        "close": "454.80",
+        "changePts": "10.73"
+      },
+      {
+        "name": "化學生技醫療類指數",
+        "shortName": "化學生技醫療",
+        "changePct": -2.16,
+        "absPct": 2.16,
+        "up": false,
+        "close": "147.52",
+        "changePts": "3.25"
+      },
+      {
+        "name": "水泥類指數",
+        "shortName": "水泥",
+        "changePct": -2.14,
+        "absPct": 2.14,
+        "up": false,
+        "close": "120.01",
+        "changePts": "2.62"
+      },
+      {
+        "name": "造紙類指數",
+        "shortName": "造紙",
+        "changePct": -2.14,
+        "absPct": 2.14,
+        "up": false,
+        "close": "254.13",
+        "changePts": "5.57"
+      },
+      {
+        "name": "綠能環保類指數",
+        "shortName": "綠能環保",
+        "changePct": -1.89,
+        "absPct": 1.89,
+        "up": false,
+        "close": "133.07",
+        "changePts": "2.57"
+      },
+      {
+        "name": "資訊服務類指數",
+        "shortName": "資訊服務",
+        "changePct": -1.68,
+        "absPct": 1.68,
+        "up": false,
+        "close": "213.05",
+        "changePts": "3.65"
+      },
+      {
+        "name": "食品類指數",
+        "shortName": "食品",
+        "changePct": -1.54,
+        "absPct": 1.54,
+        "up": false,
+        "close": "1,895.39",
+        "changePts": "29.67"
       }
     ],
-    "asOf": "20260604",
+    "asOf": "20260608",
     "disclaimer": "證交所「價格指數」表：各類指數漲跌%為相對前一交易日；方塊面積 ∝ |漲跌幅|，紅漲綠跌。僅供參考。"
   },
   "institutional": {
     "ok": true,
-    "asOf": "20260603",
+    "asOf": "20260608",
     "foreign": {
       "buyTop10": [
         {
-          "code": "00403A",
-          "name": "主動統一升級50",
-          "netShares": 152511640
+          "code": "00953B",
+          "name": "群益優選非投等債",
+          "netShares": 41193000
+        },
+        {
+          "code": "2344",
+          "name": "華邦電",
+          "netShares": 30419002
         },
         {
           "code": "2303",
           "name": "聯電",
-          "netShares": 74044941
+          "netShares": 30016560
         },
         {
-          "code": "2890",
-          "name": "永豐金",
-          "netShares": 55408665
+          "code": "00878",
+          "name": "國泰永續高股息",
+          "netShares": 17474656
         },
         {
-          "code": "3481",
-          "name": "群創",
-          "netShares": 48121131
+          "code": "3702",
+          "name": "大聯大",
+          "netShares": 13778800
         },
         {
-          "code": "00981A",
-          "name": "主動統一台股增長",
-          "netShares": 47308248
-        },
-        {
-          "code": "2834",
-          "name": "臺企銀",
-          "netShares": 46348034
-        },
-        {
-          "code": "2892",
-          "name": "第一金",
-          "netShares": 31932595
-        },
-        {
-          "code": "2317",
-          "name": "鴻海",
-          "netShares": 28019626
+          "code": "3036",
+          "name": "文曄",
+          "netShares": 12864324
         },
         {
           "code": "2609",
           "name": "陽明",
-          "netShares": 27805782
+          "netShares": 11897255
         },
         {
-          "code": "2887",
-          "name": "台新新光金",
-          "netShares": 27079739
+          "code": "00940",
+          "name": "元大台灣價值高息",
+          "netShares": 9109709
+        },
+        {
+          "code": "00945B",
+          "name": "凱基美國非投等債",
+          "netShares": 8726000
+        },
+        {
+          "code": "2890",
+          "name": "永豐金",
+          "netShares": 8354205
         }
       ],
       "sellTop10": [
         {
-          "code": "2344",
-          "name": "華邦電",
-          "netShares": -49530918
+          "code": "0050",
+          "name": "元大台灣50",
+          "netShares": -113325019
         },
         {
-          "code": "2618",
-          "name": "長榮航",
-          "netShares": -38676291
+          "code": "2883",
+          "name": "凱基金",
+          "netShares": -108621048
         },
         {
-          "code": "2409",
-          "name": "友達",
-          "netShares": -31128755
+          "code": "00403A",
+          "name": "主動統一升級50",
+          "netShares": -99850060
         },
         {
-          "code": "00919",
-          "name": "群益台灣精選高息",
-          "netShares": -27670142
+          "code": "00981A",
+          "name": "主動統一台股增長",
+          "netShares": -44879463
         },
         {
-          "code": "00918",
-          "name": "大華優利高填息30",
-          "netShares": -25304347
+          "code": "2881",
+          "name": "富邦金",
+          "netShares": -38526931
         },
         {
-          "code": "2880",
-          "name": "華南金",
-          "netShares": -24246323
+          "code": "1402",
+          "name": "遠東新",
+          "netShares": -35828227
         },
         {
-          "code": "2382",
-          "name": "廣達",
-          "netShares": -24200224
+          "code": "2002",
+          "name": "中鋼",
+          "netShares": -32274286
         },
         {
-          "code": "2105",
-          "name": "正新",
-          "netShares": -20965656
+          "code": "1101",
+          "name": "台泥",
+          "netShares": -28957474
         },
         {
-          "code": "2886",
-          "name": "兆豐金",
-          "netShares": -15377709
+          "code": "2610",
+          "name": "華航",
+          "netShares": -28513223
         },
         {
-          "code": "2408",
-          "name": "南亞科",
-          "netShares": -14402588
+          "code": "2324",
+          "name": "仁寶",
+          "netShares": -27265181
         }
       ]
     },
     "investmentTrust": {
       "buyTop10": [
         {
-          "code": "2887",
-          "name": "台新新光金",
-          "netShares": 50316174
+          "code": "2883",
+          "name": "凱基金",
+          "netShares": 95005000
         },
         {
-          "code": "2880",
-          "name": "華南金",
-          "netShares": 47739047
+          "code": "2881",
+          "name": "富邦金",
+          "netShares": 40314000
+        },
+        {
+          "code": "1402",
+          "name": "遠東新",
+          "netShares": 25058000
         },
         {
           "code": "2382",
           "name": "廣達",
-          "netShares": 33418611
-        },
-        {
-          "code": "2618",
-          "name": "長榮航",
-          "netShares": 32622579
-        },
-        {
-          "code": "3481",
-          "name": "群創",
-          "netShares": 30478000
-        },
-        {
-          "code": "00988A",
-          "name": "主動統一全球創新",
-          "netShares": 20200000
-        },
-        {
-          "code": "3231",
-          "name": "緯創",
-          "netShares": 18857358
-        },
-        {
-          "code": "2356",
-          "name": "英業達",
-          "netShares": 15597000
+          "netShares": 17760000
         },
         {
           "code": "2105",
           "name": "正新",
-          "netShares": 15361969
+          "netShares": 14010573
         },
         {
           "code": "4938",
           "name": "和碩",
-          "netShares": 14205001
+          "netShares": 13450998
+        },
+        {
+          "code": "2887",
+          "name": "台新新光金",
+          "netShares": 10753000
+        },
+        {
+          "code": "2542",
+          "name": "興富發",
+          "netShares": 8991000
+        },
+        {
+          "code": "2855",
+          "name": "統一證",
+          "netShares": 8775899
+        },
+        {
+          "code": "0050",
+          "name": "元大台灣50",
+          "netShares": 8432000
         }
       ],
       "sellTop10": [
         {
           "code": "2303",
           "name": "聯電",
-          "netShares": -140693597
+          "netShares": -60035000
         },
         {
           "code": "2609",
           "name": "陽明",
-          "netShares": -29387700
+          "netShares": -28955000
         },
         {
-          "code": "2881",
-          "name": "富邦金",
-          "netShares": -23947140
+          "code": "00988A",
+          "name": "主動統一全球創新",
+          "netShares": -10967000
         },
         {
-          "code": "2882",
-          "name": "國泰金",
-          "netShares": -22053335
+          "code": "2344",
+          "name": "華邦電",
+          "netShares": -9361000
         },
         {
           "code": "2027",
           "name": "大成鋼",
-          "netShares": -8447000
+          "netShares": -8947000
+        },
+        {
+          "code": "2618",
+          "name": "長榮航",
+          "netShares": -7628337
         },
         {
           "code": "3036",
           "name": "文曄",
-          "netShares": -6790482
+          "netShares": -7408000
+        },
+        {
+          "code": "00981A",
+          "name": "主動統一台股增長",
+          "netShares": -6730000
         },
         {
           "code": "3702",
           "name": "大聯大",
-          "netShares": -6083000
+          "netShares": -5596000
         },
         {
           "code": "6176",
           "name": "瑞儀",
-          "netShares": -5548000
-        },
-        {
-          "code": "2885",
-          "name": "元大金",
-          "netShares": -5203088
-        },
-        {
-          "code": "8070",
-          "name": "長華*",
-          "netShares": -5045079
+          "netShares": -5414000
         }
       ]
     },
@@ -1378,23 +1210,22 @@
   },
   "globalWarAi": {
     "ok": true,
-    "generatedAt": "2026-06-05T09:12:41",
+    "generatedAt": "2026-06-09T08:39:43",
     "model": "gpt-4o-mini",
     "disclaimer": "以下為 AI 依本日快照與新聞標題生成之摘要，僅供參考，非投資建議，亦不構成股價預測。",
     "summaries": {
-      "TW": "台灣加權指數今日收在45,677.46點，下跌781.70點，跌幅為1.68%。市場受到Lululemon下修財測影響，該公司股價盤後重挫11%。造紙與數位雲端產業表現相對強勁，分別上漲6.01%與5.2%；電腦及週邊設備則下跌3.63%。",
-      "US": "美國股市今日表現穩健，S&P 500指數上漲67.80點，漲幅0.90%。道瓊指數創下新高，漲575.80點，漲幅1.13%。然而，Lululemon因負面媒體評論及產品表現不佳下調年度展望，對市場情緒造成影響。",
-      "CA": "本稿池資料有限，加拿大S&P/TSX綜合指數目前暫無報價（休市或延遲）。",
-      "HK": "香港恆生指數今日持平，收在25,253.40點，變動為0.00%。市場面臨多重挑戰，社會議題仍在持續影響投資者信心。",
-      "SG": "本稿池資料有限，新加坡STI指數目前暫無報價（休市或延遲）。",
-      "KR": "本稿池資料有限，韓國KOSPI指數目前暫無報價（休市或延遲）。",
-      "JP": "本稿池資料有限，日本日經225指數目前暫無報價（休市或延遲）。",
-      "AU": "本稿池資料有限，澳洲S&P/ASX 200指數目前暫無報價（休市或延遲）。",
-      "IN": "本稿池資料有限，印度BSE Sensex指數目前暫無報價（休市或延遲）。",
-      "CN": "本稿池資料有限，中國上證綜指目前暫無報價（休市或延遲）。",
-      "DE": "德國DAX指數今日上漲95.52點，漲幅0.38%，收在24,944.95點。市場情緒穩定，投資者持續關注歐洲經濟動向。",
-      "GB": "英國富時100指數今日小幅上漲27.80點，漲幅0.27%。市場受到特朗普宣布7000萬美元煤炭投資的消息影響，投資者情緒略有回暖。",
-      "FR": "法國CAC 40指數今日上漲92.74點，漲幅1.14%，收在8,244.29點。市場受到多重國際事件影響，投資者需謹慎觀察全球動態。"
+      "TW": "台灣加權指數今日收於43,502.78點，較前一交易日下跌1,568.16點，跌幅為3.48%。市場受到玻璃陶瓷、電器電纜及電子通路等產業的影響，分別下跌7.99%、7.11%及7.08%。在國際新聞方面，輝達與LG合作開發人型機器人，亞馬遜則投入資金於AI數據中心，顯示科技領域持續受到關注。",
+      "US": "本稿池資料有限。",
+      "CA": "本稿池資料有限。",
+      "HK": "本稿池資料有限。",
+      "SG": "本稿池資料有限。",
+      "KR": "本稿池資料有限。",
+      "JP": "日本市場目前無具體指數數據，近期新聞提到伊朗與以色列承諾停止攻擊，可能影響地區穩定。其他國際事件如剛果的埃博拉疫情也引發關注。",
+      "AU": "本稿池資料有限。",
+      "IN": "本稿池資料有限。",
+      "CN": "本稿池資料有限。",
+      "DE": "本稿池資料有限。",
+      "GB": "英國市場面臨不安情緒，因科技股的擔憂及中東局勢的再度升溫。OpenAI計劃上市，可能引發投資熱潮，但市場仍需關注潛在的風險。"
     }
   }
 }
