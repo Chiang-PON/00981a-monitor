@@ -1,6 +1,6 @@
 ﻿code,name,weight,shares,price
 GLEN LN,嘉能可公司,1.58,40000,0.0
-2330,台積電,8.67,22000,2380.0
+2330,台積電,8.67,22000,2350.0
 8306 JT,三菱UFJ金融集團公司,1.45,12000,0.0
 6506 JT,安川電機公司,1.88,11000,0.0
 IFX GY,英飛凌科技股份有限公司,2.8,8000,0.0
@@ -10,7 +10,7 @@ CRWD US,Crowdstrike控股公司,4.22,3752,0.0
 GOOGL US,Alphabet 公司,5.46,3000,0.0
 AMZN US,AMAZON. COM INC,3.84,2800,0.0
 ENR GY,Siemens Energy AG,2.08,2200,0.0
-2454,聯發科,1.29,2000,3885.0
+2454,聯發科,1.29,2000,3845.0
 AVGO US,博通公司,4.02,2000,0.0
 HWM US,Howmet航太公司,2.63,1700,0.0
 LRCX US,科林研發股份有限公司,2.95,1700,0.0
@@ -28,8 +28,8 @@ TSEM US,塔爾半導體有限公司,0.95,750,0.0
 AMAT US,應用材料,1.9,700,0.0
 AAPL US,蘋果公司,0.98,600,0.0
 GS US,高盛集團,3.03,550,0.0
-CRDO US,Credo Technology Group Holding,0.65,500,0.0
 DDOG US,數據狗公司,0.65,500,0.0
+CRDO US,Credo Technology Group Holding,0.65,500,0.0
 GEV US,奇異維諾瓦公司,2.66,500,0.0
 LLY US,禮來公司,2.92,450,0.0
 MA US,萬事達卡,1.06,350,0.0
