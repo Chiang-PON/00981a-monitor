@@ -1,45 +1,45 @@
 ﻿code,name,weight,shares,price
 CERS US,Cerus公司,0.48,62549,0.0
 ACHR US,阿徹航空公司,0.68,40714,0.0
-NTLA US,英特利亞治療公司,1.37,36789,0.0
+NTLA US,英特利亞治療公司,1.28,34372,0.0
 RXRX US,利可迅生技公司,0.33,33889,0.0
-CRSP US,CRISPR治療公司,4.78,28627,0.0
-TEM US,Tempus AI Inc,5.39,27928,0.0
-BEAM US,光束治療公司,2.34,27482,0.0
-BMNR US,BitMine Immersion Technologi,1.92,27323,0.0
-TXG US,10X Genomics Inc,4.41,24355,0.0
-BLSH US,Bullish,1.8,19336,0.0
-CRCL US,Circle Internet Group Inc,4.41,17399,0.0
-XE US,X-Energy Inc,0.78,15126,0.0
-SHOP US,Shopify公司,6.34,14973,0.0
-HOOD US,羅賓漢市場公司,4.44,14529,0.0
-SOFI US,SoFi Technologies Inc,0.73,13816,0.0
-TWST US,Twist Bioscience Corp,4.96,11729,0.0
-SPCX US,太空探索科技公司,4.36,11083,0.0
-XYZ US,布洛克公司,2.32,9925,0.0
-TSLA US,特斯拉公司,8.45,8645,0.0
-WGS US,GeneDx控股公司,1.94,7621,0.0
-PLTR US,帕蘭提爾科技公司,3.51,7026,0.0
-COIN US,比特幣基地全球公司,3.51,6859,0.0
-KTOS US,克瑞拓斯安全防衛公司,1.01,6745,0.0
-FIG US,Figma Inc,0.48,6280,0.0
-CRWV US,CoreWeave Inc,1.51,6075,0.0
-ILMN US,伊魯米納公司,2.28,3603,0.0
-AMZN US,亞馬遜公司,2.27,3097,0.0
-NVDA US,輝達,1.61,2727,0.0
-AMD US,超微半導體公司,3.38,2495,0.0
-NTRA US,那提拉公司,2.26,2371,0.0
-TSM US,台積電,2.53,2152,0.0
+TEM US,Tempus AI Inc,5.71,28498,0.0
+BMNR US,BitMine Immersion Technologi,1.98,27323,0.0
+CRSP US,CRISPR治療公司,4.21,25033,0.0
+TXG US,10X Genomics Inc,4.47,24355,0.0
+BEAM US,光束治療公司,2.08,24076,0.0
+BLSH US,Bullish,1.84,19336,0.0
+CRCL US,Circle Internet Group Inc,4.64,17399,0.0
+XE US,X-Energy Inc,0.79,15126,0.0
+SHOP US,Shopify公司,6.54,14973,0.0
+HOOD US,羅賓漢市場公司,4.52,14529,0.0
+SOFI US,SoFi Technologies Inc,0.75,13816,0.0
+TWST US,Twist Bioscience Corp,5.09,11729,0.0
+SPCX US,太空探索科技公司,4.55,11414,0.0
+XYZ US,布洛克公司,2.38,9925,0.0
+TSLA US,特斯拉公司,8.7,8645,0.0
+WGS US,GeneDx控股公司,1.93,7621,0.0
+COIN US,比特幣基地全球公司,3.8,7035,0.0
+PLTR US,帕蘭提爾科技公司,3.7,7026,0.0
+KTOS US,克瑞拓斯安全防衛公司,1.03,6745,0.0
+FIG US,Figma Inc,0.54,6280,0.0
+CRWV US,CoreWeave Inc,1.49,6075,0.0
+ILMN US,伊魯米納公司,2.32,3603,0.0
+AMZN US,亞馬遜公司,2.25,3097,0.0
+NVDA US,輝達,1.76,2727,0.0
+AMD US,超微半導體公司,3.37,2495,0.0
+NTRA US,那提拉公司,2.27,2371,0.0
 VCYT US,Veracyte公司,0.26,2054,0.0
-SNOW US,Snowflake公司,1.63,1834,0.0
-CBRS US,Cerebras Systems Inc,0.81,1577,0.0
-GOOG US,Alphabet公司 Class C,1.26,1323,0.0
+SNOW US,Snowflake公司,1.71,1834,0.0
+TSM US,台積電,2.14,1765,0.0
+CBRS US,Cerebras Systems Inc,0.83,1577,0.0
+GOOG US,Alphabet公司 Class C,1.27,1323,0.0
 GOOGL US,Alphabet公司 Class A,1.01,1050,0.0
-RBLX US,Roblox公司,0.11,996,0.0
-DE US,迪爾,1.28,714,0.0
-TER US,泰瑞達公司,0.61,600,0.0
-LLY US,禮來公司,1.99,595,0.0
-AVGO US,博通公司,0.52,515,0.0
+DE US,迪爾,1.15,653,0.0
+AVGO US,博通公司,0.54,515,0.0
+TER US,泰瑞達公司,0.52,491,0.0
+LLY US,禮來公司,1.49,448,0.0
 META US,Meta平台公司,0.52,320,0.0
-NET US,Cloudflare公司,0.09,118,0.0
+NET US,Cloudflare公司,0.1,118,0.0
 BWXT US,BWX科技股份有限公司,0.05,108,0.0
+RBLX US,Roblox公司,0.01,90,0.0
